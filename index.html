@@ -18,7 +18,7 @@
   </head>
   <body>
     <header class="relative bg-red-50">
-      <nav class="fixed top-0">
+      <nav class="fixed top-0 z-1">
         navbar 佔位區
         <div class="logo"></div>
         <div class="menu"></div>
@@ -161,15 +161,46 @@
         <h4 class="text-[26px] font-bold text-center">您是否也有這些困擾？</h4>
         <!-- 車主角度痛點 -->
         <div class="flex flex-col lg:flex-row justify-evenly items-center">
-          <div>
+          <div class="">
             <img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位
           </div>
-          <div>
-            <ul class="text-[20px]">
-              <li>看不懂報價，只能「相信對方說的」</li>
-              <li class="mt-[10px]">擔心被多換、不知道維修是否必要</li>
-              <li class="mt-[10px]">比價困難，每家說法都不一樣</li>
-              <li class="mt-[10px]">維修進度不透明，只能反覆詢問</li>
+          <div class="lg:w-[30%]">
+            <ul>
+              <li>
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-scale-unbalanced"></i
+                  >看不懂報價，只能「相信對方說的」
+                </p>
+                <p class="ml-7">
+                  面對不熟悉的項目名稱與說明，難以理解內容，只能被動相信對方的專業判斷，心裡卻始終感到不安。
+                </p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-file-circle-exclamation"></i
+                  >擔心被多換、不知道維修是否必要
+                </p>
+                <p class="ml-7">
+                  缺乏清楚的判斷依據，很難確認哪些處理是真的需要，哪些其實可以觀察或延後處理。
+                </p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-comments-dollar"></i
+                  >比價困難，每家說法都不一樣
+                </p>
+                <p class="ml-7">
+                  即使詢問多家維修廠，項目與說法仍各不相同，讓人難以站在同一基準進行比較。
+                </p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-repeat"></i>維修進度不透明，只能反覆詢問
+                </p>
+                <p class="ml-7">
+                  送修後無法掌握目前進度，只能不斷詢問狀況，卻仍難以真正放心。
+                </p>
+              </li>
             </ul>
           </div>
         </div>
@@ -180,12 +211,35 @@
           <div class="lg:order-1 order-0">
             <img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位
           </div>
-          <div>
-            <ul class="text-[20px]">
-              <li>花大量時間解釋基本問題</li>
-              <li class="mt-[10px]">車主不信任，反覆殺價、猶豫</li>
-              <li class="mt-[10px]">報價流程混亂，溝通成本高</li>
-              <li class="mt-[10px]">技術專業難以被看見，只能比低價</li>
+          <div class="w-[30%]">
+            <ul>
+              <li>
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-hourglass-half"></i
+                  >花大量時間解釋基本問題
+                </p>
+                <p></p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-heart-crack"></i
+                  >車主不信任，反覆殺價、猶豫
+                </p>
+                <p></p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-spiral"></i>報價流程混亂，溝通成本高
+                </p>
+                <p></p>
+              </li>
+              <li class="mt-[10px]">
+                <p class="text-[20px]">
+                  <i class="fa-solid fa-user-slash"></i
+                  >技術專業難以被看見，只能比低價
+                </p>
+                <p></p>
+              </li>
             </ul>
           </div>
         </div>
@@ -195,17 +249,60 @@
         <h4 class="text-[26px] font-bold text-center">carE 帶給您的改變</h4>
         <div class="flex flex-col lg:flex-row justify-around items-center">
           <div class="w-full lg:w-[30%] px-3 text-center">
-            <p>🚗 對車主來說</p>
-            <p>報價清楚、項目透明，每一筆維修都有依據，不再靠運氣修車。</p>
+            <h5><i class="fa-solid fa-car-rear"></i> 對車主來說</h5>
+            <p>服務項目透明，每一筆維修都有依據，不再靠運氣修車。</p>
           </div>
           <div class="w-full lg:w-[30%] px-3 text-center">
-            <p>🔧 對維修廠來說</p>
+            <h5><i class="fa-solid fa-screwdriver-wrench"></i> 對維修廠來說</h5>
             <p>把時間留給專業，讓信任建立在透明與流程，而不是口頭說服。</p>
           </div>
         </div>
       </section>
-      <section class="max-w-[1440px] mx-auto">簡易使用說明</section>
-      <section class="max-w-[1440px] mx-auto">立即使用</section>
+      <!-- 簡易使用說明 -->
+      <section class="max-w-[1440px] mx-auto">
+        <h4 class="text-[26px] font-bold text-center">操作三步驟</h4>
+        <div class="flex flex-row justify-center items-center">
+          <ol class="w-[40%] text-center">
+            <h5>車主</h5>
+            <li>
+              <h6>1. 搜尋車廠</h6>
+              <p>輸入地區或維修項目，快速找到附近車廠。</p>
+            </li>
+            <li>
+              <h6>2. 查看與比較</h6>
+              <p>清楚查看服務內容與真實評價。</p>
+            </li>
+            <li>
+              <h6>3. 安心預約</h6>
+              <p>選擇適合的車廠，線上完成預約維修。</p>
+            </li>
+          </ol>
+          <ol class="w-[40%] text-center">
+            <h5>維修廠</h5>
+            <li>
+              <h6>1. 建立車廠資料</h6>
+              <p>填寫基本資訊、服務項目與營業時間，完成店家頁面。</p>
+            </li>
+            <li>
+              <h6>2. 接收維修需求</h6>
+              <p>車主依需求主動找上門，平台將依據營業時間自動配發。</p>
+            </li>
+            <li>
+              <h6>3. 完成服務、累積評價</h6>
+              <p>維修完成後獲得真實評價，提升信任與曝光。</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section class="max-w-[1440px] mx-auto">
+        <a href="/"
+          ><button
+            class="block w-[50%] py-[1%] mx-auto text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
+          >
+            立即使用
+          </button></a
+        >
+      </section>
 
       <button
         class="fixed right-[10px] bottom-[10px] px-[5px] py-[8px] bg-[#f5f4f0] rounded cursor-pointer"
