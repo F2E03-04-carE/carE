@@ -69,32 +69,6 @@ const errors = reactive<Record<FieldKey, string>>({
   agree: "",
 });
 
-/* ---------- ui classes ---------- */
-const ui = {
-  page: "min-h-screen bg-slate-50 px-4 py-10",
-  wrap: "mx-auto w-full max-w-md",
-  card: "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm",
-  h1: "text-xl font-semibold text-slate-900",
-  sectionTitle: "text-sm font-semibold text-slate-900",
-  label: "block text-sm font-medium text-slate-700",
-
-  inputBase:
-    "w-full rounded-xl border px-4 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-4",
-  inputOk: "border-slate-200 bg-slate-50 focus:bg-white focus:ring-slate-900/5",
-  inputErr: "border-red-500 bg-red-50 focus:ring-red-500/20",
-
-  errorText: "mt-1 text-xs text-red-600",
-
-  // ✅ 只改顏色：slate-900 -> 草綠色（其餘不動）
-  btnPrimary:
-    "w-full rounded-xl bg-[#6B705C] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5F6653] active:bg-[#4F5646] disabled:opacity-50",
-  btnGhost:
-    "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800",
-
-  grid2: "grid grid-cols-1 gap-4 sm:grid-cols-2",
-  divider: "my-6 border-t border-slate-100",
-};
-
 /* ---------- computed ---------- */
 const isShop = computed(() => form.role === "shop");
 
@@ -108,9 +82,21 @@ function isPhone(v: string): boolean {
 function showError(key: FieldKey): boolean {
   return Boolean(touched[key] && errors[key]);
 }
+
+/**
+ * ✅ class 直接回傳完整 Tailwind（不透過 ui 物件）
+ * ✅ 並依你們規範順序排列
+ */
 function inputClass(key: FieldKey): string {
-  return [ui.inputBase, showError(key) ? ui.inputErr : ui.inputOk].join(" ");
+  const base =
+    "w-full rounded-xl border px-4 py-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-4";
+
+  const ok = "border-slate-200 bg-slate-50 focus:bg-white focus:ring-slate-900/5";
+  const err = "border-red-500 bg-red-50 focus:ring-red-500/20";
+
+  return [base, showError(key) ? err : ok].join(" ");
 }
+
 function markTouched(keys: FieldKey[]): void {
   keys.forEach((k) => (touched[k] = true));
 }
@@ -232,52 +218,65 @@ function onBlur(key: FieldKey) {
 
   if (key === "name" || key === "nickname") validateOwnerFields();
 
-  if (key === "shopName" || key === "taxId" || key === "city" || key === "district" || key === "address") {
+  if (
+    key === "shopName" ||
+    key === "taxId" ||
+    key === "city" ||
+    key === "district" ||
+    key === "address"
+  ) {
     validateShopFields();
   }
 
-  // ✅ 同意條款 blur 也要驗證（原本在 step3，現在在 step2）
+  // 同意條款 blur 也要驗證（原本在 step3，現在在 step2）
   if (key === "agree") validateAgree();
 }
 </script>
 
 <template>
-  <div :class="ui.page">
-    <div :class="ui.wrap">
-      <h1 :class="ui.h1" class="mb-2">註冊</h1>
-      <!-- ✅ 只改步驟總數：3 -> 2 -->
+  <!-- page -->
+  <div class="min-h-screen px-4 py-10 bg-slate-50">
+    <!-- wrap -->
+    <div class="mx-auto w-full max-w-md">
+      <h1 class="mb-2 text-xl font-semibold text-slate-900">註冊</h1>
       <p class="mb-4 text-xs text-slate-500">步驟 {{ step }} / 2</p>
 
-      <div :class="ui.card">
+      <!-- card -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <!-- STEP 1 -->
         <section v-if="step === 1" class="space-y-4">
-          <h2 :class="ui.sectionTitle">註冊第一步</h2>
+          <h2 class="text-sm font-semibold text-slate-900">註冊第一步</h2>
 
           <div>
-            <label :class="ui.label">Email</label>
+            <label class="block text-sm font-medium text-slate-700">Email</label>
             <input
               v-model="form.email"
               :class="inputClass('email')"
               @blur="onBlur('email')"
               placeholder="name@example.com"
             />
-            <p v-if="showError('email')" :class="ui.errorText">{{ errors.email }}</p>
+            <p v-if="showError('email')" class="mt-1 text-xs text-red-600">{{ errors.email }}</p>
           </div>
 
-          <button :class="ui.btnPrimary" @click="next">下一步</button>
+          <button
+            class="w-full rounded-xl px-4 py-3 text-sm font-semibold text-white bg-[#6B705C] hover:bg-[#5F6653] active:bg-[#4F5646] disabled:opacity-50"
+            @click="next"
+          >
+            下一步
+          </button>
         </section>
 
-        <!-- STEP 2 (含原 step3 的同意條款 + 建立帳號) -->
+        <!-- STEP 2  -->
         <section v-if="step === 2" class="space-y-6">
-          <h2 :class="ui.sectionTitle">帳號資料</h2>
+          <h2 class="text-sm font-semibold text-slate-900">帳號資料</h2>
 
           <!-- role -->
           <div class="flex gap-3">
-            <label class="flex items-center gap-2">
+            <label class="flex items-center gap-2 text-sm text-slate-800">
               <input type="radio" value="owner" v-model="form.role" />
               車主（一般消費）
             </label>
-            <label class="flex items-center gap-2">
+            <label class="flex items-center gap-2 text-sm text-slate-800">
               <input type="radio" value="shop" v-model="form.role" />
               保養廠（店家）
             </label>
@@ -286,136 +285,152 @@ function onBlur(key: FieldKey) {
           <!-- owner required -->
           <div v-if="!isShop" class="space-y-4">
             <div>
-              <label :class="ui.label">姓名</label>
+              <label class="block text-sm font-medium text-slate-700">姓名</label>
               <input v-model="form.name" :class="inputClass('name')" @blur="onBlur('name')" />
-              <p v-if="showError('name')" :class="ui.errorText">{{ errors.name }}</p>
+              <p v-if="showError('name')" class="mt-1 text-xs text-red-600">{{ errors.name }}</p>
             </div>
 
             <div>
-              <label :class="ui.label">暱稱</label>
+              <label class="block text-sm font-medium text-slate-700">暱稱</label>
               <input
                 v-model="form.nickname"
                 :class="inputClass('nickname')"
                 @blur="onBlur('nickname')"
               />
-              <p v-if="showError('nickname')" :class="ui.errorText">{{ errors.nickname }}</p>
+              <p v-if="showError('nickname')" class="mt-1 text-xs text-red-600">
+                {{ errors.nickname }}
+              </p>
             </div>
           </div>
 
           <!-- common -->
           <div>
-            <label :class="ui.label">手機號碼</label>
+            <label class="block text-sm font-medium text-slate-700">手機號碼</label>
             <input
               v-model="form.phone"
               :class="inputClass('phone')"
               @blur="onBlur('phone')"
               placeholder="例如：09xxxxxxxx 或 +8869xxxxxxxx"
             />
-            <p v-if="showError('phone')" :class="ui.errorText">{{ errors.phone }}</p>
+            <p v-if="showError('phone')" class="mt-1 text-xs text-red-600">{{ errors.phone }}</p>
           </div>
 
           <!-- 密碼 -->
-<div>
-  <label :class="ui.label">密碼</label>
-  <input
-    type="password"
-    v-model="form.password"
-    :class="inputClass('password')"
-    @blur="onBlur('password')"
-    placeholder="至少 8 碼"
-  />
-  <p v-if="showError('password')" :class="ui.errorText">
-    {{ errors.password }}
-  </p>
-</div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700">密碼</label>
+            <input
+              type="password"
+              v-model="form.password"
+              :class="inputClass('password')"
+              @blur="onBlur('password')"
+              placeholder="至少 8 碼"
+            />
+            <p v-if="showError('password')" class="mt-1 text-xs text-red-600">
+              {{ errors.password }}
+            </p>
+          </div>
 
-<!-- 確認密碼 -->
-<div>
-  <label :class="ui.label">確認密碼</label>
-  <input
-    type="password"
-    v-model="form.confirmPassword"
-    :class="inputClass('confirmPassword')"
-    @blur="onBlur('confirmPassword')"
-    placeholder="再輸入一次"
-  />
-  <p v-if="showError('confirmPassword')" :class="ui.errorText">
-    {{ errors.confirmPassword }}
-  </p>
-</div>
-
+          <!-- 確認密碼 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700">確認密碼</label>
+            <input
+              type="password"
+              v-model="form.confirmPassword"
+              :class="inputClass('confirmPassword')"
+              @blur="onBlur('confirmPassword')"
+              placeholder="再輸入一次"
+            />
+            <p v-if="showError('confirmPassword')" class="mt-1 text-xs text-red-600">
+              {{ errors.confirmPassword }}
+            </p>
+          </div>
 
           <!-- shop required -->
           <div v-if="isShop" class="space-y-4">
-            <hr :class="ui.divider" />
+            <hr class="my-6 border-t border-slate-100" />
 
             <div>
-              <label :class="ui.label">保養廠名稱</label>
+              <label class="block text-sm font-medium text-slate-700">保養廠名稱</label>
               <input
                 v-model="form.shopName"
                 :class="inputClass('shopName')"
                 @blur="onBlur('shopName')"
                 placeholder="例如：XX 汽車保修中心"
               />
-              <p v-if="showError('shopName')" :class="ui.errorText">{{ errors.shopName }}</p>
+              <p v-if="showError('shopName')" class="mt-1 text-xs text-red-600">
+                {{ errors.shopName }}
+              </p>
             </div>
 
             <div>
-              <label :class="ui.label">統一編號</label>
+              <label class="block text-sm font-medium text-slate-700">統一編號</label>
               <input
                 v-model="form.taxId"
                 :class="inputClass('taxId')"
                 @blur="onBlur('taxId')"
                 placeholder="8 碼數字"
               />
-              <p v-if="showError('taxId')" :class="ui.errorText">{{ errors.taxId }}</p>
+              <p v-if="showError('taxId')" class="mt-1 text-xs text-red-600">{{ errors.taxId }}</p>
             </div>
 
-            <div :class="ui.grid2">
+            <!-- grid2 (keep responsive) -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label :class="ui.label">縣市</label>
+                <label class="block text-sm font-medium text-slate-700">縣市</label>
                 <input v-model="form.city" :class="inputClass('city')" @blur="onBlur('city')" />
-                <p v-if="showError('city')" :class="ui.errorText">{{ errors.city }}</p>
+                <p v-if="showError('city')" class="mt-1 text-xs text-red-600">{{ errors.city }}</p>
               </div>
 
               <div>
-                <label :class="ui.label">區域</label>
+                <label class="block text-sm font-medium text-slate-700">區域</label>
                 <input
                   v-model="form.district"
                   :class="inputClass('district')"
                   @blur="onBlur('district')"
                 />
-                <p v-if="showError('district')" :class="ui.errorText">{{ errors.district }}</p>
+                <p v-if="showError('district')" class="mt-1 text-xs text-red-600">
+                  {{ errors.district }}
+                </p>
               </div>
             </div>
 
             <div>
-              <label :class="ui.label">地址</label>
+              <label class="block text-sm font-medium text-slate-700">地址</label>
               <input
                 v-model="form.address"
                 :class="inputClass('address')"
                 @blur="onBlur('address')"
                 placeholder="路名/巷弄/號/樓"
               />
-              <p v-if="showError('address')" :class="ui.errorText">{{ errors.address }}</p>
+              <p v-if="showError('address')" class="mt-1 text-xs text-red-600">
+                {{ errors.address }}
+              </p>
             </div>
           </div>
 
-          <!-- ✅ 原 STEP 3：同意條款，整合到 STEP 2（位置與樣式不變） -->
+          <!-- agree -->
           <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              v-model="form.agree"
-              @blur="onBlur('agree')"
-            />
+            <input type="checkbox" v-model="form.agree" @blur="onBlur('agree')" />
             我已閱讀並同意服務條款與隱私權政策
           </label>
-          <p v-if="touched.agree && errors.agree" :class="ui.errorText">{{ errors.agree }}</p>
+          <p v-if="touched.agree && errors.agree" class="mt-1 text-xs text-red-600">
+            {{ errors.agree }}
+          </p>
 
+          <!-- actions -->
           <div class="grid grid-cols-2 gap-3">
-            <button :class="ui.btnGhost" @click="back">上一步</button>
-            <!-- ✅ 原本 step2 的「下一步」改成「建立帳號」直接送出 -->
-            <button :class="ui.btnPrimary" @click="submit">建立帳號</button>
+            <button
+              class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800"
+              @click="back"
+            >
+              上一步
+            </button>
+            <button
+              class="w-full rounded-xl px-4 py-3 text-sm font-semibold text-white bg-[#6B705C] hover:bg-[#5F6653] active:bg-[#4F5646] disabled:opacity-50"
+              @click="submit"
+            >
+              建立帳號
+            </button>
           </div>
         </section>
       </div>
