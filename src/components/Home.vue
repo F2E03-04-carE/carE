@@ -1,3 +1,14 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import LoginModal from "./auth/LoginModal.vue";
+
+// 登入浮窗開關（只放在 Home，不放在 App.vue）
+const isLoginOpen = ref(false);
+
+// 只在開發環境顯示「測試登入」按鈕，避免上線還看到
+const isDev = import.meta.env.DEV;
+</script>
+
 <template>
   <header class="relative bg-red-50">
     <nav class="fixed top-0 z-1">
@@ -5,8 +16,12 @@
       <div class="logo"></div>
       <div class="menu"></div>
       <div class="member"></div>
+
+      <!-- 之後 Navbar 做好：把登入按鈕點擊改成 isLoginOpen = true 就好 -->
+      <!-- <button type="button" @click="isLoginOpen = true">登入</button> -->
     </nav>
   </header>
+
   <main class="relative">
     <!-- HERO 搜尋 -->
     <section
@@ -73,6 +88,7 @@
               ></i>
             </div>
           </div>
+
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
             <label for="brand" class="block text-[16px] text-left text-[#8a8a7d]">車子品牌</label>
             <div class="relative">
@@ -106,6 +122,7 @@
             <i class="fa-solid fa-magnifying-glass mr-[5px]"></i>搜尋
           </button>
         </form>
+
         <!-- 信任背書 -->
         <div class="flex flex-row justify-around items-center w-[80%] mt-[5%] lg:mt-[3%]">
           <div class="text-center">
@@ -123,6 +140,7 @@
         </div>
       </div>
     </section>
+
     <section class="max-w-[1440px] mx-auto">
       <h4 class="text-[26px] font-bold text-center">您是否也有這些困擾？</h4>
       <!-- 車主角度痛點 -->
@@ -167,6 +185,7 @@
           </ul>
         </div>
       </div>
+
       <!-- 維修廠角度痛點 -->
       <div class="flex flex-col lg:flex-row justify-evenly items-center mt-[2%] lg:mt-0">
         <div class="lg:order-1 order-0">
@@ -206,6 +225,7 @@
         </div>
       </div>
     </section>
+
     <!-- 平台特色與簡易使用說明 -->
     <section class="max-w-[1440px] mx-auto">
       <h4 class="text-[26px] font-bold text-center">carE 帶給您的改變</h4>
@@ -229,6 +249,7 @@
             </li>
           </ol>
         </div>
+
         <div class="w-full lg:w-[30%] px-3 text-center">
           <h5><i class="fa-solid fa-screwdriver-wrench"></i> 對維修廠來說</h5>
           <p>把時間留給專業，讓信任建立在透明與流程，而不是口頭說服。</p>
@@ -249,21 +270,32 @@
         </div>
       </div>
     </section>
+
     <section class="max-w-[1440px] mx-auto">
       <a href="/" class="block w-[50%] mx-auto">
-        <button
-          class="block w-[100%] py-[1%] mx-auto text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
-        >
+        <button class="block w-[100%] py-[1%] mx-auto text-[#fff] bg-[#6b6b5a] rounded cursor-pointer">
           立即使用
         </button>
       </a>
     </section>
 
-    <button
-      class="fixed right-[10px] bottom-[10px] px-[5px] py-[8px] bg-[#f5f4f0] rounded cursor-pointer"
-    >
+    <button class="fixed right-[10px] bottom-[10px] px-[5px] py-[8px] bg-[#f5f4f0] rounded cursor-pointer">
       <i class="fa-solid fa-arrow-up text-[26px] text-[#6b6b5a]"></i>
     </button>
+
+    <!--  LoginModal：放在 Home（不要放 App.vue） -->
+    <LoginModal :open="isLoginOpen" @close="isLoginOpen = false" />
+
+    <!--  測試登入按鈕：只在 DEV 顯示 -->
+    <button
+      v-if="isDev"
+      type="button"
+      class="fixed bottom-6 right-6 z-[9998] rounded-xl px-4 py-2 text-white shadow-lg bg-emerald-600 hover:bg-emerald-700"
+      @click="isLoginOpen = true"
+    >
+      測試登入
+    </button>
   </main>
+
   <footer>Footer 佔位區</footer>
 </template>
