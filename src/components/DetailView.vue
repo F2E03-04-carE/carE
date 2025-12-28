@@ -2,9 +2,7 @@
   <div class="min-h-screen py-8 bg-[#FAF8F5]">
     <div class="max-w-3xl mx-auto px-4">
       <div class="mb-4 text-sm text-gray-600 cursor-pointer">← 返回搜尋結果</div>
-
       <section class="p-6 bg-white rounded-2xl shadow-sm">
-
         <div class="flex items-start justify-between">
           <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
           <div class="text-gray-500">★★★★★</div>
@@ -59,8 +57,8 @@
             <div class="flex gap-2 text-gray-700">
               <span class="font-medium">王貓貓</span>
               <span class="text-gray-400">2025-12-27</span>
+              <div class="text-[#4A4A44]"> ★★★★★ </div>
             </div>
-            <div class="text-[#4A4A44]"> ★★★★★ </div>
             <p class="mt-2 text-gray-600 leading-relaxed">213123123</p>
             <div class="mt-3 p-3 bg-[#F5F4F1] rounded-lg">
               <span class="block mb-1 text-xs font-bold text-gray-500">店家回覆：</span>
@@ -69,7 +67,12 @@
           </div>
         </div>
       </section>
-
+      <section>
+        <div>車廠周邊休息地點</div>
+      </section>
     </div>
   </div>
 </template>
+
+<!-- 1. 車廠周邊附近休息地點，提供消費者等待維修期間的去處。
+3. 外部預覽有車廠banner，點進去後同樣有車廠banner，然後另有其他車廠提供的環境圖片。 -->
