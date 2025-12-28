@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 
-/* ---------- step control ---------- */
+// 步驟控制
 const step = ref(1);
 
-/* ---------- form state ---------- */
+// 表單資料
 const form = reactive({
   role: "owner", // owner | shop
 
@@ -28,7 +28,7 @@ const form = reactive({
   agree: false,
 });
 
-/* ---------- touched / submitted flags ---------- */
+/*  touched / submitted flags  */
 const touched = reactive({
   email: false,
   phone: false,
@@ -47,10 +47,10 @@ const touched = reactive({
   agree: false,
 });
 
-/** ✅ TS：讓 key 索引合法化 */
+/**  TS：讓 key 索引合法化 */
 type FieldKey = keyof typeof touched;
 
-/* ---------- error state ---------- */
+/*  error state  */
 const errors = reactive<Record<FieldKey, string>>({
   email: "",
   phone: "",
@@ -69,8 +69,11 @@ const errors = reactive<Record<FieldKey, string>>({
   agree: "",
 });
 
-/* ---------- computed ---------- */
+/*  computed  */
 const isShop = computed(() => form.role === "shop");
+
+// 切換身分時避免觸發 blur 驗證
+const isSwitchingRole = ref(false);
 
 /* ---------- helpers ---------- */
 function isEmail(v: string): boolean {
@@ -84,8 +87,8 @@ function showError(key: FieldKey): boolean {
 }
 
 /**
- * ✅ class 直接回傳完整 Tailwind（不透過 ui 物件）
- * ✅ 並依你們規範順序排列
+ *  class 直接回傳完整 Tailwind（不透過 ui 物件）
+ *  並依你們規範順序排列
  */
 function inputClass(key: FieldKey): string {
   const base =
@@ -104,7 +107,26 @@ function clearErrors(keys: FieldKey[]): void {
   keys.forEach((k) => (errors[k] = ""));
 }
 
-/* ---------- validation (per field) ---------- */
+//切換身分時清掉另一邊身分的 touched / errors，避免切回來立刻紅框
+function resetFields(keys: FieldKey[]): void {
+  keys.forEach((k) => {
+    touched[k] = false;
+    errors[k] = "";
+  });
+}
+
+watch(
+  () => form.role,
+  (role) => {
+    const ownerKeys: FieldKey[] = ["name", "nickname"];
+    const shopKeys: FieldKey[] = ["shopName", "taxId", "city", "district", "address"];
+
+    if (role === "shop") resetFields(ownerKeys);
+    else resetFields(shopKeys);
+  }
+);
+
+//欄位個別驗證
 function validateEmail() {
   errors.email = "";
   if (!form.email) errors.email = "請輸入電子郵件";
@@ -153,7 +175,7 @@ function validateAgree() {
   if (!form.agree) errors.agree = "請勾選同意服務條款與隱私權政策";
 }
 
-/* ---------- step validators ---------- */
+//步驟驗證器（每一個步驟的檢查）
 function validateStep1() {
   const keys: FieldKey[] = ["email"];
   markTouched(keys);
@@ -186,16 +208,16 @@ function validateStep2() {
   return !keysToCheck.some((k) => Boolean(errors[k]));
 }
 
-/* ---------- actions ---------- */
+//動作處理
 function next() {
-  // ✅ 只剩 2 步：1 -> 2
+  //  只剩 2 步：1 -> 2
   if (step.value === 1 && validateStep1()) step.value = 2;
 }
 function back() {
   if (step.value > 1) step.value--;
 }
 function submit() {
-  // ✅ Step3 已整合到 Step2：送出時一起驗證 Step2 + agree
+  //  Step3 已整合到 Step2：送出時一起驗證 Step2 + agree
   if (!validateStep2()) return;
 
   const keys: FieldKey[] = ["agree"];
@@ -207,8 +229,10 @@ function submit() {
   alert("註冊完成（示範）");
 }
 
-/* ---------- input blur handlers ---------- */
+//輸入欄位事件處理
 function onBlur(key: FieldKey) {
+  if (isSwitchingRole.value) return;
+
   touched[key] = true;
 
   if (key === "email") validateEmail();
@@ -273,16 +297,28 @@ function onBlur(key: FieldKey) {
           <!-- role -->
           <div class="flex gap-3">
             <label class="flex items-center gap-2 text-sm text-slate-800">
-              <input type="radio" value="owner" v-model="form.role" />
+              <input
+                type="radio"
+                value="owner"
+                v-model="form.role"
+                @mousedown="isSwitchingRole = true"
+                @change="isSwitchingRole = false"
+              />
               車主（一般消費）
             </label>
             <label class="flex items-center gap-2 text-sm text-slate-800">
-              <input type="radio" value="shop" v-model="form.role" />
+              <input
+                type="radio"
+                value="shop"
+                v-model="form.role"
+                @mousedown="isSwitchingRole = true"
+                @change="isSwitchingRole = false"
+              />
               保養廠（店家）
             </label>
           </div>
 
-          <!-- owner required -->
+          <!-- (必填）負責人欄位 -->
           <div v-if="!isShop" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-slate-700">姓名</label>
@@ -345,7 +381,7 @@ function onBlur(key: FieldKey) {
             </p>
           </div>
 
-          <!-- shop required -->
+          <!-- （必填）店家資料 -->
           <div v-if="isShop" class="space-y-4">
             <hr class="my-6 border-t border-slate-100" />
 
@@ -373,7 +409,7 @@ function onBlur(key: FieldKey) {
               <p v-if="showError('taxId')" class="mt-1 text-xs text-red-600">{{ errors.taxId }}</p>
             </div>
 
-            <!-- grid2 (keep responsive) -->
+            <!-- 網格排列（保持響應式） -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label class="block text-sm font-medium text-slate-700">縣市</label>
@@ -436,4 +472,6 @@ function onBlur(key: FieldKey) {
       </div>
     </div>
   </div>
+
+
 </template>
