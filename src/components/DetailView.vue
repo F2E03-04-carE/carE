@@ -21,11 +21,11 @@
         <div class="mt-6">
           <h3 class="mb-2 font-medium text-gray-800">專修品牌</h3>
           <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Toyota</span>
-            <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Honda</span>
-            <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Nissan</span>
-            <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Mazda</span>
-            <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Lexus</span>
+            <span class="px-16 py-1 text-sm bg-[#E8E3DB] rounded-full">Toyota</span>
+            <span class="px-16 py-1 text-sm bg-[#E8E3DB] rounded-full">Honda</span>
+            <span class="px-16 py-1 text-sm bg-[#E8E3DB] rounded-full">Nissan</span>
+            <span class="px-16 py-1 text-sm bg-[#E8E3DB] rounded-full">Mazda</span>
+            <span class="px-16 py-1 text-sm bg-[#E8E3DB] rounded-full">Lexus</span>
           </div>
         </div>
         <!-- 需要串資料，這邊僅切版 -->
