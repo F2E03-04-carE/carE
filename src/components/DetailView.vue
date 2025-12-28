@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen py-8 bg-[#FAF8F5]">
+  <div class="min-h-screen py-8 bg-[#FAF8F5] min-w-[450px]">
     <div class="max-w-3xl mx-auto px-4">
-      <div class="mb-4 text-sm text-gray-600 cursor-pointer">← 返回搜尋結果</div>
+      <div class="inline-flex items-center px-4 py-2 mb-4 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">← 返回搜尋結果</div>
       <section class="p-6 bg-white rounded-2xl shadow-sm">
         <div class="flex items-start justify-between">
           <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
@@ -28,10 +28,10 @@
             <span class="px-3 py-1 text-sm bg-[#E8E3DB] rounded-full">Lexus</span>
           </div>
         </div>
-
+        <!-- 需要串資料，這邊僅切版 -->
         <div class="mt-6">
           <h3 class="mb-2 font-medium text-gray-800">服務項目</h3>
-          <div class="flex gap-12 text-sm text-gray-700">
+          <div class="flex flex-col gap-2 text-sm text-gray-700 sm:flex-row sm:gap-12">
             <ul class="pl-4 space-y-1 list-disc">
               <li>定期保養</li>
               <li>變速箱維修</li>
@@ -73,6 +73,3 @@
     </div>
   </div>
 </template>
-
-<!-- 1. 車廠周邊附近休息地點，提供消費者等待維修期間的去處。
-3. 外部預覽有車廠banner，點進去後同樣有車廠banner，然後另有其他車廠提供的環境圖片。 -->
