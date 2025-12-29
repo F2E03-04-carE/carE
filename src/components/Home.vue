@@ -19,7 +19,10 @@
         <h3 class="mb-[50px] text-[20px] text-[#8a8a7d] font-normal">
           連結全台優質保養廠，給您的愛車最好的照顧
         </h3>
-
+         <!-- 測試用連結 -->
+    <router-link to="/forgot-password" style="display:block; margin-top:16px;">
+      忘記密碼（測試）
+    </router-link>
         <form
           action=""
           method="get"
