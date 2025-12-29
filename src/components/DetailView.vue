@@ -129,7 +129,7 @@
               <h3 class="mb-4 font-medium text-gray-800">維修廠地圖地點</h3>
               <div class="w-full aspect-square bg-gray-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-gray-400">
                 <span class="text-4xl mb-2">🗺️</span>
-                <span class="text-sm">Google Map 載入中...</span>
+                <span class="text-sm">Google Map 載入中....</span>
               </div>
               <div class="mt-4 text-sm text-gray-500">
                 <p>地址：台北市咪咪毛毛區 123 號</p>
