@@ -1,19 +1,9 @@
 <template>
-  <header class="relative bg-red-50">
-    <nav class="fixed top-0 z-1">
-      navbar 佔位區
-      <div class="logo"></div>
-      <div class="menu"></div>
-      <div class="member"></div>
-    </nav>
-  </header>
-  <main class="relative">
-    <!-- HERO 搜尋 -->
+  <main class="relative mt-[70px]">
     <section
-      class="h-[100vh] text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
+      class="text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
     >
-      <!-- LINE 29 section 的底圖目前是假圖，因此先用 LINE 33 div 做透色遮罩處理文字顏色與原底圖主色相近問題 -->
-      <div class="mask flex flex-col justify-center items-center h-[100%] bg-[#f2f1eedd]">
+      <div class="mask flex flex-col justify-center items-center bg-[#f2f1eedd]">
         <h1 class="text-[36px] text-[#4a4a43] font-black">carE 汽車維修預約平台</h1>
         <h2 class="text-[28px] text-[#4a4a43] font-bold">尋找專業的汽車維修服務</h2>
         <h3 class="mb-[50px] text-[20px] text-[#8a8a7d] font-normal">
@@ -25,36 +15,64 @@
           method="get"
           class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px]"
         >
+          <!-- TODO: 修正下拉選單 icon 位置，避免 Safari browser 跑版 -->
           <div class="w-full lg:w-[25%]">
-            <label for="repairItem" class="block text-[16px] text-left text-[#8a8a7d]"
+            <label for="repair" class="block text-[16px] text-left text-[#8a8a7d]"
               >搜尋維修項目</label
             >
             <div class="relative">
-              <input
-                type="text"
-                name="repair-item"
-                id="repairItem"
-                placeholder="例如：定期保養、換機油"
-                class="block w-full px-[35px] py-[10px] placeholder:text-[#4c4c46] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
-              />
-
+              <select
+                name="repair"
+                id="repair"
+                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+              >
+                <option value="" selected disabled>選擇維修項目</option>
+                <option value="body_repair">板金維修／鈑金烤漆</option>
+                <option value="engine_maintenance">引擎保養與維修</option>
+                <option value="transmission_repair">變速箱維修</option>
+                <option value="brake_system">煞車系統維修</option>
+                <option value="air_conditioning">冷氣系統維修</option>
+                <option value="suspension_system">底盤／懸吊系統維修</option>
+              </select>
               <i
-                class="fa-solid fa-magnifying-glass absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
+                class="fa-solid fa-wrench absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
               ></i>
             </div>
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label for="location" class="block text-[16px] text-left text-[#8a8a7d]"
-              >城市 / 行政區</label
-            >
+            <label for="city" class="block text-[16px] text-left text-[#8a8a7d]">
+              縣市
+              <span class="text-[12px]">(選項先卡位，之後抓郵局API)</span>
+            </label>
+            <div class="relative">
+              <select
+                name="city"
+                id="city"
+                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+              >
+                <option value="" selected disabled>選擇縣市</option>
+                <option value="TPE">臺北市</option>
+                <option value="NTPC">新北市</option>
+              </select>
+              <i
+                class="fa-solid fa-city absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
+              ></i>
+            </div>
+          </div>
+
+          <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+            <label for="location" class="block text-[16px] text-left text-[#8a8a7d]">
+              行政區
+              <span class="text-[12px]">(選項先卡位，之後抓郵局API)</span>
+            </label>
             <div class="relative">
               <select
                 name="location"
                 id="location"
                 class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
               >
-                <option value="" selected disabled>選擇城市</option>
+                <option value="" selected disabled>選擇行政區</option>
                 <option value="Zhongzheng">中正區</option>
                 <option value="Datong">大同區</option>
                 <option value="Zhongshan">中山區</option>
@@ -73,6 +91,7 @@
               ></i>
             </div>
           </div>
+
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
             <label for="brand" class="block text-[16px] text-left text-[#8a8a7d]">車子品牌</label>
             <div class="relative">
@@ -106,8 +125,63 @@
             <i class="fa-solid fa-magnifying-glass mr-[5px]"></i>搜尋
           </button>
         </form>
+        <!-- 六大常見搜尋主題 -->
+        <!-- TODO: button 待加 click event function -->
+        <h3 class="mt-[50px] text-[24px] text-[#4a4a43] font-bold">六大熱門搜尋主題</h3>
+        <div
+          class="flex flex-row flex-wrap lg:flex-nowrap justify-evenly items-center w-full mt-[5%] lg:mt-[0%]"
+        >
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-gears text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">維修</span>
+            </p>
+          </button>
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-car text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">保養</span>
+            </p>
+          </button>
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-screwdriver-wrench text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">改裝</span>
+            </p>
+          </button>
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-solid fa-spray-can-sparkles text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">鈑金</span>
+            </p>
+          </button>
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-circle-dot text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">輪胎</span>
+            </p>
+          </button>
+          <button
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+          >
+            <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
+              <i class="fa-solid fa-road-circle-exclamation text-[50px]"></i>
+              <span class="mt-[12px] text-[20px] font-bold leading-none">救援</span>
+            </p>
+          </button>
+        </div>
         <!-- 信任背書 -->
-        <div class="flex flex-row justify-around items-center w-[80%] mt-[5%] lg:mt-[3%]">
+        <div class="flex flex-row justify-around items-center w-[80%] my-[5%] lg:my-[3%]">
           <div class="text-center">
             <p class="text-[28px] text-[#4A4A43]">500+</p>
             <h3 class="text-[#8F8F84]">合作廠商</h3>
@@ -125,6 +199,7 @@
     </section>
     <section class="max-w-[1440px] mx-auto">
       <h4 class="text-[26px] font-bold text-center">您是否也有這些困擾？</h4>
+      <!-- TODO: 修改非平台功能的特點文案 -->
       <!-- 車主角度痛點 -->
       <div class="flex flex-col lg:flex-row justify-evenly items-center">
         <div class=""><img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位</div>
@@ -265,5 +340,4 @@
       <i class="fa-solid fa-arrow-up text-[26px] text-[#6b6b5a]"></i>
     </button>
   </main>
-  <footer>Footer 佔位區</footer>
 </template>
