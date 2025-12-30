@@ -1,5 +1,5 @@
 <template>
-  <main class="relative mt-[70px]">
+  <main class="relative mt-[60px] sm:mt-[70px]">
     <section
       class="text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
     >
