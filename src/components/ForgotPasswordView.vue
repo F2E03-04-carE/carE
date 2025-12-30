@@ -21,7 +21,7 @@ const identifierPlaceholder = computed(() =>
   state.method === "email" ? "例如：name@example.com" : "例如：0912345678"
 );
 
-// 純切版：先不串 API，按鈕只切步驟方便往後合併
+// 純切版：先不串 API，按鈕只切步驟方便往後合併了
 function goStep2() {
   state.step = 2;
 }
@@ -368,7 +368,7 @@ function backToStep1() {
 }
 
 .btn--primary {
-  background: #6b6a5c; 
+  background: #6b6a5c;
   color: #fff;
   border-color: rgba(0, 0, 0, 0.08);
 }
