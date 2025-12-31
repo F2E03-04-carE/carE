@@ -32,13 +32,11 @@ const serviceOptions = [
 				</div>
 			</div>
 			<div class="flex items-center gap-4">
-				<button class="px-4 py-2 text-sm font-medium text-white transition-colors rounded bg-[#6b635c] hover:bg-[#5a534d]">預約服務
-				</button>
-				<button class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">我的預約
-				</button>
+				<button class="px-4 py-2 text-sm font-medium text-white transition-colors rounded bg-[#6b635c] hover:bg-[#5a534d]">預約服務</button>
+				<button class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900">我的預約</button>
 				<button class="flex items-center gap-2 px-4 py-2 text-sm text-white rounded bg-[#6b635c]">
 					<i class="fa-solid fa-check"></i>
-					開發模式
+                    開發模式
 				</button>
 			</div>
 		</header>
@@ -46,19 +44,14 @@ const serviceOptions = [
 			<div class="flex flex-col p-10 bg-white shadow-lg rounded-2xl min-h-[600px]">
 				<div class="relative flex justify-between w-full px-12 mb-12">
 					<div class="absolute top-5 left-0 right-0 w-full h-[2px] bg-gray-200 -z-10 translate-y-[-50%] mx-auto max-w-[90%]"></div>
-					<div 
-						v-for="s in steps" 
-						:key="s.step"
-						class="flex flex-col items-center gap-3 bg-white"
-					>
-						<div 
-							class="flex items-center justify-center w-10 h-10 text-sm font-bold transition-all border-2 rounded-full"
+					<div v-for="s in steps" :key="s.step" class="flex flex-col items-center gap-3 bg-white">
+						<div class="flex items-center justify-center w-10 h-10 text-sm font-bold transition-all border-2 rounded-full"
 							:class="[
 								currentStep === s.step 
 									? `bg-[#6b635c] border-[#6b635c] text-white` 
 									: `bg-white border-gray-300 text-gray-400`
-							]"
-						>
+                                    ]"
+                        >
 							{{ s.step }}
 						</div>
 						<span 
@@ -92,8 +85,7 @@ const serviceOptions = [
 				<div v-if="currentStep === 1" class="flex-1">
 					<h2 class="mb-6 text-xl font-bold text-gray-800">選擇服務項目</h2>
 					<div class="grid grid-cols-2 gap-6">
-						<div 
-							v-for="service in serviceOptions"
+						<div v-for="service in serviceOptions"
 							:key="service.id"
 							@click="selectedServiceId = service.id"
 							class="flex items-center gap-6 p-6 transition-all border rounded-xl cursor-pointer group hover:shadow-md"
@@ -101,15 +93,15 @@ const serviceOptions = [
 								selectedServiceId === service.id 
 									? `border-[#6b635c] bg-stone-50` 
 									: `border-gray-200 bg-white`
-							]"
-						>
+                                    ]"
+                        >
 							<div 
 								class="flex items-center justify-center w-16 h-16 transition-colors rounded-lg"
 								:class="[
 									selectedServiceId === service.id 
 										? `bg-[#6b635c] text-white` 
 										: `bg-[#6b635c] text-white opacity-80`
-								]"
+                                        ]"
 							>
 								<i class="text-2xl fa-solid" :class="service.icon"></i>
 							</div>
@@ -125,7 +117,7 @@ const serviceOptions = [
 					<p>步驟 {{ currentStep }} 內容建置中...</p>
 				</div>
 				<div class="flex justify-between mt-12 pt-6 border-t border-gray-100">
-					<button 
+                    <button 
 						@click="currentStep > 1 ? currentStep-- : null"
 						:disabled="currentStep === 1"
 						class="px-8 py-3 text-sm font-medium transition-colors border border-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-500">
