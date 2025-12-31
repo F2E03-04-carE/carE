@@ -20,6 +20,7 @@ const serviceOptions = [
 </script>
 
 <template>
+	<!--新年快樂-->
 	<div class="flex flex-col min-h-screen bg-[#f9f9f9] text-[#4a4a4a] font-sans">
 		<header class="flex justify-between items-center px-8 py-4 bg-white border-b border-gray-100">
 			<div class="flex items-center gap-4">
