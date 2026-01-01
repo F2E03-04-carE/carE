@@ -16,16 +16,16 @@
           method="get"
           class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px]"
         >
-          <!-- TODO: 修正下拉選單 icon 位置，避免 Safari browser 跑版 -->
           <div class="w-full lg:w-[25%]">
-            <label for="repair" class="block text-[16px] text-left text-[#8a8a7d]"
-              >搜尋維修項目</label
-            >
-            <div class="relative">
+            <label for="repair" class="block text-[16px] text-left text-[#8a8a7d]">
+              <i class="fa-solid fa-wrench mx-[3px] text-[#8a8a7d]"></i>
+              搜尋維修項目
+            </label>
+            <div>
               <select
                 name="repair"
                 id="repair"
-                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
               >
                 <option value="" selected disabled>選擇維修項目</option>
                 <option value="body_repair">板金維修／鈑金烤漆</option>
@@ -35,45 +35,39 @@
                 <option value="air_conditioning">冷氣系統維修</option>
                 <option value="suspension_system">底盤／懸吊系統維修</option>
               </select>
-              <i
-                class="fa-solid fa-wrench absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
-              ></i>
             </div>
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
             <label for="city" class="block text-[16px] text-left text-[#8a8a7d]">
+              <i class="fa-solid fa-city mx-[3px] text-[#8a8a7d]"></i>
               縣市
-              <span class="text-[12px]">(選項先卡位，之後抓郵局API)</span>
             </label>
-            <div class="relative">
+            <div>
               <select
                 name="city"
                 id="city"
-                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
               >
-                <option value="" selected disabled>選擇縣市</option>
+                <option value="" selected disabled>選擇縣市，抓郵局API</option>
                 <option value="TPE">臺北市</option>
                 <option value="NTPC">新北市</option>
               </select>
-              <i
-                class="fa-solid fa-city absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
-              ></i>
             </div>
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
             <label for="location" class="block text-[16px] text-left text-[#8a8a7d]">
+              <i class="fa-solid fa-location-dot mx-[3px] text-[#8a8a7d]"></i>
               行政區
-              <span class="text-[12px]">(選項先卡位，之後抓郵局API)</span>
             </label>
-            <div class="relative">
+            <div>
               <select
                 name="location"
                 id="location"
-                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
               >
-                <option value="" selected disabled>選擇行政區</option>
+                <option value="" selected disabled>選擇行政區，抓郵局API</option>
                 <option value="Zhongzheng">中正區</option>
                 <option value="Datong">大同區</option>
                 <option value="Zhongshan">中山區</option>
@@ -87,19 +81,19 @@
                 <option value="Nangang">南港區</option>
                 <option value="Wenshan">文山區</option>
               </select>
-              <i
-                class="fa-solid fa-location-dot absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
-              ></i>
             </div>
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label for="brand" class="block text-[16px] text-left text-[#8a8a7d]">車子品牌</label>
-            <div class="relative">
+            <label for="brand" class="block text-[16px] text-left text-[#8a8a7d]">
+              <i class="fa-solid fa-car-side mx-[3px] text-[#8a8a7d]"></i>
+              車子品牌
+            </label>
+            <div>
               <select
                 name="brand"
                 id="brand"
-                class="block w-full px-[35px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
               >
                 <option value="" selected disabled>選擇品牌</option>
                 <option value="Toyota">Toyota</option>
@@ -113,9 +107,6 @@
                 <option value="Volkswagen">Volkswagen</option>
                 <option value="else">其他品牌</option>
               </select>
-              <i
-                class="fa-solid fa-car-side absolute top-[50%] left-[10px] translate-y-[-50%] text-[#8a8a7d]"
-              ></i>
             </div>
           </div>
 
