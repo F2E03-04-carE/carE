@@ -189,9 +189,8 @@
         </div>
       </div>
     </section>
-    <section class="max-w-[1440px] mx-auto">
-      <h4 class="text-[26px] font-bold text-center">您是否也有這些困擾？</h4>
-      <!-- TODO: 修改非平台功能的特點文案 -->
+    <section class="max-w-[1440px] mx-auto my-[3%] text-[#4a4a43]">
+      <h4 class="text-[26px] font-bold text-center my-[3%]">您是否也有這些困擾？</h4>
       <!-- 車主角度痛點 -->
       <div class="flex flex-col lg:flex-row justify-evenly items-center">
         <div class=""><img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位</div>
@@ -199,37 +198,24 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-scale-unbalanced absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 看不懂報價，只能「相信對方說的 </span>
+                <i class="fa-solid fa-mug-hot absolute top-1 left-0"></i>
+                <span class="inline-block ml-7 font-bold">等待維修，只能乾等</span>
               </p>
-              <p class="ml-7">
-                面對不熟悉的項目名稱與說明，難以理解內容，只能被動相信對方的專業判斷，心裡卻始終感到不安。
-              </p>
+              <p class="ml-7">送修後只能在附近耗時間，不知道要去哪裡，等待本身就成了一種壓力。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-file-circle-exclamation absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 擔心被多換、不知道維修是否必要 </span>
+                <i class="fa-solid fa-wrench absolute top-1 left-0"></i>
+                <span class="inline-block ml-7 font-bold">找維修廠，全靠運氣</span>
               </p>
-              <p class="ml-7">
-                缺乏清楚的判斷依據，很難確認哪些處理是真的需要，哪些其實可以觀察或延後處理。
-              </p>
+              <p class="ml-7">不清楚每間維修廠擅長的品牌，只能碰運氣選一家，修得好不好心裡沒底。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-comments-dollar absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 比價困難，每家說法都不一樣 </span>
+                <i class="fa-solid fa-clock-rotate-left absolute top-1 left-0"></i>
+                <span class="inline-block ml-7 font-bold">維修進度不明，只能一直問</span>
               </p>
-              <p class="ml-7">
-                即使詢問多家維修廠，項目與說法仍各不相同，讓人難以站在同一基準進行比較。
-              </p>
-            </li>
-            <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <i class="fa-solid fa-repeat absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 維修進度不透明，只能反覆詢問 </span>
-              </p>
-              <p class="ml-7">送修後無法掌握目前進度，只能不斷詢問狀況，卻仍難以真正放心。</p>
+              <p class="ml-7">不知道現在修到哪、什麼時候能取車，只能反覆詢問，卻始終無法安心。</p>
             </li>
           </ul>
         </div>
@@ -243,80 +229,73 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-hourglass-half absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 花大量時間解釋基本問題 </span>
+                <i class="fa-solid fa-award absolute top-1 left-0"></i>
+                <span class="inline-block ml-7 font-bold">明明有專長，卻要重說</span>
               </p>
-              <p class="ml-7">每天從零解釋維修常識，話說盡了，時間卻一點一滴被消耗。</p>
+              <p class="ml-7">熟悉的項目與車型，每次都得從頭解釋，時間被一點一滴消耗。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-heart-crack absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 車主不信任，反覆殺價、猶豫 </span>
+                <i class="fa-solid fa-clock absolute top-1 left-0"></i>
+                <span class="inline-block ml-7 font-bold">客人一來，先算時間</span>
               </p>
-              <p class="ml-7">專業說得再清楚，車主仍反覆比較、殺價，遲遲無法下決定。</p>
+              <p class="ml-7">臨時詢問不斷，卻不清楚空檔，只能邊算邊回，流程卡住。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
                 <i class="fa-solid fa-spiral absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 報價流程混亂，溝通成本高 </span>
+                <span class="inline-block ml-7 font-bold">行程一多，腦袋不夠用</span>
               </p>
-              <p class="ml-7">報價來回修改、訊息零散，溝通成本不斷堆高，效率越來越低。</p>
-            </li>
-            <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <i class="fa-solid fa-user-slash absolute top-1 left-0"></i>
-                <span class="inline-block ml-7"> 技術專業難以被看見，只能比低價 </span>
-              </p>
-              <p class="ml-7">累積多年的技術，最後卻被簡化成價格數字，被迫參與低價競爭。</p>
+              <p class="ml-7">維修與交件時間零散，一忙起來，全靠人工排程撐著。</p>
             </li>
           </ul>
         </div>
       </div>
     </section>
     <!-- 平台特色與簡易使用說明 -->
-    <section class="max-w-[1440px] mx-auto">
-      <h4 class="text-[26px] font-bold text-center">carE 帶給您的改變</h4>
-      <h5 class="text-[22px] font-bold text-center">操作只要三步驟</h5>
-      <div class="flex flex-col lg:flex-row justify-around items-center">
-        <div class="w-full lg:w-[30%] px-3 text-center">
-          <h5><i class="fa-solid fa-car-rear"></i> 對車主來說</h5>
-          <p>服務項目透明，每一筆維修都有依據，不再靠運氣修車。</p>
-          <ol class="text-center">
-            <li>
-              <h6>1. 搜尋車廠</h6>
-              <p>輸入地區或維修項目，快速找到附近車廠。</p>
-            </li>
-            <li>
-              <h6>2. 查看與比較</h6>
-              <p>清楚查看服務內容與真實評價。</p>
-            </li>
-            <li>
-              <h6>3. 安心預約</h6>
-              <p>選擇適合的車廠，線上完成預約維修。</p>
-            </li>
-          </ol>
-        </div>
-        <div class="w-full lg:w-[30%] px-3 text-center">
-          <h5><i class="fa-solid fa-screwdriver-wrench"></i> 對維修廠來說</h5>
-          <p>把時間留給專業，讓信任建立在透明與流程，而不是口頭說服。</p>
-          <ol class="text-center">
-            <li>
-              <h6>1. 建立車廠資料</h6>
-              <p>填寫基本資訊、服務項目與營業時間，完成店家頁面。</p>
-            </li>
-            <li>
-              <h6>2. 接收維修需求</h6>
-              <p>車主依需求主動找上門，平台依據營業時間自動配發。</p>
-            </li>
-            <li>
-              <h6>3. 完成服務、累積評價</h6>
-              <p>維修完成後獲得真實評價，提升信任與曝光。</p>
-            </li>
-          </ol>
+    <section class="py-[3%] bg-[#f5f4f0] text-[#4a4a43]">
+      <div class="max-w-[1440px] mx-auto">
+        <h4 class="text-[26px] font-bold text-center my-[1%]">carE 帶給您的改變</h4>
+        <h5 class="text-[22px] font-bold text-center">操作只要三步驟</h5>
+        <div class="flex flex-col lg:flex-row justify-around items-center my-[3%]">
+          <div class="w-full lg:w-[35%] px-3 text-center">
+            <h5 class="text-[24px] font-bold"><i class="fa-solid fa-car-rear"></i> 對車主來說</h5>
+            <p class="my-[5%] text-[18px] font-bold">服務項目透明，筆筆維修有依據，不再靠運氣。</p>
+            <ol class="text-center">
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">1. 搜尋車廠</h6>
+                <p>輸入地區或維修項目，快速找到附近車廠。</p>
+              </li>
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">2. 查看與比較</h6>
+                <p>清楚查看服務內容與真實評價。</p>
+              </li>
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">3. 安心預約</h6>
+                <p>選擇適合的車廠，線上完成預約維修。</p>
+              </li>
+            </ol>
+          </div>
+          <div class="w-full lg:w-[35%] px-3 text-center">
+            <h5 class="text-[24px] font-bold"><i class="fa-solid fa-toolbox"></i> 對維修廠來說</h5>
+            <p class="my-[5%] text-[18px] font-bold">把時間留給專業，讓信任建立在透明與流程。</p>
+            <ol class="text-center">
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">1. 建立車廠資料</h6>
+                <p>填寫基本資訊、服務項目與營業時間，完成店家頁面。</p>
+              </li>
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">2. 接收維修需求</h6>
+                <p>車主依需求主動找上門，平台依據營業時間自動配發。</p>
+              </li>
+              <li class="my-[5%]">
+                <h6 class="text-[20px] font-bold">3. 完成服務、累積評價</h6>
+                <p>維修完成後獲得真實評價，提升信任與曝光。</p>
+              </li>
+            </ol>
+          </div>
         </div>
       </div>
-    </section>
-    <section class="max-w-[1440px] mx-auto">
       <a href="/" class="block w-[50%] mx-auto">
         <button
           class="block w-[100%] py-[1%] mx-auto text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
@@ -325,11 +304,5 @@
         </button>
       </a>
     </section>
-
-    <button
-      class="fixed right-[10px] bottom-[10px] px-[5px] py-[8px] bg-[#f5f4f0] rounded cursor-pointer"
-    >
-      <i class="fa-solid fa-arrow-up text-[26px] text-[#6b6b5a]"></i>
-    </button>
   </main>
 </template>
