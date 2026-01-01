@@ -218,6 +218,12 @@
               <p class="ml-7">不知道現在修到哪、什麼時候能取車，只能反覆詢問，卻始終無法安心。</p>
             </li>
           </ul>
+          <!-- TODO: click 事件要到註冊頁面，並預設為車主身分 -->
+          <button
+            class="w-full mt-[5%] px-[5%] py-[3%] text-[#fff] text-center font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
+          >
+            立即體驗
+          </button>
         </div>
       </div>
       <!-- 維修廠角度痛點 -->
@@ -249,6 +255,12 @@
               <p class="ml-7">維修與交件時間零散，一忙起來，全靠人工排程撐著。</p>
             </li>
           </ul>
+          <!-- TODO: click 事件要到註冊頁面，並預設為維修廠身分 -->
+          <button
+            class="w-full mt-[5%] px-[5%] py-[3%] text-[#fff] text-center font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
+          >
+            立即體驗
+          </button>
         </div>
       </div>
     </section>
@@ -298,7 +310,7 @@
       </div>
       <a href="/" class="block w-[50%] mx-auto">
         <button
-          class="block w-[100%] py-[1%] mx-auto text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
+          class="block w-[100%] py-[2%] mx-auto text-[18px] text-[#fff] font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
         >
           立即使用
         </button>
