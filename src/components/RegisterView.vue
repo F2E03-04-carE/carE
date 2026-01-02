@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 
-//
- Vue3 全台縣市/鄉鎮市區套件（全台資料內建）
+//   Vue3 全台縣市/鄉鎮市區套件（全台資料內建）
 import { VueTwZipCodeSelector } from "@andy922200/vue-tw-zip-code-selector";
 
 // 步驟
