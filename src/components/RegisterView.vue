@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch, nextTick, onBeforeUnmount } from "vue";
-import TwCitySelector from "tw-city-selector";
+import { computed, reactive, ref, watch } from "vue";
 
- // 步驟
+//
+ Vue3 全台縣市/鄉鎮市區套件（全台資料內建）
+import { VueTwZipCodeSelector } from "@andy922200/vue-tw-zip-code-selector";
+
+// 步驟
 const step = ref<1 | 2>(1);
 
- //  表單狀態資料（
-
+// 表單狀態資料
 const form = reactive({
   role: "owner" as "owner" | "shop",
 
@@ -16,22 +18,26 @@ const form = reactive({
   password: "",
   confirmPassword: "",
 
-  //車主
+  // 車主
   name: "",
   nickname: "",
 
-  //保養廠
+  // 保養廠
   shopName: "",
   taxId: "",
+
+  //  地址（由套件回填，全台）
   city: "",
   district: "",
+  zipCode: "",
+
   address: "",
 
   // 使用者同意條款狀態
   agree: false,
 });
 
- //記錄各欄位是否被操作過及其驗證錯誤
+// 記錄各欄位是否被操作過及其驗證錯誤
 const touched = reactive({
   email: false,
   phone: false,
@@ -70,14 +76,14 @@ const errors = reactive<Record<FieldKey, string>>({
   agree: "",
 });
 
-//欄位群組定義（依使用者角色分類）
+// 欄位群組定義（依使用者角色分類）
 const ownerKeys: FieldKey[] = ["name", "nickname"];
 const shopKeys: FieldKey[] = ["shopName", "taxId", "city", "district", "address"];
 const agreeKeys: FieldKey[] = ["agree"];
 
 const isShop = computed(() => form.role === "shop");
 
-// 判斷目前是否為「店家」身分
+// 基本驗證
 function isEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
@@ -110,7 +116,7 @@ function resetTouchedAndErrors(keys: FieldKey[]): void {
   });
 }
 
-//欄位驗證的唯一來源 所有欄位的驗證邏輯都集中在這裡，避免分散在多個地方。
+// 欄位驗證的唯一來源
 type Validator = () => void;
 
 const validators: Record<FieldKey, Validator> = {
@@ -174,14 +180,12 @@ const validators: Record<FieldKey, Validator> = {
 };
 
 function validateKeys(keys: FieldKey[]): boolean {
-  // 只清本次要驗證的 keys 的 error，避免誤清其他欄位狀態
   clearErrors(keys);
   keys.forEach((k) => validators[k]());
   return !keys.some((k) => Boolean(errors[k]));
 }
-//角色切換邏輯
-//當使用者切換成「店家」時，會清空「一般用戶」相關欄位的狀態與錯誤
-//當使用者切換回「一般用戶」時，會清空「店家」相關欄位的狀態與錯誤
+
+// 角色切換邏輯
 watch(
   () => form.role,
   (role) => {
@@ -190,104 +194,26 @@ watch(
   }
 );
 
-//縣市 / 區域選擇（使用 tw-city-selector,只負責「資料來源」（縣市資料,不改變既有畫面結構或驗證邏輯
-let twSelector: any | null = null;
-let bound = false;
+// 套件選擇地址後回填（全台縣市/鄉鎮市區）
+function onSelectedZone(zone: {
+  name?: string;
+  zipCode?: number | string;
+  county?: string;
+  countyName?: string;
+}) {
+  form.city = zone.countyName || zone.county || "";
+  form.district = zone.name || "";
+  form.zipCode = zone.zipCode != null ? String(zone.zipCode) : "";
 
-let twRoot: Element | null = null;
-let countyEl: HTMLSelectElement | null = null;
-let districtEl: HTMLSelectElement | null = null;
-
-const handleCountyChange = () => {
-  if (!countyEl) return;
-
-  const nextCity = countyEl.value ?? "";
-
-  // 等同你原本 watch(city) 的行為：換縣市就清空區域
-  if (form.city !== nextCity) {
-    form.city = nextCity;
-    form.district = "";
-
-    // 如果 district select 有值，手動清掉（避免 UI 殘留）
-    if (districtEl) districtEl.value = "";
-  }
-
+  // 已 touched 才即時驗證（維持你原本 UX）
   if (touched.city || touched.district) {
     touched.city = true;
     touched.district = true;
     validateKeys(["city", "district"]);
   }
-};
-
-const handleDistrictChange = () => {
-  if (!districtEl) return;
-
-  form.district = districtEl.value ?? "";
-
-  if (touched.city || touched.district) {
-    touched.city = true;
-    touched.district = true;
-    validateKeys(["city", "district"]);
-  }
-};
-
-async function initTwSelectorIfNeeded() {
-  if (twSelector) return;
-
-  await nextTick();
-
-  twSelector = new (TwCitySelector as any)({
-    el: ".tw-city-selector-set",
-    elCounty: ".county",
-    elDistrict: ".district",
-  });
-
-  if (!bound) {
-    bound = true;
-
-    twRoot = document.querySelector(".tw-city-selector-set");
-    countyEl = twRoot?.querySelector(".county") as HTMLSelectElement | null;
-    districtEl = twRoot?.querySelector(".district") as HTMLSelectElement | null;
-
-    // 初始同步（讓 form 有值）
-    form.city = countyEl?.value ?? "";
-    form.district = districtEl?.value ?? "";
-
-    countyEl?.addEventListener("change", handleCountyChange);
-    districtEl?.addEventListener("change", handleDistrictChange);
-  }
 }
 
-function destroyTwSelector() {
-  countyEl?.removeEventListener("change", handleCountyChange);
-  districtEl?.removeEventListener("change", handleDistrictChange);
-
-  twSelector = null;
-  bound = false;
-
-  twRoot = null;
-  countyEl = null;
-  districtEl = null;
-}
-
-// 只有 step=2 且顯示 shop 區塊時才初始化（因為該區塊是 v-if）
-watch(
-  [step, isShop],
-  async ([s, shop]) => {
-    if (s === 2 && shop) {
-      await initTwSelectorIfNeeded();
-    } else {
-      destroyTwSelector();
-    }
-  },
-  { immediate: true }
-);
-
-onBeforeUnmount(() => {
-  destroyTwSelector();
-});
-
-//使用者行操作行為邏輯
+// 使用者行為
 function next() {
   if (step.value !== 1) return;
 
@@ -317,11 +243,10 @@ function submit() {
   alert("註冊完成（示範）");
 }
 
-//欄位事件（失焦處理）
+// 欄位事件（失焦處理）
 function onBlur(key: FieldKey) {
   touched[key] = true;
 
-  // 單欄位驗證（保留 blur 驗證體驗）
   if (key === "city" || key === "district") {
     validateKeys(["city", "district"]);
     return;
@@ -329,7 +254,6 @@ function onBlur(key: FieldKey) {
 
   validateKeys([key]);
 
-  // confirmPassword 受 password 影響：password blur 後同步檢查 confirmPassword（若已有輸入/已 touched）
   if (key === "password" && (touched.confirmPassword || form.confirmPassword)) {
     touched.confirmPassword = true;
     validateKeys(["confirmPassword"]);
@@ -371,7 +295,7 @@ function onBlur(key: FieldKey) {
         <section v-else class="space-y-6">
           <h2 class="text-sm font-semibold text-slate-900">帳號資料</h2>
 
-          <!--身分 -->
+          <!-- 身分 -->
           <div class="flex gap-3">
             <label class="flex items-center gap-2 text-sm text-slate-800">
               <input type="radio" value="owner" v-model="form.role" />
@@ -472,36 +396,13 @@ function onBlur(key: FieldKey) {
               <p v-if="showError('taxId')" class="mt-1 text-xs text-red-600">{{ errors.taxId }}</p>
             </div>
 
-            <!-- 城市與區域欄位現在由 tw-city-selector 自動產生 -->
-            <div class="tw-city-selector-set grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="block text-sm font-medium text-slate-700">縣市</label>
-                <select
-                  class="county"
-                  :class="inputClass('city')"
-                  :data-county-value="form.city"
-                  @blur="onBlur('city')"
-                >
-                  <option value="" disabled>選擇縣市</option>
-                </select>
-                <p v-if="showError('city')" class="mt-1 text-xs text-red-600">{{ errors.city }}</p>
-              </div>
+            <!--  全台縣市 / 鄉鎮市區（Vue3 套件） -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">縣市 / 區域</label>
 
-              <div>
-                <label class="block text-sm font-medium text-slate-700">區域</label>
-                <select
-                  class="district"
-                  :class="inputClass('district')"
-                  :data-district-value="form.district"
-                  :disabled="!form.city"
-                  @blur="onBlur('district')"
-                >
-                  <option value="" disabled>選擇區域</option>
-                </select>
-                <p v-if="showError('district')" class="mt-1 text-xs text-red-600">
-                  {{ errors.district }}
-                </p>
-              </div>
+              <VueTwZipCodeSelector @getSelectedZone="onSelectedZone" />
+
+
             </div>
 
             <div>

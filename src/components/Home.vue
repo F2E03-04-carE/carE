@@ -1,14 +1,7 @@
 <template>
-  <header class="relative bg-red-50">
-    <nav class="fixed top-0 z-1">
-      navbar 佔位區
-      <div class="logo"></div>
-      <div class="menu"></div>
-      <div class="member"></div>
-    </nav>
-  </header>
+  
   <main class="relative">
-    
+
     <section
       class="h-[100vh] text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
     >
