@@ -12,6 +12,8 @@ const selectedDate = ref<Date | null>(null)
 
 const today: Date = new Date()
 
+const time = ref<string | null>(null)
+
 function onDateSelected(date: Date | null): void {
   selectedDate.value = date
 }
@@ -51,18 +53,104 @@ const formattedDate = computed<string | null>(() => {
               <i class="fa-regular fa-calendar text-[50px] text-[#c2c2c0]"></i>
               <p class="mt-3 text-[14px] text-[#8a8a86]">請選擇日期</p>
             </div>
-            <div v-else class="flex flex-row justify-left items-center">
+            <div v-else class="flex flex-row justify-left items-start">
               <i class="fa-regular fa-calendar text-[24px] text-[#6b6b5c]"></i>
-              <span class="ml-2 text-[18px] text-[#3a3a38] font-bold">{{ formattedDate }}</span>
+              <div>
+                <span class="ml-2 text-[18px] text-[#3a3a38] font-bold">{{ formattedDate }}</span>
+                <p v-if="time" class="ml-2 text-[18px] text-[#8a8a86] font-bold">{{ time }}</p>
+              </div>
             </div>
           </div>
           <div>
             <p class="my-2 text-[14px] text-[#8a8a86] font-black">選擇時段</p>
             <div
-              class="flex flex-col justify-center items-center p-4 border border-[#e9e9e7] rounded-[8px] bg-[#fbfbfa]"
+              class="p-4 border border-[#e9e9e7] rounded-[8px]"
+              :class="{ 'bg-[#fbfbfa]': !formattedDate }"
             >
-              <i class="fa-regular fa-clock text-[50px] text-[#c2c2c0]"></i>
-              <p class="mt-3 text-[14px] text-[#8a8a86]">請先選擇日期</p>
+              <div v-if="!formattedDate" class="flex flex-col justify-center items-center">
+                <i class="fa-regular fa-clock text-[50px] text-[#c2c2c0]"></i>
+                <p class="mt-3 text-[14px] text-[#8a8a86]">請先選擇日期</p>
+              </div>
+              <div v-else>
+                <div class="p-4 border border-[#e9e9e7] rounded-[8px]">
+                  <label for="time09" class="w-full flex font-bold">
+                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
+                    <p
+                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
+                    >
+                      <span class="text-[16px]">09:00</span>
+                      <span class="text-[14px]">剩餘 3</span>
+                    </p>
+                    <input
+                      v-model="time"
+                      type="radio"
+                      name="time"
+                      id="time09"
+                      value="09:00 早上"
+                      class="appearance-none"
+                    />
+                  </label>
+                </div>
+                <div class="p-4 mt-4 border border-[#e9e9e7] rounded-[8px]">
+                  <label for="time10" class="w-full flex font-bold">
+                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
+                    <p
+                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
+                    >
+                      <span class="text-[16px]">10:00</span>
+                      <span class="text-[14px]">剩餘 3</span>
+                    </p>
+                    <input
+                      v-model="time"
+                      type="radio"
+                      name="time"
+                      id="time10"
+                      value="10:00 早上"
+                      class="appearance-none"
+                    />
+                  </label>
+                </div>
+                <div class="p-4 mt-4 border border-[#e9e9e7] rounded-[8px]">
+                  <label for="time11" class="w-full flex font-bold">
+                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
+                    <p
+                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
+                    >
+                      <span class="text-[16px]">11:00</span>
+                      <span class="text-[14px]">剩餘 1</span>
+                    </p>
+                    <input
+                      v-model="time"
+                      type="radio"
+                      name="time"
+                      id="time11"
+                      value="11:00 早上"
+                      class="appearance-none"
+                    />
+                  </label>
+                </div>
+                <div
+                  class="p-4 mt-4 bg-[#fbfbfa] border border-[#e9e9e7] rounded-[8px] cursor-not-allowed"
+                >
+                  <label for="time13" class="w-full flex font-bold cursor-not-allowed">
+                    <p><i class="fa-regular fa-clock text-[#cdcdcb]"></i></p>
+                    <p
+                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#cdcdcb]"
+                    >
+                      <span class="text-[16px]">13:00</span>
+                      <span class="text-[14px]">已額滿</span>
+                    </p>
+                    <input
+                      v-model="time"
+                      type="radio"
+                      name="time"
+                      id="time13"
+                      value="13:00 下午"
+                      class="appearance-none"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
