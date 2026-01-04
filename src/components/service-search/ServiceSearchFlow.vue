@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import ServiceStepper from "./ServiceStepper.vue";
 import ServiceModal from "./ServiceModal.vue";
+import BookingTimeSelectorView from "../BookingTimeSelectorView.vue"; //引入Booking元件
 
 defineEmits<{
   (e: "back"): void;
@@ -26,23 +27,8 @@ const serviceOptions: Array<{ key: ServiceKey; title: string; minutes: number; f
 ];
 const selectedService = ref<ServiceKey | null>(null);
 
-const weekDaysMon = ["一", "二", "三", "四", "五", "六", "日"];
-const monthOptions = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-
-const viewYear = ref<number>(2026);
-const viewMonth = ref<number>(0); // Jan
 const selectedDate = ref<Date | null>(null);
 const selectedTime = ref<string | null>(null);
-
-const yearOptions = computed(() => [2026, 2027, 2028]);
-const timeOptions = [
-  { time: "09:00", remain: 3 },
-  { time: "10:00", remain: 5 },
-  { time: "11:00", remain: 2 },
-  { time: "13:00", remain: 4 },
-  { time: "14:00", remain: 1 },
-  { time: "15:00", remain: 6 },
-];
 
 const contactName = ref<string>("");
 const contactPhone = ref<string>("");
@@ -107,57 +93,6 @@ const nextBtnClass = computed(() => {
     : "bg-[#D1D1CB] cursor-not-allowed";
 });
 
-const toMonIndex = (jsDay: number) => (jsDay + 6) % 7;
-
-const calendarCellsMon42 = computed(() => {
-  const first = new Date(viewYear.value, viewMonth.value, 1);
-  const firstMonIdx = toMonIndex(first.getDay());
-  const start = new Date(viewYear.value, viewMonth.value, 1 - firstMonIdx);
-
-  const cells: Array<{ key: string; date: Date; inMonth: boolean }> = [];
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    cells.push({
-      key: `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`,
-      date: d,
-      inMonth: d.getMonth() === viewMonth.value,
-    });
-  }
-  return cells;
-});
-
-const sameDay = (a: Date, b: Date) =>
-  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-
-const dayBtnClass = (d: Date, inMonth: boolean) => {
-  const sel = selectedDate.value && sameDay(d, selectedDate.value);
-  if (sel) return "bg-[#6B6B5C] text-white";
-  if (!inMonth) return "text-[#D1D1CB] hover:bg-transparent";
-  return "text-[#2B2B2B] hover:bg-[#F5F4EF]";
-};
-
-const onPickDate = (d: Date) => {
-  selectedDate.value = new Date(d);
-};
-
-const prevMonth = () => {
-  if (viewMonth.value === 0) {
-    viewMonth.value = 11;
-    viewYear.value -= 1;
-  } else {
-    viewMonth.value -= 1;
-  }
-};
-const nextMonth = () => {
-  if (viewMonth.value === 11) {
-    viewMonth.value = 0;
-    viewYear.value += 1;
-  } else {
-    viewMonth.value += 1;
-  }
-};
-
 const weekdayCN = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
@@ -170,19 +105,67 @@ const selectedDateLong = computed(() => {
   return `${y}年 ${m}月 ${d}日 ${w}`;
 });
 
+// 修正：因為組員的元件回傳的格式已經是 "09:00 早上"，不需要再額外處理
 const selectedTimeLong = computed(() => {
-  if (!selectedTime.value) return "";
-  const hour = Number(selectedTime.value.split(":")[0] || 0);
-  const period = hour < 12 ? "早上" : hour < 18 ? "下午" : "晚上";
-  return `${selectedTime.value} ${period}`;
+  return selectedTime.value || "";
 });
 
-const timeRowClass = (t: string) => {
-  const active = selectedTime.value === t;
-  return active ? "border-transparent bg-[#6B6B5C]" : "border-[#E6E6DF] bg-white hover:border-[#CFCFC6]";
-};
-
 const selectedServiceObj = computed(() => serviceOptions.find((s) => s.key === selectedService.value) || null);
+
+interface SummaryItem {
+  key: string;
+  icon: string;
+  iconClass?: string;
+  label: string;
+  value: string;
+  valueClass?: string;
+  details?: string;
+  detailsClass?: string;
+}
+
+const summaryItems = computed<SummaryItem[]>(() => [
+  {
+    key: "service",
+    icon: "fa-solid fa-wrench",
+    label: "服務項目",
+    value: selectedServiceObj.value?.title || "—",
+    details: `預估時間：${selectedServiceObj.value?.minutes ?? "—"}分鐘`,
+  },
+  {
+    key: "datetime",
+    icon: "fa-regular fa-calendar",
+    label: "預約日期 & 時段",
+    value: selectedDateLong.value || "—",
+    details: selectedTimeLong.value || "—",
+    detailsClass: "text-lg font-semibold text-[#7A7A7A]",
+  },
+  {
+    key: "name",
+    icon: "fa-regular fa-user",
+    label: "姓名",
+    value: contactName.value || "—",
+  },
+  {
+    key: "phone",
+    icon: "fa-solid fa-phone",
+    label: "電話",
+    value: contactPhone.value || "—",
+  },
+  {
+    key: "email",
+    icon: "fa-regular fa-envelope",
+    label: "電子郵件",
+    value: contactEmail.value || "—",
+  },
+  {
+    key: "note",
+    icon: "fa-regular fa-pen-to-square",
+    iconClass: "text-[#6E6E6A]",
+    label: "備註",
+    value: contactNote.value || "—",
+    valueClass: "whitespace-pre-wrap",
+  },
+]);
 
 const showSuccess = ref(false);
 const bookingCode = ref<string>("");
@@ -236,7 +219,7 @@ const resetAll = () => {
                 v-for="item in serviceOptions"
                 :key="item.key"
                 type="button"
-                class="flex items-center gap-5 rounded-2xl border px-7 py-6 text-left transition"
+                class="flex items-center gap-5 rounded-2xl border bg-white px-7 py-6 text-left transition"
                 :class="serviceCardClass(item.key)"
                 @click="selectedService = item.key"
               >
@@ -257,116 +240,14 @@ const resetAll = () => {
               </button>
             </div>
           </div>
+          
           <div v-else-if="step === 2">
-            <h2 class="text-3xl font-bold tracking-tight">選擇日期</h2>
-            <div class="mt-10 grid grid-cols-2 gap-8">
-              <div class="rounded-2xl border border-[#E6E6DF] bg-white p-8">
-                <div class="flex items-center justify-center gap-4">
-                  <button
-                    type="button"
-                    class="grid h-10 w-10 place-items-center rounded-xl bg-[#F5F4EF] text-lg text-[#6B6B5C] hover:opacity-90"
-                    @click="prevMonth"
-                    aria-label="prev month"
-                  >
-                    <i class="fa-solid fa-chevron-left text-sm" aria-hidden="true"></i>
-                  </button>
-                  <div class="flex items-center gap-3">
-                    <div class="relative">
-                      <select
-                        v-model.number="viewYear"
-                        class="h-10 appearance-none rounded-xl bg-[#F5F4EF] px-4 pr-10 text-sm font-semibold text-[#2B2B2B] outline-none"
-                      >
-                        <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}年</option>
-                      </select>
-                      <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7A7A7A]"
-                        >▾</span
-                      >
-                    </div>
-                    <div class="relative">
-                      <select
-                        v-model.number="viewMonth"
-                        class="h-10 appearance-none rounded-xl bg-[#F5F4EF] px-4 pr-10 text-sm font-semibold text-[#2B2B2B] outline-none"
-                      >
-                        <option v-for="(m, idx) in monthOptions" :key="m" :value="idx">{{ m }}</option>
-                      </select>
-                      <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7A7A7A]"
-                        >▾</span
-                      >
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="grid h-10 w-10 place-items-center rounded-xl bg-[#F5F4EF] text-lg text-[#6B6B5C] hover:opacity-90"
-                    @click="nextMonth"
-                    aria-label="next month"
-                  >
-                    <i class="fa-solid fa-chevron-right text-sm" aria-hidden="true"></i>
-                  </button>
-                </div>
-                <div class="mt-10 grid grid-cols-7 gap-4 text-center text-sm font-semibold text-[#6B6B5C]">
-                  <div v-for="d in weekDaysMon" :key="d">{{ d }}</div>
-                </div>
-                <div class="mt-6 grid grid-cols-7 gap-4 text-center">
-                  <button
-                    v-for="cell in calendarCellsMon42"
-                    :key="cell.key"
-                    type="button"
-                    class="h-11 w-11 rounded-xl text-base font-semibold transition"
-                    :class="dayBtnClass(cell.date, cell.inMonth)"
-                    @click="onPickDate(cell.date)"
-                  >
-                    {{ cell.date.getDate() }}
-                  </button>
-                </div>
-              </div>
-              <div class="space-y-6">
-                <div class="rounded-2xl border border-[#E6E6DF] bg-white px-6 py-5">
-                  <div class="flex items-start gap-4">
-                    <div class="mt-0.5 text-[#6B6B5C]">
-                      <i class="fa-regular fa-calendar text-xl" aria-hidden="true"></i>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="text-lg font-bold">{{ selectedDateLong || "尚未選擇日期" }}</div>
-                      <div class="mt-2 text-lg font-semibold text-[#7A7A7A]">
-                        {{ selectedTimeLong || "請選擇時段" }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="text-sm font-semibold text-[#6B6B5C]">選擇時段</div>
-                <div class="rounded-2xl border border-[#E6E6DF] bg-white p-4">
-                  <div class="max-h-[320px] overflow-y-auto pr-2">
-                    <button
-                      v-for="t in timeOptions"
-                      :key="t.time"
-                      type="button"
-                      class="mb-3 flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left transition"
-                      :class="timeRowClass(t.time)"
-                      @click="selectedTime = t.time"
-                    >
-                      <div class="flex items-center gap-3">
-                        <span :class="selectedTime === t.time ? 'text-white' : 'text-[#6B6B5C]'" class="shrink-0">
-                          <i class="fa-regular fa-clock text-lg" aria-hidden="true"></i>
-                        </span>
-                        <div
-                          class="text-base font-bold"
-                          :class="selectedTime === t.time ? 'text-white' : 'text-[#2B2B2B]'"
-                        >
-                          {{ t.time }}
-                        </div>
-                      </div>
-                      <div
-                        class="text-sm font-semibold"
-                        :class="selectedTime === t.time ? 'text-white/90' : 'text-[#7A7A7A]'"
-                      >
-                        剩餘 {{ t.remain }}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <BookingTimeSelectorView 
+              v-model:date="selectedDate" 
+              v-model:time="selectedTime" 
+            />
           </div>
+
           <div v-else-if="step === 3">
             <h2 class="text-3xl font-bold tracking-tight">聯絡資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-6">
@@ -430,69 +311,30 @@ const resetAll = () => {
               </div>
             </div>
           </div>
+          
           <div v-else>
             <h2 class="text-3xl font-bold tracking-tight">確認預約資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-2">
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-solid fa-wrench text-2xl" aria-hidden="true"></i>
+              <div v-for="(item, index) in summaryItems" :key="item.key">
+                <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
+                  <div class="pt-1" :class="item.iconClass || 'text-[#6B6B5C]'">
+                    <i :class="[item.icon, 'text-2xl']" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-[#6B6B5C]">{{ item.label }}</div>
+                    <div class="mt-2 text-lg font-semibold" :class="item.valueClass">
+                      {{ item.value }}
+                    </div>
+                    <div 
+                      v-if="item.details" 
+                      class="mt-2"
+                      :class="item.detailsClass || 'text-sm text-[#7A7A7A]'"
+                    >
+                      {{ item.details }}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">服務項目</div>
-                  <div class="mt-2 text-lg font-semibold">{{ selectedServiceObj?.title || "—" }}</div>
-                  <div class="mt-2 text-sm text-[#7A7A7A]">預估時間：{{ selectedServiceObj?.minutes ?? "—" }}分鐘</div>
-                </div>
-              </div>
-              <div class="h-px bg-[#E6E6DF]" />
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-regular fa-calendar text-2xl" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">預約日期 &amp; 時段</div>
-                  <div class="mt-2 text-lg font-semibold">{{ selectedDateLong || "—" }}</div>
-                  <div class="mt-2 text-lg font-semibold text-[#7A7A7A]">{{ selectedTimeLong || "—" }}</div>
-                </div>
-              </div>
-              <div class="h-px bg-[#E6E6DF]" />
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-regular fa-user text-2xl" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">姓名</div>
-                  <div class="mt-2 text-lg font-semibold">{{ contactName || "—" }}</div>
-                </div>
-              </div>
-              <div class="h-px bg-[#E6E6DF]" />
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-solid fa-phone text-2xl" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">電話</div>
-                  <div class="mt-2 text-lg font-semibold">{{ contactPhone || "—" }}</div>
-                </div>
-              </div>
-              <div class="h-px bg-[#E6E6DF]" />
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-regular fa-envelope text-2xl" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">電子郵件</div>
-                  <div class="mt-2 text-lg font-semibold">{{ contactEmail || "—" }}</div>
-                </div>
-              </div>
-              <div class="h-px bg-[#E6E6DF]" />
-              <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
-                <div class="pt-1 text-[#6E6E6A]">
-                  <i class="fa-regular fa-pen-to-square text-2xl" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="text-base font-semibold text-[#6B6B5C]">備註</div>
-                  <div class="mt-2 whitespace-pre-wrap text-lg font-semibold">{{ contactNote || "—" }}</div>
-                </div>
+                <div v-if="index < summaryItems.length - 1" class="h-px bg-[#E6E6DF]" />
               </div>
             </div>
           </div>
