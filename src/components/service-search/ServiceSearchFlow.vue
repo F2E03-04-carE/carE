@@ -32,6 +32,7 @@ const contactName = ref<string>("");
 const contactPhone = ref<string>("");
 const contactEmail = ref<string>("");
 const contactNote = ref<string>("");
+
 const isContactValid = computed(() => {
   return !!contactName.value.trim() && !!contactPhone.value.trim() && !!contactEmail.value.trim();
 });
@@ -90,16 +91,14 @@ const nextBtnClass = computed(() => {
     : "bg-[#D1D1CB] cursor-not-allowed";
 });
 
-const weekdayCN = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-const pad2 = (n: number) => String(n).padStart(2, "0");
-
 const selectedDateLong = computed(() => {
   if (!selectedDate.value) return "";
-  const y = selectedDate.value.getFullYear();
-  const m = pad2(selectedDate.value.getMonth() + 1);
-  const d = pad2(selectedDate.value.getDate());
-  const w = weekdayCN[selectedDate.value.getDay()];
-  return `${y}年 ${m}月 ${d}日 ${w}`;
+  return selectedDate.value.toLocaleDateString("zh-TW", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  });
 });
 
 const selectedTimeLong = computed(() => selectedTime.value || "");
