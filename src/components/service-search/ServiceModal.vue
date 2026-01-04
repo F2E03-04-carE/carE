@@ -41,7 +41,7 @@ defineEmits<{
             class="mt-8 w-full rounded-xl bg-[#6B6B5C] px-6 py-4 text-base font-bold text-white hover:opacity-95 active:opacity-90"
             @click="$emit('again')"
           >
-            再次預約
+            查看預約狀態
           </button>
         </div>
       </div>
