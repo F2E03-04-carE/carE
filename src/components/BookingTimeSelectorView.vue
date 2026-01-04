@@ -1,8 +1,3 @@
-<!-- 日期選擇器。
-時段選擇器。
-預約緩衝時間設定 (預設間隔1小時)
-顯示剩餘可接單數
-(預設2位、0位代表該時端不可預約) -->
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { DatePicker } from 'v-calendar'
