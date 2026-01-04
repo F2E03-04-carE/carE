@@ -70,7 +70,7 @@ const setActive = (btnTime: string, status: string) => {
               <i class="fa-regular fa-calendar text-[50px] text-[#c2c2c0]"></i>
               <p class="mt-3 text-[14px] text-[#8a8a86]">請選擇日期</p>
             </div>
-            <div v-else class="flex flex-row justify-left items-start">
+            <div v-else class="flex flex-row justify-start items-start">
               <i class="fa-regular fa-calendar text-[24px] text-[#6b6b5c]"></i>
               <div>
                 <span class="ml-2 text-[18px] text-[#3a3a38] font-bold">{{ formattedDate }}</span>
