@@ -8,19 +8,15 @@ import { ref, computed } from 'vue'
 import { DatePicker } from 'v-calendar'
 import 'v-calendar/style.css'
 
+// 選日期與時間
 const selectedDate = ref<Date | null>(null)
-
 const today: Date = new Date()
-
 const time = ref<string | null>(null)
-
 function onDateSelected(date: Date | null): void {
   selectedDate.value = date
 }
-
 const formattedDate = computed<string | null>(() => {
   if (!selectedDate.value) return null
-
   return selectedDate.value.toLocaleDateString('zh-TW', {
     year: 'numeric',
     month: 'long',
@@ -28,6 +24,31 @@ const formattedDate = computed<string | null>(() => {
     weekday: 'long',
   })
 })
+
+// 時段點選變色
+const activeBtn = ref<string | null>(null)
+const buttons = [
+  {
+    time: '09:00 早上',
+    status: '剩餘 3',
+  },
+  {
+    time: '10:00 早上',
+    status: '剩餘 3',
+  },
+  {
+    time: '11:00 早上',
+    status: '剩餘 3',
+  },
+  {
+    time: '13:00 下午',
+    status: '已額滿',
+  },
+]
+const setActive = (btnTime: string, status: string) => {
+  if (status === '已額滿') return null
+  time.value = btnTime
+}
 </script>
 
 <template>
@@ -40,6 +61,7 @@ const formattedDate = computed<string | null>(() => {
       <h2 class="mb-3 text-[20px] text-[#3a3a38] font-bold">選擇日期</h2>
       <section class="flex flex-wrap justify-between">
         <div class="w-full md:w-[40%]">
+          <!-- TODO: 日曆點選後的顏色 -->
           <DatePicker
             v-model="selectedDate"
             @update:model-value="onDateSelected"
@@ -72,83 +94,38 @@ const formattedDate = computed<string | null>(() => {
                 <p class="mt-3 text-[14px] text-[#8a8a86]">請先選擇日期</p>
               </div>
               <div v-else>
-                <div class="p-4 border border-[#e9e9e7] rounded-[8px]">
-                  <label for="time09" class="w-full flex font-bold">
-                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
-                    <p
-                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
-                    >
-                      <span class="text-[16px]">09:00</span>
-                      <span class="text-[14px]">剩餘 3</span>
+                <div class="flex flex-col gap-4">
+                  <button
+                    v-for="btn in buttons"
+                    :key="btn.time"
+                    @click="setActive(btn.time, btn.status)"
+                    :class="[
+                      'w-full border rounded-[8px] p-4 flex items-center font-bold transition',
+                      btn.status === '已額滿'
+                        ? 'bg-[#fbfbfa] border-[#e9e9e7] cursor-not-allowed text-[#cdcdcb]'
+                        : time === btn.time
+                          ? 'bg-[#6b6b5c]  text-white'
+                          : 'bg-white border-[#e9e9e7] hover:border-[#b5b5ae] hover:shadow-md text-[#3a3a38]',
+                    ]"
+                    :disabled="btn.status === '已額滿'"
+                  >
+                    <p>
+                      <i
+                        class="fa-regular fa-clock mr-3"
+                        :class="
+                          time === btn.time
+                            ? 'text-white'
+                            : btn.status === '已額滿'
+                              ? 'text-[#cdcdcb]'
+                              : 'text-[#6b6b5c]'
+                        "
+                      ></i>
                     </p>
-                    <input
-                      v-model="time"
-                      type="radio"
-                      name="time"
-                      id="time09"
-                      value="09:00 早上"
-                      class="appearance-none"
-                    />
-                  </label>
-                </div>
-                <div class="p-4 mt-4 border border-[#e9e9e7] rounded-[8px]">
-                  <label for="time10" class="w-full flex font-bold">
-                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
-                    <p
-                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
-                    >
-                      <span class="text-[16px]">10:00</span>
-                      <span class="text-[14px]">剩餘 3</span>
+                    <p class="flex justify-between flex-grow">
+                      <span class="text-[16px]">{{ btn.time }}</span>
+                      <span class="text-[14px]">{{ btn.status }}</span>
                     </p>
-                    <input
-                      v-model="time"
-                      type="radio"
-                      name="time"
-                      id="time10"
-                      value="10:00 早上"
-                      class="appearance-none"
-                    />
-                  </label>
-                </div>
-                <div class="p-4 mt-4 border border-[#e9e9e7] rounded-[8px]">
-                  <label for="time11" class="w-full flex font-bold">
-                    <p><i class="fa-regular fa-clock text-[#6b6b5c]"></i></p>
-                    <p
-                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#3a3a38]"
-                    >
-                      <span class="text-[16px]">11:00</span>
-                      <span class="text-[14px]">剩餘 1</span>
-                    </p>
-                    <input
-                      v-model="time"
-                      type="radio"
-                      name="time"
-                      id="time11"
-                      value="11:00 早上"
-                      class="appearance-none"
-                    />
-                  </label>
-                </div>
-                <div
-                  class="p-4 mt-4 bg-[#fbfbfa] border border-[#e9e9e7] rounded-[8px] cursor-not-allowed"
-                >
-                  <label for="time13" class="w-full flex font-bold cursor-not-allowed">
-                    <p><i class="fa-regular fa-clock text-[#cdcdcb]"></i></p>
-                    <p
-                      class="flex flex-row justify-between items-center flex-grow ml-3 text-[#cdcdcb]"
-                    >
-                      <span class="text-[16px]">13:00</span>
-                      <span class="text-[14px]">已額滿</span>
-                    </p>
-                    <input
-                      v-model="time"
-                      type="radio"
-                      name="time"
-                      id="time13"
-                      value="13:00 下午"
-                      class="appearance-none"
-                    />
-                  </label>
+                  </button>
                 </div>
               </div>
             </div>
@@ -164,8 +141,13 @@ const formattedDate = computed<string | null>(() => {
             上一步
           </button>
           <button
-            class="px-5 py-2 text-[14px] text-[#ffffff] font-black bg-[#b5b5ad] rounded-[8px]"
-            disabled
+            :disabled="!time"
+            :class="[
+              'px-5 py-2 text-[14px] font-black rounded-[8px] transition-colors duration-150',
+              time
+                ? 'bg-[#6b6b5c] text-white cursor-pointer hover:bg-[#4A4A43]'
+                : 'bg-[#b5b5ad] text-white cursor-not-allowed',
+            ]"
           >
             下一步
           </button>
