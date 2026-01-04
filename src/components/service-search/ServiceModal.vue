@@ -15,7 +15,7 @@ defineEmits<{
       >
         <button
           type="button"
-          class="absolute right-5 top-5 text-[#6E6E6A] hover:opacity-80"
+          class="absolute right-5 top-5 text-[#6B6B5C] hover:opacity-80"
           aria-label="close"
           @click="$emit('close')"
         >
@@ -23,7 +23,7 @@ defineEmits<{
         </button>
 
         <div class="px-10 pb-10 pt-12 text-center">
-          <div class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-[#F2F1EC] text-[#6E6E6A]">
+          <div class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-[#F2F1EC] text-[#6B6B5C]">
             <i class="fa-regular fa-circle-check text-4xl" aria-hidden="true"></i>
           </div>
 
@@ -43,7 +43,7 @@ defineEmits<{
 
           <button
             type="button"
-            class="mt-8 w-full rounded-xl bg-[#6E6E6A] px-6 py-4 text-base font-bold text-white hover:opacity-95 active:opacity-90"
+            class="mt-8 w-full rounded-xl bg-[#6B6B5C] px-6 py-4 text-base font-bold text-white hover:opacity-95 active:opacity-90"
             @click="$emit('again')"
           >
             再次預約

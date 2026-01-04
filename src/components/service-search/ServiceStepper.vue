@@ -17,7 +17,7 @@ const progressWidth = computed(() => {
 });
 
 const circleClass = (n: number) => {
-  if (n <= props.step) return "bg-[#6E6E6A] text-white";
+  if (n <= props.step) return "bg-[#6B6B5C] text-white";
   return "bg-white text-[#7A7A7A] border border-[#E6E6DF]";
 };
 
@@ -32,7 +32,7 @@ const labelClass = (n: number) => {
     <div class="absolute left-0 right-0 top-[18px] h-px bg-[#E6E6DF]" />
     <div
       v-if="step > 1"
-      class="absolute left-0 top-[18px] h-px bg-[#6E6E6A]"
+      class="absolute left-0 top-[18px] h-px bg-[#6B6B5C]"
       :style="{ width: progressWidth }"
     />
     <div class="grid grid-cols-5 items-start gap-0">
