@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-type StepKey = "service" | "vehicle" | "datetime" | "contact" | "confirm";
+type StepKey = "service" | "datetime" | "contact" | "confirm";
 
 const props = defineProps<{
   step: number;
@@ -28,14 +28,14 @@ const labelClass = (n: number) => {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative w-full">
     <div class="absolute left-0 right-0 top-[18px] h-px bg-[#E6E6DF]" />
     <div
       v-if="step > 1"
-      class="absolute left-0 top-[18px] h-px bg-[#6B6B5C]"
+      class="absolute left-0 top-[18px] h-px bg-[#6B6B5C] transition-all duration-300"
       :style="{ width: progressWidth }"
     />
-    <div class="grid grid-cols-5 items-start gap-0">
+    <div class="grid grid-cols-4 items-start gap-0">
       <button
         v-for="(s, idx) in steps"
         :key="s.key"
@@ -43,7 +43,10 @@ const labelClass = (n: number) => {
         class="group relative flex flex-col items-center gap-3"
         @click="$emit('go', idx + 1)"
       >
-        <span class="grid h-9 w-9 place-items-center rounded-full text-sm font-semibold transition" :class="circleClass(idx + 1)">
+        <span 
+          class="grid h-9 w-9 place-items-center rounded-full text-sm font-semibold transition z-10" 
+          :class="circleClass(idx + 1)"
+        >
           <template v-if="idx + 1 < step">
             <i class="fa-solid fa-check text-[14px]" aria-hidden="true"></i>
           </template>
@@ -51,7 +54,6 @@ const labelClass = (n: number) => {
             {{ idx + 1 }}
           </template>
         </span>
-
         <span class="text-sm transition" :class="labelClass(idx + 1)">
           {{ s.label }}
         </span>

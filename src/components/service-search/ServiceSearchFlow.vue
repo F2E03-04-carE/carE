@@ -3,12 +3,10 @@ import { computed, ref } from "vue";
 import ServiceStepper from "./ServiceStepper.vue";
 import ServiceModal from "./ServiceModal.vue";
 
-// 定義 emit，讓父層可以監聽 'back' 事件來處理返回邏輯
 defineEmits<{
   (e: "back"): void;
 }>();
 
-/** Steps - 維持 4 步驟 (已移除 vehicle) */
 type StepKey = "service" | "datetime" | "contact" | "confirm";
 const steps: Array<{ key: StepKey; label: string }> = [
   { key: "service", label: "選擇服務" },
@@ -55,7 +53,6 @@ const isContactValid = computed(() => {
   return !!contactName.value.trim() && !!contactPhone.value.trim() && !!contactEmail.value.trim();
 });
 
-// 邏輯調整：總共 4 步
 const maxUnlocked = computed(() => {
   if (step.value === 1) return selectedService.value ? 2 : 1;
   if (step.value === 2) return selectedDate.value && selectedTime.value ? 3 : 2;
@@ -218,7 +215,6 @@ const resetAll = () => {
 
 <template>
   <div class="min-h-screen bg-[#FAF8F5] px-6 py-10 text-[#2B2B2B]">
-    
     <div class="mx-auto mb-6 w-full max-w-6xl">
       <button
         type="button"
@@ -226,14 +222,12 @@ const resetAll = () => {
         @click="$emit('back')"
       >
         <i class="fa-solid fa-arrow-left"></i>
-        返回店家介紹頁面
+        返回維修廠介紹頁面
       </button>
     </div>
-
     <div class="mx-auto w-full max-w-6xl rounded-[28px] border border-[#E6E6DF] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)]">
       <div class="p-10">
         <ServiceStepper :step="step" :steps="steps" @go="goToStep" />
-
         <div class="mt-16">
           <div v-if="step === 1">
             <h2 class="text-3xl font-bold tracking-tight">選擇服務項目</h2>
@@ -263,7 +257,6 @@ const resetAll = () => {
               </button>
             </div>
           </div>
-          
           <div v-else-if="step === 2">
             <h2 class="text-3xl font-bold tracking-tight">選擇日期</h2>
             <div class="mt-10 grid grid-cols-2 gap-8">
@@ -374,7 +367,6 @@ const resetAll = () => {
               </div>
             </div>
           </div>
-
           <div v-else-if="step === 3">
             <h2 class="text-3xl font-bold tracking-tight">聯絡資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-6">
@@ -421,9 +413,7 @@ const resetAll = () => {
                   />
                 </div>
               </div>
-
               <div class="h-px bg-[#E6E6DF]" />
-
               <div class="grid grid-cols-[44px_1fr] gap-6 py-7">
                 <div class="pt-1 text-[#6E6E6A]">
                   <i class="fa-regular fa-pen-to-square text-2xl" aria-hidden="true"></i>
@@ -440,7 +430,6 @@ const resetAll = () => {
               </div>
             </div>
           </div>
-
           <div v-else>
             <h2 class="text-3xl font-bold tracking-tight">確認預約資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-2">
@@ -495,9 +484,7 @@ const resetAll = () => {
                   <div class="mt-2 text-lg font-semibold">{{ contactEmail || "—" }}</div>
                 </div>
               </div>
-
               <div class="h-px bg-[#E6E6DF]" />
-
               <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
                 <div class="pt-1 text-[#6E6E6A]">
                   <i class="fa-regular fa-pen-to-square text-2xl" aria-hidden="true"></i>
