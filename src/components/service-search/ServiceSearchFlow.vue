@@ -34,7 +34,7 @@ const viewMonth = ref<number>(0); // Jan
 const selectedDate = ref<Date | null>(null);
 const selectedTime = ref<string | null>(null);
 
-const yearOptions = computed(() => [2025, 2026, 2027, 2028]);
+const yearOptions = computed(() => [2026, 2027, 2028]);
 const timeOptions = [
   { time: "09:00", remain: 3 },
   { time: "10:00", remain: 5 },
