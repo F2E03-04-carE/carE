@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import ServiceStepper from "./ServiceStepper.vue";
 import ServiceModal from "./ServiceModal.vue";
-import BookingTimeSelectorView from "../BookingTimeSelectorView.vue"; //引入Booking元件
+import BookingTimeSelectorView from "../BookingTimeSelectorView.vue";
 
 defineEmits<{
   (e: "back"): void;
@@ -26,15 +26,12 @@ const serviceOptions: Array<{ key: ServiceKey; title: string; minutes: number; f
   { key: "maintain", title: "定期保養", minutes: 90, fa: "fa-solid fa-screwdriver-wrench" },
 ];
 const selectedService = ref<ServiceKey | null>(null);
-
 const selectedDate = ref<Date | null>(null);
 const selectedTime = ref<string | null>(null);
-
 const contactName = ref<string>("");
 const contactPhone = ref<string>("");
 const contactEmail = ref<string>("");
 const contactNote = ref<string>("");
-
 const isContactValid = computed(() => {
   return !!contactName.value.trim() && !!contactPhone.value.trim() && !!contactEmail.value.trim();
 });
@@ -105,11 +102,7 @@ const selectedDateLong = computed(() => {
   return `${y}年 ${m}月 ${d}日 ${w}`;
 });
 
-// 修正：因為組員的元件回傳的格式已經是 "09:00 早上"，不需要再額外處理
-const selectedTimeLong = computed(() => {
-  return selectedTime.value || "";
-});
-
+const selectedTimeLong = computed(() => selectedTime.value || "");
 const selectedServiceObj = computed(() => serviceOptions.find((s) => s.key === selectedService.value) || null);
 
 interface SummaryItem {
@@ -183,12 +176,10 @@ const finish = () => {
 
 const resetAll = () => {
   showSuccess.value = false;
-
   step.value = 1;
   selectedService.value = null;
   selectedDate.value = null;
   selectedTime.value = null;
-
   contactName.value = "";
   contactPhone.value = "";
   contactEmail.value = "";
@@ -219,7 +210,7 @@ const resetAll = () => {
                 v-for="item in serviceOptions"
                 :key="item.key"
                 type="button"
-                class="flex items-center gap-5 rounded-2xl border bg-white px-7 py-6 text-left transition"
+                class="flex items-center gap-5 rounded-2xl border px-7 py-6 text-left transition"
                 :class="serviceCardClass(item.key)"
                 @click="selectedService = item.key"
               >
@@ -240,14 +231,12 @@ const resetAll = () => {
               </button>
             </div>
           </div>
-          
           <div v-else-if="step === 2">
             <BookingTimeSelectorView 
               v-model:date="selectedDate" 
               v-model:time="selectedTime" 
             />
           </div>
-
           <div v-else-if="step === 3">
             <h2 class="text-3xl font-bold tracking-tight">聯絡資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-6">
@@ -311,7 +300,6 @@ const resetAll = () => {
               </div>
             </div>
           </div>
-          
           <div v-else>
             <h2 class="text-3xl font-bold tracking-tight">確認預約資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-2">
@@ -371,6 +359,6 @@ const resetAll = () => {
         </div>
       </div>
     </div>
-        <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="resetAll" />
+    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="resetAll" />
   </div>
 </template>
