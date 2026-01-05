@@ -212,21 +212,30 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-mug-hot absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-mug-hot absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  emoji_food_beverage
+                </span>
                 <span class="inline-block ml-7 font-bold">等待維修，只能乾等</span>
               </p>
               <p class="ml-7">送修後只能在附近耗時間，不知道要去哪裡，等待本身就成了一種壓力。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-wrench absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-wrench absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  handyman
+                </span>
                 <span class="inline-block ml-7 font-bold">找維修廠，全靠運氣</span>
               </p>
               <p class="ml-7">不清楚每間維修廠擅長的品牌，只能碰運氣選一家，修得好不好心裡沒底。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-clock-rotate-left absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-clock-rotate-left absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  cached
+                </span>
                 <span class="inline-block ml-7 font-bold">維修進度不明，只能一直問</span>
               </p>
               <p class="ml-7">不知道現在修到哪、什麼時候能取車，只能反覆詢問，卻始終無法安心。</p>
@@ -249,21 +258,30 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-award absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-award absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  editor_choice
+                </span>
                 <span class="inline-block ml-7 font-bold">明明有專長，卻要重說</span>
               </p>
               <p class="ml-7">熟悉的項目與車型，每次都得從頭解釋，時間被一點一滴消耗。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-clock absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-clock absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  schedule
+                </span>
                 <span class="inline-block ml-7 font-bold">客人一來，先算時間</span>
               </p>
               <p class="ml-7">臨時詢問不斷，卻不清楚空檔，只能邊算邊回，流程卡住。</p>
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <i class="fa-solid fa-spiral absolute top-1 left-0"></i>
+                <!-- <i class="fa-solid fa-spiral absolute top-1 left-0"></i> -->
+                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
+                  cognition
+                </span>
                 <span class="inline-block ml-7 font-bold">行程一多，腦袋不夠用</span>
               </p>
               <p class="ml-7">維修與交件時間零散，一忙起來，全靠人工排程撐著。</p>
