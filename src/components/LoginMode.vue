@@ -21,17 +21,14 @@ const handleLoginSubmit = () => {
   formErrors.account = '';
   formErrors.password = '';
   let isValid = true;
-
   if (!loginForm.account) {
     formErrors.account = '請輸入帳號';
     isValid = false;
   }
-  
   if (!loginForm.password) {
     formErrors.password = '請輸入密碼';
     isValid = false;
   }
-
   if (!isValid) return;
 
   console.log('執行登入', loginForm);
@@ -96,10 +93,7 @@ const handleLoginSubmit = () => {
         <div class="relative px-4 text-[14px] text-gray-500 bg-white/0 backdrop-blur-md">還沒有帳號嗎？</div>
       </div>
       <div class="text-center">
-        <button
-          @click="$emit('switch-to-signup')"
-          class="text-[16px] font-bold text-[#6b6b5a] hover:underline cursor-pointer"
-        >
+        <button @click="$emit('switch-to-signup')" class="text-[16px] font-bold text-[#6b6b5a] hover:underline cursor-pointer">
           立即註冊
         </button>
       </div>

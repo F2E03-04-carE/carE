@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import LoginMode from './LoginMode.vue';
-import ServiceSearchFlow from './service-search/ServiceSearchFlow.vue';
+import RegisterPage from './RegisterPage.vue';
 
 const baseButtonClass = 'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] rounded-lg sm:rounded-xl transition-colors duration-200 cursor-pointer';
 
@@ -59,15 +59,12 @@ const closeRegister = () => {
     />
     <div v-if="isShowRegister" class="fixed inset-0 z-[100] bg-white overflow-y-auto">
       <div class="fixed top-0 right-0 p-4 z-[101]">
-         <button 
-           @click="closeRegister" 
-           class="text-gray-500 hover:text-black font-bold px-4 py-2 bg-gray-100 rounded-lg cursor-pointer flex items-center shadow-md border border-gray-200"
-         >
+         <button @click="closeRegister" class="text-gray-500 hover:text-black font-bold px-4 py-2 bg-gray-100 rounded-lg cursor-pointer flex items-center shadow-md border border-gray-200">
            <i class="fa-solid fa-xmark mr-2"></i>
            關閉 / 返回
          </button>
       </div>
-      <ServiceSearchFlow />
+      <RegisterPage />
     </div>
   </header>
 </template>
