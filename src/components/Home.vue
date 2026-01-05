@@ -4,7 +4,7 @@
     <section
       class="text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
     >
-      <div class="mask flex flex-col justify-center items-center bg-[#f2f1eedd]">
+      <div class="mask flex flex-col justify-center items-center py-10 bg-[#f2f1eedd]">
         <h1 class="text-[36px] text-[#4a4a43] font-black">carE 汽車維修預約平台</h1>
         <h2 class="text-[28px] text-[#4a4a43] font-bold">尋找專業的汽車維修服務</h2>
         <h3 class="mb-[50px] text-[20px] text-[#8a8a7d] font-normal">
@@ -17,8 +17,11 @@
           class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px]"
         >
           <div class="w-full lg:w-[25%]">
-            <label for="repair" class="block text-[16px] text-left text-[#8a8a7d]">
-              <i class="fa-solid fa-wrench mx-[3px] text-[#8a8a7d]"></i>
+            <label
+              for="repair"
+              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+            >
+              <span class="material-symbols-outlined mr-2 md-48"> build </span>
               搜尋維修項目
             </label>
             <div>
@@ -39,8 +42,12 @@
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label for="city" class="block text-[16px] text-left text-[#8a8a7d]">
-              <i class="fa-solid fa-city mx-[3px] text-[#8a8a7d]"></i>
+            <label
+              for="city"
+              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+            >
+              <span class="material-symbols-outlined mr-2"> location_city </span>
+
               縣市
             </label>
             <div>
@@ -57,8 +64,11 @@
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label for="location" class="block text-[16px] text-left text-[#8a8a7d]">
-              <i class="fa-solid fa-location-dot mx-[3px] text-[#8a8a7d]"></i>
+            <label
+              for="location"
+              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+            >
+              <span class="material-symbols-outlined mr-2"> location_on </span>
               行政區
             </label>
             <div>
@@ -85,8 +95,11 @@
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label for="brand" class="block text-[16px] text-left text-[#8a8a7d]">
-              <i class="fa-solid fa-car-side mx-[3px] text-[#8a8a7d]"></i>
+            <label
+              for="brand"
+              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+            >
+              <span class="material-symbols-outlined mr-2"> directions_car </span>
               車子品牌
             </label>
             <div>
@@ -112,9 +125,10 @@
 
           <button
             type="submit"
-            class="w-full lg:w-[20%] px-[20px] py-[10px] mt-[30px] lg:mt-0 text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
+            class="w-full lg:w-[20%] px-[20px] py-[10px] mt-[30px] lg:mt-0 flex flex-row justify-center items-center text-[#fff] bg-[#6b6b5a] rounded cursor-pointer"
           >
-            <i class="fa-solid fa-magnifying-glass mr-[5px]"></i>搜尋
+            <span class="material-symbols-outlined mr-1"> search </span>
+            搜尋
           </button>
         </form>
         <!-- 六大常見搜尋主題 -->
@@ -127,7 +141,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-gears text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> handyman </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">維修</span>
             </p>
           </button>
@@ -135,7 +149,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-car text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> directions_car </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">保養</span>
             </p>
           </button>
@@ -143,7 +157,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-screwdriver-wrench text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> build </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">改裝</span>
             </p>
           </button>
@@ -151,7 +165,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-solid fa-spray-can-sparkles text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> fragrance </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">鈑金</span>
             </p>
           </button>
@@ -159,7 +173,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-circle-dot text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> adjust </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">輪胎</span>
             </p>
           </button>
@@ -167,7 +181,7 @@
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
-              <i class="fa-solid fa-road-circle-exclamation text-[50px]"></i>
+              <span class="six-theme-icon material-symbols-outlined"> car_crash </span>
               <span class="mt-[12px] text-[20px] font-bold leading-none">救援</span>
             </p>
           </button>
