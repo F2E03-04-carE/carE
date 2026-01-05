@@ -92,7 +92,24 @@ function MarkAllTouched() {
 
 function HandleClose() {
 	if (Timer) clearInterval(Timer);
-	router.push('/'); 
+
+	IsSubmitted.value = false;
+	DidSubmitAttempt.value = false;
+
+	Form.Email = '';
+	Form.Phone = '';
+	Form.Password = '';
+	Form.ConfirmPassword = '';
+
+	Object.keys(Touched).forEach((key) => {
+		Touched[key as FieldKey] = false;
+	});
+
+	try {
+		router.push('/');
+	} catch (error) {
+		console.warn('Navigation failed', error);
+	}
 }
 
 function StartRedirectTimer() {
@@ -122,7 +139,7 @@ async function HandleSubmit() {
 	try {
 		await new Promise((resolve) => setTimeout(resolve, 1500));
 
-		console.log('註冊資料已送出 (Safe):', {
+		console.log('註冊成功 (Safe Log):', {
 			email: Form.Email,
 			phone: Form.Phone,
 		});
@@ -157,9 +174,7 @@ onUnmounted(() => {
 					<i class="fa-solid fa-xmark text-xl"></i>
 				</button>
 				<div class="mb-6">
-					<div
-						class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6B6B5C]/10"
-					>
+					<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6B6B5C]/10">
 						<i class="fa-solid fa-check text-2xl text-[#6B6B5C]" aria-hidden="true"></i>
 					</div>
 					<h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">註冊成功</h2>
@@ -169,6 +184,7 @@ onUnmounted(() => {
 					</p>
 				</div>
 				<button
+					type="button"
 					@click="HandleClose"
 					class="mt-2 w-full rounded-lg bg-[#6B6B5C] px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-[#6B6B5C]/90"
 				>
@@ -186,8 +202,8 @@ onUnmounted(() => {
 						<input
 							id="email"
 							v-model.trim="Form.Email"
-							type="email" 
-							autocomplete="username" 
+							type="email"
+							autocomplete="username"
 							placeholder="example@email.com"
 							class="w-full rounded-lg border bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
 							:class="InputBorderClass('Email')"
@@ -224,9 +240,9 @@ onUnmounted(() => {
 						<p v-if="ShowError('Password')" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Password }}</p>
 					</div>
 					<div>
-						<label for="confirmPassword" class="mb-2 block text-base font-medium text-[#3d3d3d]"
-							>確認密碼</label
-						>
+						<label for="confirmPassword" class="mb-2 block text-base font-medium text-[#3d3d3d]">
+							確認密碼
+						</label>
 						<input
 							id="confirmPassword"
 							v-model="Form.ConfirmPassword"
