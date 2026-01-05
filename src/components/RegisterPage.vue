@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-type FieldKey = `Email` | `Phone` | `Password` | `ConfirmPassword`;
+type FieldKey = 'Email' | 'Phone' | 'Password' | 'ConfirmPassword';
+
+const router = useRouter();
 
 const IsSubmitted = ref(false);
 const DidSubmitAttempt = ref(false);
+const IsLoading = ref(false);
 
 const Countdown = ref(5);
 let Timer: number | undefined;
 
 const Form = reactive({
-	Email: ``,
-	Phone: ``,
-	Password: ``,
-	ConfirmPassword: ``,
+	Email: '',
+	Phone: '',
+	Password: '',
+	ConfirmPassword: '',
 });
 
 const Touched = reactive<Record<FieldKey, boolean>>({
@@ -25,45 +29,45 @@ const Touched = reactive<Record<FieldKey, boolean>>({
 
 const Errors = computed<Record<FieldKey, string>>(() => {
 	const Next: Record<FieldKey, string> = {
-		Email: ``,
-		Phone: ``,
-		Password: ``,
-		ConfirmPassword: ``,
+		Email: '',
+		Phone: '',
+		Password: '',
+		ConfirmPassword: '',
 	};
 
 	if (!Form.Email) {
-		Next.Email = `請輸入電子信箱`;
+		Next.Email = '請輸入電子信箱';
 	} else {
 		const EmailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 		if (!EmailPattern.test(Form.Email)) {
-			Next.Email = `請輸入有效的電子信箱格式`;
+			Next.Email = '請輸入有效的電子信箱格式';
 		}
 	}
 
 	if (!Form.Phone) {
-		Next.Phone = `請輸入電話號碼`;
+		Next.Phone = '請輸入電話號碼';
 	} else {
 		const PhonePattern = /^09\d{8}$/;
 		if (!PhonePattern.test(Form.Phone)) {
-			Next.Phone = `請輸入有效的手機號碼格式（09開頭，共10碼）`;
+			Next.Phone = '請輸入有效的手機號碼格式（09開頭，共10碼）';
 		}
 	}
 
 	if (!Form.Password) {
-		Next.Password = `請輸入密碼`;
+		Next.Password = '請輸入密碼';
 	} else if (Form.Password.length < 8) {
-		Next.Password = `密碼長度至少需要8個字元`;
+		Next.Password = '密碼長度至少需要8個字元';
 	} else {
 		const PasswordPattern = /[A-Z]/;
 		if (!PasswordPattern.test(Form.Password)) {
-			Next.Password = `密碼需包含至少一個大寫字母`;
+			Next.Password = '密碼需包含至少一個大寫字母';
 		}
 	}
 
 	if (!Form.ConfirmPassword) {
-		Next.ConfirmPassword = `請再次輸入密碼`;
+		Next.ConfirmPassword = '請再次輸入密碼';
 	} else if (Form.ConfirmPassword !== Form.Password) {
-		Next.ConfirmPassword = `兩次輸入的密碼不相符`;
+		Next.ConfirmPassword = '兩次輸入的密碼不相符';
 	}
 
 	return Next;
@@ -74,9 +78,9 @@ function ShowError(Key: FieldKey) {
 }
 
 function InputBorderClass(Key: FieldKey) {
-	return ShowError(Key) 
-		? `border-[#c97d7d] focus:border-[#c97d7d] focus:ring-[#c97d7d]/30` 
-		: `border-[#e0ddd5]`;
+	return ShowError(Key)
+		? 'border-[#c97d7d] focus:border-[#c97d7d] focus:ring-[#c97d7d]/30'
+		: 'border-[#e0ddd5]';
 }
 
 function MarkAllTouched() {
@@ -88,17 +92,15 @@ function MarkAllTouched() {
 
 function HandleClose() {
 	if (Timer) clearInterval(Timer);
-
-	IsSubmitted.value = false;
-	DidSubmitAttempt.value = false;
+	router.push('/'); 
 }
 
 function StartRedirectTimer() {
 	Countdown.value = 5;
-	
+
 	if (Timer) clearInterval(Timer);
 
-	Timer = setInterval(() => {
+	Timer = window.setInterval(() => {
 		Countdown.value -= 1;
 		if (Countdown.value <= 0) {
 			HandleClose();
@@ -106,24 +108,35 @@ function StartRedirectTimer() {
 	}, 1000);
 }
 
-function HandleSubmit() {
+async function HandleSubmit() {
+	if (IsLoading.value) return;
+
 	DidSubmitAttempt.value = true;
 	MarkAllTouched();
 
 	const HasError = Object.values(Errors.value).some((Msg) => Msg.length > 0);
 	if (HasError) return;
 
-	console.log(`註冊資料：`, {
-		email: Form.Email,
-		phone: Form.Phone,
-		password: Form.Password,
-	});
+	IsLoading.value = true;
 
-	IsSubmitted.value = true;
-	StartRedirectTimer();
+	try {
+		await new Promise((resolve) => setTimeout(resolve, 1500));
+
+		console.log('註冊資料已送出 (Safe):', {
+			email: Form.Email,
+			phone: Form.Phone,
+		});
+
+		IsSubmitted.value = true;
+		StartRedirectTimer();
+	} catch (error) {
+		console.error('註冊失敗', error);
+		alert('發生錯誤，請稍後再試');
+	} finally {
+		IsLoading.value = false;
+	}
 }
 
-// 清除計時器，避免memory leak
 onUnmounted(() => {
 	if (Timer) clearInterval(Timer);
 });
@@ -136,7 +149,7 @@ onUnmounted(() => {
 				v-if="IsSubmitted"
 				class="relative rounded-2xl border border-[#e0ddd5] bg-white p-8 text-center shadow-sm md:p-10"
 			>
-				<button 
+				<button
 					type="button"
 					class="absolute right-4 top-4 text-[#8a8a7e] transition-colors hover:text-[#3d3d3d]"
 					@click="HandleClose"
@@ -144,15 +157,23 @@ onUnmounted(() => {
 					<i class="fa-solid fa-xmark text-xl"></i>
 				</button>
 				<div class="mb-6">
-					<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6B6B5C]/10">
+					<div
+						class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#6B6B5C]/10"
+					>
 						<i class="fa-solid fa-check text-2xl text-[#6B6B5C]" aria-hidden="true"></i>
 					</div>
 					<h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">註冊成功</h2>
 					<p class="mb-4 text-[#8a8a7e]">感謝您的註冊，我們已收到您的資料</p>
 					<p class="text-sm text-[#8a8a7e]">
-						將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後返回...
+						將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後返回首頁...
 					</p>
 				</div>
+				<button
+					@click="HandleClose"
+					class="mt-2 w-full rounded-lg bg-[#6B6B5C] px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-[#6B6B5C]/90"
+				>
+					立即返回
+				</button>
 			</div>
 			<div v-else class="rounded-2xl border border-[#e0ddd5] bg-white p-8 shadow-sm md:p-10">
 				<div class="mb-8">
@@ -165,13 +186,14 @@ onUnmounted(() => {
 						<input
 							id="email"
 							v-model.trim="Form.Email"
-							type="text"
+							type="email" 
+							autocomplete="username" 
 							placeholder="example@email.com"
 							class="w-full rounded-lg border bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-							:class="InputBorderClass(`Email`)"
+							:class="InputBorderClass('Email')"
 							@blur="Touched.Email = true"
 						/>
-						<p v-if="ShowError(`Email`)" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Email }}</p>
+						<p v-if="ShowError('Email')" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Email }}</p>
 					</div>
 					<div>
 						<label for="phone" class="mb-2 block text-base font-medium text-[#3d3d3d]">電話號碼</label>
@@ -179,12 +201,13 @@ onUnmounted(() => {
 							id="phone"
 							v-model.trim="Form.Phone"
 							type="tel"
+							autocomplete="tel"
 							placeholder="0912345678"
 							class="w-full rounded-lg border bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-							:class="InputBorderClass(`Phone`)"
+							:class="InputBorderClass('Phone')"
 							@blur="Touched.Phone = true"
 						/>
-						<p v-if="ShowError(`Phone`)" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Phone }}</p>
+						<p v-if="ShowError('Phone')" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Phone }}</p>
 					</div>
 					<div>
 						<label for="password" class="mb-2 block text-base font-medium text-[#3d3d3d]">密碼</label>
@@ -192,33 +215,41 @@ onUnmounted(() => {
 							id="password"
 							v-model="Form.Password"
 							type="password"
+							autocomplete="new-password"
 							placeholder="至少8個字元"
 							class="w-full rounded-lg border bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-							:class="InputBorderClass(`Password`)"
+							:class="InputBorderClass('Password')"
 							@blur="Touched.Password = true"
 						/>
-						<p v-if="ShowError(`Password`)" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Password }}</p>
+						<p v-if="ShowError('Password')" class="mt-2 text-sm text-[#c97d7d]">{{ Errors.Password }}</p>
 					</div>
 					<div>
-						<label for="confirmPassword" class="mb-2 block text-base font-medium text-[#3d3d3d]">確認密碼</label>
+						<label for="confirmPassword" class="mb-2 block text-base font-medium text-[#3d3d3d]"
+							>確認密碼</label
+						>
 						<input
 							id="confirmPassword"
 							v-model="Form.ConfirmPassword"
 							type="password"
+							autocomplete="new-password"
 							placeholder="再次輸入密碼"
 							class="w-full rounded-lg border bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-							:class="InputBorderClass(`ConfirmPassword`)"
+							:class="InputBorderClass('ConfirmPassword')"
 							@blur="Touched.ConfirmPassword = true"
 						/>
-						<p v-if="ShowError(`ConfirmPassword`)" class="mt-2 text-sm text-[#c97d7d]">
+						<p v-if="ShowError('ConfirmPassword')" class="mt-2 text-sm text-[#c97d7d]">
 							{{ Errors.ConfirmPassword }}
 						</p>
 					</div>
 					<button
 						type="submit"
-						class="mt-8 w-full rounded-lg bg-[#6B6B5C] px-6 py-3 text-base font-medium text-white transition-colors hover:bg-[#6B6B5C]/90 focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2"
+						:disabled="IsLoading"
+						class="mt-8 w-full rounded-lg bg-[#6B6B5C] px-6 py-3 text-base font-medium text-white transition-colors hover:bg-[#6B6B5C]/90 focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
 					>
-						確認送出
+						<span v-if="IsLoading">
+							<i class="fa-solid fa-spinner fa-spin mr-2"></i>處理中...
+						</span>
+						<span v-else>確認送出</span>
 					</button>
 				</form>
 			</div>
