@@ -56,11 +56,11 @@ const handleLoginSubmit = async () => {
         aria-label="關閉"
       >
         <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke-width="2.5" 
-          stroke="currentColor" 
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
           class="w-6 h-6"
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -79,8 +79,8 @@ const handleLoginSubmit = async () => {
             placeholder="請輸入您的帳號"
             :class="[
               `w-full px-4 py-2 text-[16px] rounded-lg border outline-none transition-all`,
-              formErrors.account 
-                ? `border-red-500 bg-red-50 focus:ring-2 focus:ring-red-200` 
+              formErrors.account
+                ? `border-red-500 bg-red-50 focus:ring-2 focus:ring-red-200`
                 : `border-gray-300 focus:border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a]/20`
             ]"
           />
@@ -97,8 +97,8 @@ const handleLoginSubmit = async () => {
             placeholder="請輸入您的密碼"
             :class="[
               `w-full px-4 py-2 text-[16px] rounded-lg border outline-none transition-all`,
-              formErrors.password 
-                ? `border-red-500 bg-red-50 focus:ring-2 focus:ring-red-200` 
+              formErrors.password
+                ? `border-red-500 bg-red-50 focus:ring-2 focus:ring-red-200`
                 : `border-gray-300 focus:border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a]/20`
             ]"
           />
