@@ -1,69 +1,93 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import ServiceStepper from "./ServiceStepper.vue";
-import ServiceModal from "./ServiceModal.vue";
-import BookingTimeSelectorView from "../BookingTimeSelectorView.vue";
+import { computed, ref } from 'vue'
+import ServiceStepper from './ServiceStepper.vue'
+import ServiceModal from './ServiceModal.vue'
+import BookingTimeSelectorView from '../BookingTimeSelectorView.vue'
 
 defineEmits<{
-  (e: "back"): void;
-}>();
+  (e: 'back'): void
+}>()
 
-type StepKey = "service" | "datetime" | "contact" | "confirm";
+type StepKey = 'service' | 'datetime' | 'contact' | 'confirm'
 const steps: Array<{ key: StepKey; label: string }> = [
-  { key: "service", label: "選擇服務" },
-  { key: "datetime", label: "日期時段" },
-  { key: "contact", label: "聯絡資訊" },
-  { key: "confirm", label: "確認預約" },
-];
+  { key: 'service', label: '選擇服務' },
+  { key: 'datetime', label: '日期時段' },
+  { key: 'contact', label: '聯絡資訊' },
+  { key: 'confirm', label: '確認預約' },
+]
 
-const step = ref<number>(1);
+const step = ref<number>(1)
 
-type ServiceKey = "oil" | "tire" | "brake" | "maintain";
-const serviceOptions: Array<{ key: ServiceKey; title: string; minutes: number; fa: string }> = [
-  { key: "oil", title: "機油更換", minutes: 30, fa: "fa-solid fa-oil-can" },
-  { key: "tire", title: "輪胎檢修", minutes: 45, fa: "fa-solid fa-car-side" },
-  { key: "brake", title: "煞車系統檢查", minutes: 60, fa: "fa-solid fa-circle-check" },
-  { key: "maintain", title: "定期保養", minutes: 90, fa: "fa-solid fa-screwdriver-wrench" },
-];
-const selectedService = ref<ServiceKey | null>(null);
-const selectedDate = ref<Date | null>(null);
-const selectedTime = ref<string | null>(null);
-const contactName = ref<string>("");
-const contactPhone = ref<string>("");
-const contactEmail = ref<string>("");
-const contactNote = ref<string>("");
+type ServiceKey = 'oil' | 'tire' | 'brake' | 'maintain'
+const serviceOptions: Array<{
+  key: ServiceKey
+  title: string
+  minutes: number
+  fa: string
+  icon: string
+}> = [
+  { key: 'oil', title: '機油更換', minutes: 30, fa: 'fa-solid fa-oil-can', icon: 'gas_meter' },
+  {
+    key: 'tire',
+    title: '輪胎檢修',
+    minutes: 45,
+    fa: 'fa-solid fa-car-side',
+    icon: 'directions_car',
+  },
+  {
+    key: 'brake',
+    title: '煞車系統檢查',
+    minutes: 60,
+    fa: 'fa-solid fa-circle-check',
+    icon: 'check_circle',
+  },
+  {
+    key: 'maintain',
+    title: '定期保養',
+    minutes: 90,
+    fa: 'fa-solid fa-screwdriver-wrench',
+    icon: 'construction',
+  },
+]
+const selectedService = ref<ServiceKey | null>(null)
+const selectedDate = ref<Date | null>(null)
+const selectedTime = ref<string | null>(null)
+const contactName = ref<string>('')
+const contactPhone = ref<string>('')
+const contactEmail = ref<string>('')
+const contactNote = ref<string>('')
 
 const isContactValid = computed(() => {
-  return !!contactName.value.trim() && !!contactPhone.value.trim() && !!contactEmail.value.trim();
-});
+  return !!contactName.value.trim() && !!contactPhone.value.trim() && !!contactEmail.value.trim()
+})
 
 const maxUnlocked = computed(() => {
-  if (step.value === 1) return selectedService.value ? 2 : 1;
-  if (step.value === 2) return selectedDate.value && selectedTime.value ? 3 : 2;
-  if (step.value === 3) return isContactValid.value ? 4 : 3;
-  return 4;
-});
+  if (step.value === 1) return selectedService.value ? 2 : 1
+  if (step.value === 2) return selectedDate.value && selectedTime.value ? 3 : 2
+  if (step.value === 3) return isContactValid.value ? 4 : 3
+  return 4
+})
 
 const goToStep = (n: number) => {
-  const target = Math.min(4, Math.max(1, n));
-  step.value = Math.min(target, maxUnlocked.value);
-};
+  const target = Math.min(4, Math.max(1, n))
+  step.value = Math.min(target, maxUnlocked.value)
+}
 
 const nextStep = () => {
-  if (!canGoNext.value) return;
-  step.value = Math.min(4, step.value + 1);
-};
+  if (!canGoNext.value) return
+  step.value = Math.min(4, step.value + 1)
+}
 
 const prevStep = () => {
-  step.value = Math.max(1, step.value - 1);
-};
+  step.value = Math.max(1, step.value - 1)
+}
 
 const canGoNext = computed(() => {
-  if (step.value === 1) return selectedService.value !== null;
-  if (step.value === 2) return selectedDate.value !== null && selectedTime.value !== null;
-  if (step.value === 3) return isContactValid.value;
-  return true;
-});
+  if (step.value === 1) return selectedService.value !== null
+  if (step.value === 2) return selectedDate.value !== null && selectedTime.value !== null
+  if (step.value === 3) return isContactValid.value
+  return true
+})
 
 const canFinish = computed(() => {
   return (
@@ -71,119 +95,127 @@ const canFinish = computed(() => {
     selectedDate.value !== null &&
     selectedTime.value !== null &&
     isContactValid.value
-  );
-});
+  )
+})
 
 const serviceCardClass = (key: ServiceKey) => {
   return selectedService.value === key
-    ? "border-[#6B6B5C] bg-[#6B6B5C] shadow-[0_3px_0_rgba(0,0,0,0.18)]"
-    : "border-[#E6E6DF] bg-white hover:border-[#CFCFC6]";
-};
+    ? 'border-[#6B6B5C] bg-[#6B6B5C] shadow-[0_3px_0_rgba(0,0,0,0.18)]'
+    : 'border-[#E6E6DF] bg-white hover:border-[#CFCFC6]'
+}
 
 const prevBtnClass = computed(() => {
   return step.value === 1
-    ? "border-[#E6E6DF] text-[#B5B5AD] bg-[#FBFAF7] cursor-not-allowed"
-    : "border-[#E6E6DF] text-[#6B6B5C] bg-[#FBFAF7] hover:bg-white";
-});
+    ? 'border-[#E6E6DF] text-[#B5B5AD] bg-[#FBFAF7] cursor-not-allowed'
+    : 'border-[#E6E6DF] text-[#6B6B5C] bg-[#FBFAF7] hover:bg-white'
+})
 const nextBtnClass = computed(() => {
   return canGoNext.value
-    ? "bg-[#6B6B5C] hover:opacity-95 active:opacity-90 shadow-[0_3px_0_rgba(0,0,0,0.18)]"
-    : "bg-[#D1D1CB] cursor-not-allowed";
-});
+    ? 'bg-[#6B6B5C] hover:opacity-95 active:opacity-90 shadow-[0_3px_0_rgba(0,0,0,0.18)]'
+    : 'bg-[#D1D1CB] cursor-not-allowed'
+})
 
 const selectedDateLong = computed(() => {
-  if (!selectedDate.value) return "";
-  return selectedDate.value.toLocaleDateString("zh-TW", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  });
-});
+  if (!selectedDate.value) return ''
+  return selectedDate.value.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  })
+})
 
-const selectedTimeLong = computed(() => selectedTime.value || "");
-const selectedServiceObj = computed(() => serviceOptions.find((s) => s.key === selectedService.value) || null);
+const selectedTimeLong = computed(() => selectedTime.value || '')
+const selectedServiceObj = computed(
+  () => serviceOptions.find((s) => s.key === selectedService.value) || null,
+)
 
 interface SummaryItem {
-  key: string;
-  icon: string;
-  iconClass?: string;
-  label: string;
-  value: string;
-  valueClass?: string;
-  details?: string;
-  detailsClass?: string;
+  key: string
+  icon: string
+  iconClass?: string
+  label: string
+  value: string
+  valueClass?: string
+  details?: string
+  detailsClass?: string
 }
 
 const summaryItems = computed<SummaryItem[]>(() => [
   {
-    key: "service",
-    icon: "fa-solid fa-wrench",
-    label: "服務項目",
-    value: selectedServiceObj.value?.title || "—",
-    details: `預估時間：${selectedServiceObj.value?.minutes ?? "—"}分鐘`,
+    key: 'service',
+    // icon: 'fa-solid fa-wrench',
+    icon: 'build',
+    label: '服務項目',
+    value: selectedServiceObj.value?.title || '—',
+    details: `預估時間：${selectedServiceObj.value?.minutes ?? '—'}分鐘`,
   },
   {
-    key: "datetime",
-    icon: "fa-regular fa-calendar",
-    label: "預約日期 & 時段",
-    value: selectedDateLong.value || "—",
-    details: selectedTimeLong.value || "—",
-    detailsClass: "text-lg font-semibold text-[#7A7A7A]",
+    key: 'datetime',
+    // icon: 'fa-regular fa-calendar',
+    icon: 'calendar_today',
+    label: '預約日期 & 時段',
+    value: selectedDateLong.value || '—',
+    details: selectedTimeLong.value || '—',
+    detailsClass: 'text-lg font-semibold text-[#7A7A7A]',
   },
   {
-    key: "name",
-    icon: "fa-regular fa-user",
-    label: "姓名",
-    value: contactName.value || "—",
+    key: 'name',
+    // icon: 'fa-regular fa-user',
+    icon: 'person',
+    label: '姓名',
+    value: contactName.value || '—',
   },
   {
-    key: "phone",
-    icon: "fa-solid fa-phone",
-    label: "電話",
-    value: contactPhone.value || "—",
+    key: 'phone',
+    // icon: 'fa-solid fa-phone',
+    icon: 'phone_enabled',
+    label: '電話',
+    value: contactPhone.value || '—',
   },
   {
-    key: "email",
-    icon: "fa-regular fa-envelope",
-    label: "電子郵件",
-    value: contactEmail.value || "—",
+    key: 'email',
+    // icon: 'fa-regular fa-envelope',
+    icon: 'mail',
+    label: '電子郵件',
+    value: contactEmail.value || '—',
   },
   {
-    key: "note",
-    icon: "fa-regular fa-pen-to-square",
-    iconClass: "text-[#6E6E6A]",
-    label: "備註",
-    value: contactNote.value || "—",
-    valueClass: "whitespace-pre-wrap",
+    key: 'note',
+    // icon: 'fa-regular fa-pen-to-square',
+    icon: 'edit_square',
+    iconClass: 'text-[#6E6E6A]',
+    label: '備註',
+    value: contactNote.value || '—',
+    valueClass: 'whitespace-pre-wrap',
   },
-]);
+])
 
-const showSuccess = ref(false);
-const bookingCode = ref<string>("");
+const showSuccess = ref(false)
+const bookingCode = ref<string>('')
 
 const randomBookingCode = () => {
-  const n = Math.floor(10000000 + Math.random() * 90000000);
-  return `BK${n}`;
-};
+  const n = Math.floor(10000000 + Math.random() * 90000000)
+  return `BK${n}`
+}
 
 const finish = () => {
-  if (!canFinish.value) return;
-  bookingCode.value = randomBookingCode();
-  showSuccess.value = true;
-};
+  if (!canFinish.value) return
+  bookingCode.value = randomBookingCode()
+  showSuccess.value = true
+}
 
 const resetAll = () => {
-  showSuccess.value = false;
-  step.value = 1;
-  selectedService.value = null;
-  selectedDate.value = null;
-  selectedTime.value = null;
-  contactName.value = "";
-  contactPhone.value = "";
-  contactEmail.value = "";
-  contactNote.value = "";
-};
+  showSuccess.value = false
+  step.value = 1
+  selectedService.value = null
+  selectedDate.value = null
+  selectedTime.value = null
+  contactName.value = ''
+  contactPhone.value = ''
+  contactEmail.value = ''
+  contactNote.value = ''
+}
 </script>
 
 <template>
@@ -194,11 +226,14 @@ const resetAll = () => {
         class="flex items-center gap-2 rounded-xl border border-[#E6E6DF] bg-white px-6 py-3 text-sm font-semibold text-[#6B6B5C] transition hover:bg-[#F5F4EF]"
         @click="$emit('back')"
       >
-        <i class="fa-solid fa-arrow-left"></i>
+        <!-- <i class="fa-solid fa-arrow-left"></i> -->
+        <span class="material-symbols-outlined"> arrow_left_alt </span>
         返回維修廠介紹頁面
       </button>
     </div>
-    <div class="mx-auto w-full max-w-6xl rounded-[28px] border border-[#E6E6DF] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)]">
+    <div
+      class="mx-auto w-full max-w-6xl rounded-[28px] border border-[#E6E6DF] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)]"
+    >
       <div class="p-10">
         <ServiceStepper :step="step" :steps="steps" @go="goToStep" />
         <div class="mt-16">
@@ -213,14 +248,19 @@ const resetAll = () => {
                 :class="serviceCardClass(item.key)"
                 @click="selectedService = item.key"
               >
-                <div 
+                <div
                   class="grid h-14 w-14 place-items-center rounded-2xl transition"
-                  :class="selectedService === item.key ? 'bg-white/20 text-white' : 'bg-[#F5F4EF] text-[#6B6B5C]'"
+                  :class="
+                    selectedService === item.key
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[#F5F4EF] text-[#6B6B5C]'
+                  "
                 >
-                  <i :class="item.fa" class="text-xl" aria-hidden="true"></i>
+                  <!-- <i :class="item.fa" class="text-xl" aria-hidden="true"></i> -->
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
                 </div>
                 <div class="min-w-0">
-                  <div 
+                  <div
                     class="text-lg font-semibold transition"
                     :class="selectedService === item.key ? 'text-white' : 'text-[#2B2B2B]'"
                   >
@@ -231,17 +271,15 @@ const resetAll = () => {
             </div>
           </div>
           <div v-else-if="step === 2">
-            <BookingTimeSelectorView 
-              v-model:date="selectedDate" 
-              v-model:time="selectedTime" 
-            />
+            <BookingTimeSelectorView v-model:date="selectedDate" v-model:time="selectedTime" />
           </div>
           <div v-else-if="step === 3">
             <h2 class="text-3xl font-bold tracking-tight">聯絡資訊</h2>
             <div class="mt-10 rounded-2xl border border-[#E6E6DF] bg-white px-10 py-6">
               <div class="grid grid-cols-[44px_1fr] gap-6 py-7">
                 <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-regular fa-user text-2xl" aria-hidden="true"></i>
+                  <!-- <i class="fa-regular fa-user text-2xl" aria-hidden="true"></i> -->
+                  <span class="material-symbols-outlined"> person </span>
                 </div>
                 <div>
                   <div class="text-base font-semibold text-[#6B6B5C]">姓名</div>
@@ -255,7 +293,8 @@ const resetAll = () => {
               <div class="h-px bg-[#E6E6DF]" />
               <div class="grid grid-cols-[44px_1fr] gap-6 py-7">
                 <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-solid fa-phone text-2xl" aria-hidden="true"></i>
+                  <!-- <i class="fa-solid fa-phone text-2xl" aria-hidden="true"></i> -->
+                  <span class="material-symbols-outlined"> phone_enabled </span>
                 </div>
                 <div>
                   <div class="text-base font-semibold text-[#6B6B5C]">電話</div>
@@ -270,7 +309,8 @@ const resetAll = () => {
               <div class="h-px bg-[#E6E6DF]" />
               <div class="grid grid-cols-[44px_1fr] gap-6 py-7">
                 <div class="pt-1 text-[#6B6B5C]">
-                  <i class="fa-regular fa-envelope text-2xl" aria-hidden="true"></i>
+                  <!-- <i class="fa-regular fa-envelope text-2xl" aria-hidden="true"></i> -->
+                  <span class="material-symbols-outlined"> mail </span>
                 </div>
                 <div>
                   <div class="text-base font-semibold text-[#6B6B5C]">電子郵件</div>
@@ -285,7 +325,8 @@ const resetAll = () => {
               <div class="h-px bg-[#E6E6DF]" />
               <div class="grid grid-cols-[44px_1fr] gap-6 py-7">
                 <div class="pt-1 text-[#6E6E6A]">
-                  <i class="fa-regular fa-pen-to-square text-2xl" aria-hidden="true"></i>
+                  <!-- <i class="fa-regular fa-pen-to-square text-2xl" aria-hidden="true"></i> -->
+                  <span class="material-symbols-outlined"> edit_square </span>
                 </div>
                 <div>
                   <div class="text-base font-semibold text-[#6B6B5C]">備註</div>
@@ -305,15 +346,18 @@ const resetAll = () => {
               <div v-for="(item, index) in summaryItems" :key="item.key">
                 <div class="grid grid-cols-[44px_1fr] gap-6 py-8">
                   <div class="pt-1" :class="item.iconClass || 'text-[#6B6B5C]'">
-                    <i :class="[item.icon, 'text-2xl']" aria-hidden="true"></i>
+                    <!-- <i :class="[item.icon, 'text-2xl']" aria-hidden="true"></i> -->
+                    <span class="material-symbols-outlined" aria-hidden="true">{{
+                      item.icon
+                    }}</span>
                   </div>
                   <div>
                     <div class="text-base font-semibold text-[#6B6B5C]">{{ item.label }}</div>
                     <div class="mt-2 text-lg font-semibold" :class="item.valueClass">
                       {{ item.value }}
                     </div>
-                    <div 
-                      v-if="item.details" 
+                    <div
+                      v-if="item.details"
                       class="mt-2"
                       :class="item.detailsClass || 'text-sm text-[#7A7A7A]'"
                     >
@@ -358,6 +402,11 @@ const resetAll = () => {
         </div>
       </div>
     </div>
-    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="resetAll" />
+    <ServiceModal
+      v-if="showSuccess"
+      :bookingCode="bookingCode"
+      @close="showSuccess = false"
+      @again="resetAll"
+    />
   </div>
 </template>

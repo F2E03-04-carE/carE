@@ -76,14 +76,21 @@ const setActive = (btnTime: string, status: string) => {
       <div class="flex w-full flex-col md:w-[55%]">
         <div class="mb-6 rounded-[16px] border border-[#E6E6DF] bg-[#FBFBFA] p-5">
           <div v-if="!formattedDate" class="flex flex-col items-center justify-center py-4">
-            <i class="fa-regular fa-calendar text-[40px] text-[#D1D1CB]"></i>
+            <!-- <i class="fa-regular fa-calendar text-[40px] text-[#D1D1CB]"></i> -->
+            <span class="material-symbols-outlined text-[#D1D1CB] choose-calendar-icon">
+              calendar_today
+            </span>
             <p class="mt-3 text-[14px] text-[#8A8A86]">請先選擇日期</p>
           </div>
           <div v-else class="flex items-start gap-3">
-            <i class="fa-regular fa-calendar mt-1 text-[24px] text-[#6B6B5C]"></i>
+            <!-- <i class="fa-regular fa-calendar mt-1 text-[24px] text-[#6B6B5C]"></i> -->
+            <span class="material-symbols-outlined text-[#6B6B5C]"> calendar_today </span>
+
             <div>
               <div class="text-[18px] font-bold text-[#3A3A38]">{{ formattedDate }}</div>
-              <div v-if="localTime" class="mt-1 text-[16px] font-bold text-[#6B6B5C]">{{ localTime }}</div>
+              <div v-if="localTime" class="mt-1 text-[16px] font-bold text-[#6B6B5C]">
+                {{ localTime }}
+              </div>
               <div v-else class="mt-1 text-[14px] text-[#8A8A86]">請選擇下方時段</div>
             </div>
           </div>
@@ -95,7 +102,10 @@ const setActive = (btnTime: string, status: string) => {
             :class="{ 'bg-[#FBFBFA]': !formattedDate }"
           >
             <div v-if="!formattedDate" class="flex flex-col items-center justify-center py-8">
-              <i class="fa-regular fa-clock text-[40px] text-[#D1D1CB]"></i>
+              <!-- <i class="fa-regular fa-clock text-[40px] text-[#D1D1CB]"></i> -->
+              <span class="material-symbols-outlined text-[#D1D1CB] choose-time-icon">
+                schedule
+              </span>
               <p class="mt-3 text-[14px] text-[#8A8A86]">請先選擇日期以查看時段</p>
             </div>
             <div v-else class="flex flex-col gap-3">
@@ -115,7 +125,7 @@ const setActive = (btnTime: string, status: string) => {
                 ]"
               >
                 <div class="flex items-center gap-3">
-                  <i
+                  <!-- <i
                     class="fa-regular fa-clock text-lg"
                     :class="[
                       localTime === btn.time
@@ -124,7 +134,19 @@ const setActive = (btnTime: string, status: string) => {
                           ? 'text-[#B5B5AD]'
                           : 'text-[#6B6B5C]',
                     ]"
-                  ></i>
+                  ></i> -->
+                  <span
+                    class="material-symbols-outlined"
+                    :class="[
+                      localTime === btn.time
+                        ? 'text-white'
+                        : btn.status === '已額滿'
+                          ? 'text-[#B5B5AD]'
+                          : 'text-[#6B6B5C]',
+                    ]"
+                    >schedule</span
+                  >
+
                   <span class="text-[16px] font-bold">{{ btn.time }}</span>
                 </div>
                 <span class="text-[13px] font-medium opacity-90">{{ btn.status }}</span>
@@ -134,5 +156,5 @@ const setActive = (btnTime: string, status: string) => {
         </div>
       </div>
     </section>
-    </div>
+  </div>
 </template>

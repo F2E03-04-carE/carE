@@ -2,6 +2,9 @@
 .logo {
   font-size: 36px;
 }
-.six-theme-icon {
-  font-size: 48px !important;
+.six-theme-icon.material-symbols-outlined,
+.choose-calendar-icon.material-symbols-outlined,
+.choose-time-icon.material-symbols-outlined,
+.search-modal-check-icon.material-symbols-outlined {
+  font-size: 48px;
 }
