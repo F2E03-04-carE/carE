@@ -21,7 +21,7 @@
               for="repair"
               class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
             >
-              <span class="material-symbols-outlined mr-2 md-48"> build </span>
+              <span class="material-symbols-outlined mr-2"> build </span>
               搜尋維修項目
             </label>
             <div>
@@ -212,7 +212,6 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-mug-hot absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   emoji_food_beverage
                 </span>
@@ -222,7 +221,6 @@
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-wrench absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   handyman
                 </span>
@@ -232,7 +230,6 @@
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-clock-rotate-left absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   cached
                 </span>
@@ -258,7 +255,6 @@
           <ul>
             <li>
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-award absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   editor_choice
                 </span>
@@ -268,7 +264,6 @@
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-clock absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   schedule
                 </span>
@@ -278,7 +273,6 @@
             </li>
             <li class="mt-[10px]">
               <p class="relative text-[20px]">
-                <!-- <i class="fa-solid fa-spiral absolute top-1 left-0"></i> -->
                 <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
                   cognition
                 </span>
