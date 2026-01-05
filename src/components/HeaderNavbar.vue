@@ -3,7 +3,8 @@ defineEmits<{
   (e: 'login'): void
   (e: 'signup'): void
 }>()
-const baseButtonClass = 'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] rounded-lg sm:rounded-xl transition-colors duration-200'
+const baseButtonClass =
+  'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] rounded-lg sm:rounded-xl transition-colors duration-200'
 </script>
 
 <template>
@@ -12,21 +13,28 @@ const baseButtonClass = 'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] s
       <div class="flex justify-between items-center h-[60px] sm:h-[70px]">
         <!-- logo佔位區 -->
         <a href="/" class="flex items-center gap-2">
-          <i class="fa-solid fa-car text-[#6b6b5a] text-[20px] sm:text-[24px]"></i>
+          <!-- <i class="fa-solid fa-car text-[#6b6b5a] text-[20px] sm:text-[24px]"></i> -->
+          <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
           <span class="text-[20px] sm:text-[24px] font-bold text-[#4a4a43]">carE</span>
         </a>
         <div class="flex items-center gap-2 sm:gap-3">
           <button
             @click="$emit('login')"
-            :class="[baseButtonClass, 'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white']"
+            :class="[
+              baseButtonClass,
+              'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
+            ]"
           >
-          登入
+            登入
           </button>
           <button
             @click="$emit('signup')"
-            :class="[baseButtonClass, 'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 font-medium border border-transparent']"
+            :class="[
+              baseButtonClass,
+              'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 font-medium border border-transparent',
+            ]"
           >
-          加入會員
+            加入會員
           </button>
         </div>
       </div>

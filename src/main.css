@@ -1,5 +1,7 @@
 @import 'tailwindcss';
-
+.logo {
+  font-size: 36px;
+}
 .six-theme-icon {
   font-size: 48px !important;
 }
