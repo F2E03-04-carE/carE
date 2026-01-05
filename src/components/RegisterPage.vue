@@ -159,7 +159,6 @@ onUnmounted(() => {
 					<h1 class="mb-2 text-3xl font-medium text-[#3d3d3d]">會員註冊</h1>
 					<p class="text-[#8a8a7e]">請填寫以下資訊完成註冊</p>
 				</div>
-
 				<form class="space-y-6" @submit.prevent="HandleSubmit">
 					<div>
 						<label for="email" class="mb-2 block text-base font-medium text-[#3d3d3d]">電子信箱</label>
