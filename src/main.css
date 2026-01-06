@@ -1,1 +1,11 @@
 @import 'tailwindcss';
+.logo,
+.issue-icon.material-symbols-outlined {
+  font-size: 24px;
+}
+.six-theme-icon.material-symbols-outlined,
+.choose-calendar-icon.material-symbols-outlined,
+.choose-time-icon.material-symbols-outlined,
+.search-modal-check-icon.material-symbols-outlined {
+  font-size: 48px;
+}

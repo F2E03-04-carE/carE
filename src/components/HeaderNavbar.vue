@@ -33,7 +33,8 @@ const closeRegister = () => {
     <nav class="max-w-[1440px] mx-auto px-[5%] sm:px-[8%] lg:px-[5%]">
       <div class="flex justify-between items-center h-[60px] sm:h-[70px]">
         <a href="/" class="flex items-center gap-2">
-          <i class="fa-solid fa-car text-[#6b6b5a] text-[20px] sm:text-[24px]"></i>
+          <!-- <i class="fa-solid fa-car text-[#6b6b5a] text-[20px] sm:text-[24px]"></i> -->
+          <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
           <span class="text-[20px] sm:text-[24px] font-bold text-[#4a4a43]">carE</span>
         </a>
         <div class="flex items-center gap-2 sm:gap-3">
@@ -41,13 +42,13 @@ const closeRegister = () => {
             @click="openLoginModal"
             :class="[baseButtonClass, 'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white']"
           >
-          登入
+            登入
           </button>
           <button
             @click="handleGoToRegister"
             :class="[baseButtonClass, 'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 font-medium border border-transparent']"
           >
-          加入會員
+            加入會員
           </button>
         </div>
       </div>

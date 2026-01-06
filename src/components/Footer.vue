@@ -1,18 +1,14 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 <template>
   <footer class="bg-stone-400 text-white py-10 mt-10">
     <div class="max-w-[1440px] mx-auto px-[5%] sm:px-[8%] lg:px-[5%]">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-5xl mx-auto text-center">
         <div class="text-center">
-          <div class="flex items-center gap-2 mb-4 justify-center ">
-            <i class="fa-solid fa-car text-[#6b6b5a] text-[24px]"></i>
+          <div class="flex items-center gap-2 mb-4 justify-center">
+            <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
             <span class="text-[24px] font-bold">carE</span>
           </div>
-          <p class="text-sm">
-            給您的愛車最好的照顧
-          </p>
+          <p class="text-sm">給您的愛車最好的照顧</p>
         </div>
         <div class="text-center">
           <h3 class="font-bold mb-4">網站地圖</h3>
