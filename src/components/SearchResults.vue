@@ -29,7 +29,8 @@ const resultsCount = computed(() => results.value.length)
 </script>
 
 <template>
-  <section class="pt-10 bg-[#f5f1ed]">
+  <div>
+    <section class="pt-10 bg-[#f5f1ed]">
     <div class="container mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
@@ -54,14 +55,15 @@ const resultsCount = computed(() => results.value.length)
         </div>
       </div>
     </div>
-  </section>
-  <section class="pt-5 bg-[#f5f1ed]">
+    </section>
+    <section class="pt-5 bg-[#f5f1ed]">
     <div class="container mx-auto flex flex-wrap gap-5">
       <div v-if="!resultsCount">
         <p class="text-[#4a4a43]">查無相關結果</p>
       </div>
       <div
-        v-for="result in results"
+        v-for="(result, index) in results"
+        :key="result.name || index"
         class="w-full md:w-[33.3%] lg:w-[25%] border border-[#DBCEBD] rounded-[5px] overflow-hidden hover:shadow-md duration-300"
       >
         <img
@@ -75,13 +77,14 @@ const resultsCount = computed(() => results.value.length)
             <span v-html="getStars(result.score)"></span>
           </p>
           <p class="flex flex-row justify-start items-center my-1">
-            <span class="material-symbols-outlined"> location_on </span>
+            <span class="material-symbols-outlined">location_on</span>
             {{ result.distance }} 公里
           </p>
           <!-- FIXME: 一行中，最左與最右標籤貼齊外容器 -->
           <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
             <span
               v-for="brand in result.brands"
+              :key="brand"
               class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
             >
               {{ brand }}
@@ -91,6 +94,7 @@ const resultsCount = computed(() => results.value.length)
           <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
             <span
               v-for="service in result.services"
+              :key="service"
               class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
             >
               {{ service }}
@@ -105,5 +109,6 @@ const resultsCount = computed(() => results.value.length)
         </div>
       </div>
     </div>
-  </section>
+    </section>
+  </div>
 </template>
