@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import ShopCard from '@/components/ShopCard.vue'
-import { log } from 'console';
 
 const orderTitle = ref('排序')
 const filterTitle = ref('篩選')
@@ -20,7 +19,10 @@ interface ResultItem {
 const results = ref<ResultItem[]>([])
 
 const resultsCount = computed(() => results.value.length)
-try{ // 範例資料，實際應從API取得
+const fetchShops = async () => {
+try{
+  //TODO:從API取得搜尋結果
+  // 範例資料，實際應從API取得
       results.value = [
       {
         id: 1,
@@ -52,9 +54,23 @@ try{ // 範例資料，實際應從API取得
     ];
 }catch(err){
   console.log('沒有符合資料的結果:', err);
+  }
+};
+// 處理排序變更
+const handleSortChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  sortBy.value = target.value;
+  fetchShops();
+};
 
-}
-
+const handleViewDetail = (shopId: number) => {
+  console.log('使用者要查看商店詳細，ID:', shopId);
+  // TODO: 之後這裡會接路由跳轉
+  alert(`查看商店 ID: ${shopId} 的詳細資料`);
+};
+onMounted(() => {
+  fetchShops();
+});
 
 </script>
 
