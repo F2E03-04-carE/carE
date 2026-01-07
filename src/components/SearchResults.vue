@@ -76,26 +76,32 @@ onMounted(() => {
 
 <template>
   <section class="pt-10 bg-[#f5f1ed]">
-    <div class="container mx-auto">
+    <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
           <label for="order" class="py-2 pl-3">{{ orderTitle }}：</label>
-          <select name="order" id="order" class="grow py-2 outline-none">
-            <!-- TODO: 選項待補齊 -->
-            <option value="distance" selected>距離</option>
-            <option value="">評價</option>
-            <option value="">？？</option>
-            <option value="">？？？</option>
+          <select
+            name="order"
+            id="order"
+            class="grow py-2 outline-none"
+            @change="handleSortChange"
+            v-model="sortBy"
+            >
+            <option value="rating" selected>評價</option>
+            <option value="distance">距離</option>
+            <option value="reviewCount">評論數</option>
           </select>
         </div>
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
           <label for="filter" class="py-2 pl-3">{{ filterTitle }}：</label>
-          <select name="filter" id="filter" class="grow py-2 outline-none">
-            <!-- TODO: 選項待補齊 -->
+          <select
+            name="filter"
+            id="filter"
+            class="grow py-2 outline-none">
             <option value="all" selected>全部</option>
-            <option value="">？</option>
-            <option value="">？？</option>
-            <option value="">？？？</option>
+            <option value="nearby">附近</option>
+            <option value="popular">熱門</option>
+            <option value="ratingGood">評價4星以上</option>
           </select>
         </div>
       </div>
