@@ -18,6 +18,7 @@ const emit = defineEmits<{
   viewDetail: [shopId: number]
 }>();
 // 星等邏輯
+//TODO:帶調整顯示星星數量
 const starIcon = `<span class="material-symbols-outlined">kid_star</span>`;
 const getStars = (score: number) => {
   return starIcon.repeat(score);
@@ -43,7 +44,7 @@ const handleViewDetail = () => {
         <span v-html="getStars(shop.score)"></span>
       </p>
         <p class="flex flex-row justify-start items-center my-1">
-        <span class="material-symbols-outlined">location_on</span>
+        <span class="material-symbols-outlined pr-2">location_on</span>
         {{ shop.distance }} 公里
       </p>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
