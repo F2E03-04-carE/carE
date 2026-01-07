@@ -5,6 +5,7 @@ import ShopCard from '@/components/ShopCard.vue'
 const orderTitle = ref('排序')
 const filterTitle = ref('篩選')
 const sortBy = ref('rating');
+const filterBy = ref('all');
 
 interface ResultItem {
   image?: string;
@@ -16,9 +17,16 @@ interface ResultItem {
   services: string[];
 }
 
-const results = ref<ResultItem[]>([])
+const allShops = ref<ResultItem[]>([])
 
-const resultsCount = computed(() => results.value.length)
+const results = computed(() => let filtered = [...allShops.value];
+  if (filterBy.value === 'nearby') {
+    filtered = filtered.filter(shop => shop.distance < 3);
+  } else if (filterBy.value === 'ratingGood') {
+    filtered = filtered.filter(shop => shop.score >= 4);
+  }
+  return filtered;
+});
 const fetchShops = async () => {
 try{
   //TODO:從API取得搜尋結果
@@ -100,7 +108,6 @@ onMounted(() => {
             class="grow py-2 outline-none">
             <option value="all" selected>全部</option>
             <option value="nearby">附近</option>
-            <option value="popular">熱門</option>
             <option value="ratingGood">評價4星以上</option>
           </select>
         </div>
