@@ -19,19 +19,38 @@ interface ResultItem {
 
 const allShops = ref<ResultItem[]>([])
 
-const results = computed(() => let filtered = [...allShops.value];
+const results = computed(() => {
+  let filtered = [...allShops.value];
   if (filterBy.value === 'nearby') {
     filtered = filtered.filter(shop => shop.distance < 3);
   } else if (filterBy.value === 'ratingGood') {
     filtered = filtered.filter(shop => shop.score >= 4);
   }
+  if (filterBy.value === 'all') {
+    if (sortBy.value === 'rating') {
+      filtered.sort((a, b) => b.score - a.score);
+    } else if (sortBy.value === 'distance') {
+      filtered.sort((a, b) => a.distance - b.distance);
+    } else if (sortBy.value === 'reviewCount') {
+      filtered.sort((a, b) => b.score - a.score);
+    }
+  } else {
+    if (sortBy.value !== 'rating'){
+      if (sortBy.value === 'distance') {
+        filtered.sort((a, b) => a.distance - b.distance);
+      } else if (sortBy.value === 'reviewCount') {
+        filtered.sort((a, b) => b.score - a.score);
+      }
+    }
+  }
   return filtered;
 });
+const resultsCount = computed(() => results.value.length);
 const fetchShops = async () => {
 try{
   //TODO:從API取得搜尋結果
   // 範例資料，實際應從API取得
-      results.value = [
+      allShops.value = [
       {
         id: 1,
         name: '匠心汽車維修中心',
@@ -68,7 +87,12 @@ try{
 const handleSortChange = (event: Event) => {
   const target = event.target as HTMLSelectElement;
   sortBy.value = target.value;
-  fetchShops();
+  console.log('切換排序方式：', sortBy.value);
+};
+const handleFilterChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  filterBy.value = target.value;
+  console.log('切換篩選條件：', filterBy.value);
 };
 
 const handleViewDetail = (shopId: number) => {
@@ -95,9 +119,9 @@ onMounted(() => {
             @change="handleSortChange"
             v-model="sortBy"
             >
-            <option value="rating" selected>評價</option>
-            <option value="distance">距離</option>
-            <option value="reviewCount">評論數</option>
+            <option value="rating" selected>依評價</option>
+            <option value="distance">依距離</option>
+            <option value="reviewCount">依評論數</option>
           </select>
         </div>
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
@@ -105,10 +129,12 @@ onMounted(() => {
           <select
             name="filter"
             id="filter"
-            class="grow py-2 outline-none">
+            class="grow py-2 outline-none"
+            @change="handleFilterChange"
+            v-model="filterBy">
             <option value="all" selected>全部</option>
-            <option value="nearby">附近</option>
-            <option value="ratingGood">評價4星以上</option>
+            <option value="nearby">附近(3公里內)</option>
+            <option value="ratingGood">評價 4 星以上</option>
           </select>
         </div>
       </div>

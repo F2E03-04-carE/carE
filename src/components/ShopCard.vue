@@ -48,7 +48,7 @@ const handleViewDetail = () => {
         {{ shop.distance }} 公里
       </p>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-        <!-- 用Tag元件顯示 -->
+        //用Tag元件顯示
         <Tag
           v-for="(brand, index) in shop.brands"
           :key="`brand-${index}`"
