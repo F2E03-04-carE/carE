@@ -1,10 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-const orderTitle = ref<string>('排序')
-const filterTitle = ref<string>('篩選')
-const results = ref<object[]>([])
-const resultsCount = ref<number>(results.value.length)
+import { ref, computed } from 'vue'
+
+const orderTitle = ref('排序')
+const filterTitle = ref('篩選')
+const starIcon = `<span class="material-symbols-outlined">kid_star</span>`
+
+interface ResultItem {
+  name: string
+  score: number
+  distance: number
+  brands: string[]
+  services: string[]
+}
+
+const results = ref<ResultItem[]>([
+  {
+    name: '咪咪毛毛',
+    score: 5,
+    distance: 1,
+    brands: ['咪咪', '毛毛'],
+    services: ['保養', '維修'],
+  },
+])
+const getStars = (score: number) => {
+  return starIcon.repeat(score)
+}
+const resultsCount = computed(() => results.value.length)
 </script>
+
 <template>
   <section class="pt-10 bg-[#f5f1ed]">
     <div class="container mx-auto">
@@ -47,73 +70,30 @@ const resultsCount = ref<number>(results.value.length)
           class="w-full aspect-3/2 object-cover"
         />
         <div class="px-5 py-3 text-[#4a4a43]">
-          <p class="my-1">維修廠名字</p>
+          <p class="my-1">{{ result.name }}</p>
           <p class="my-1">
-            <span class="material-symbols-outlined"> kid_star </span>
+            <span v-html="getStars(result.score)"></span>
           </p>
           <p class="flex flex-row justify-start items-center my-1">
             <span class="material-symbols-outlined"> location_on </span>
-            N 公里
+            {{ result.distance }} 公里
           </p>
           <!-- FIXME: 一行中，最左與最右標籤貼齊外容器 -->
           <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
             <span
+              v-for="brand in result.brands"
               class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
             >
-              品牌
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              品牌
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              品牌
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              品牌
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              品牌
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              品牌
+              {{ brand }}
             </span>
           </p>
           <!-- FIXME: 一行中，最左與最右標籤貼齊外容器 -->
           <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
             <span
+              v-for="service in result.services"
               class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
             >
-              服務項目
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
-            >
-              服務項目
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
-            >
-              服務項目
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
-            >
-              服務項目
-            </span>
-            <span
-              class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
-            >
-              服務項目
+              {{ service }}
             </span>
           </p>
           <!-- TODO: click 事件 -->
