@@ -20,6 +20,10 @@ const tagClass = computed(() => {
 });
 
 </script>
+
 <template>
+  <span :class="tagClass">
+    {{ label }}
+  </span>
 
 </template>
