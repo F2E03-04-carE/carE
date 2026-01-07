@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
-type ReceiveMethod = `Email` | `Phone`;
+const ReceiveMethods = [
+	{ id: `Email`, label: `電子郵件` },
+	{ id: `Phone`, label: `手機號碼` },
+] as const;
+
+type ReceiveMethod = typeof ReceiveMethods[number][`id`];
 
 const ReceiveMethodValue = ref<ReceiveMethod>(`Email`);
 const Email = ref<string>(``);
@@ -9,11 +14,15 @@ const Phone = ref<string>(``);
 
 const IsSubmitting = ref<boolean>(false);
 const IsModalOpen = ref<boolean>(false);
+
 const Countdown = ref<number>(5);
 let CountdownTimer: number | null = null;
 
 const IsEmailMode = computed<boolean>(() => ReceiveMethodValue.value === `Email`);
-const CurrentValue = computed<string>(() => (IsEmailMode.value ? Email.value : Phone.value));
+
+const CurrentValue = computed<string>(() => {
+	return IsEmailMode.value ? Email.value : Phone.value;
+});
 
 const CanSubmit = computed<boolean>(() => {
 	return CurrentValue.value.trim().length > 0 && !IsSubmitting.value;
@@ -28,12 +37,11 @@ const ClearCountdownTimer = (): void => {
 const StartCountdown = (): void => {
 	ClearCountdownTimer();
 	Countdown.value = 5;
+
 	CountdownTimer = window.setInterval(() => {
 		if (Countdown.value <= 1) {
 			ClearCountdownTimer();
 			IsModalOpen.value = false;
-			// TODO: 之後接 router 時，可在這裡導回登入頁
-			// router.push(`/login`);
 			return;
 		}
 		Countdown.value = Countdown.value - 1;
@@ -46,6 +54,7 @@ const HandleSubmit = async (): Promise<void> => {
 	IsSubmitting.value = true;
 
 	try {
+		// 假 API 延遲
 		await new Promise((Resolve) => setTimeout(Resolve, 600));
 		IsModalOpen.value = true;
 	} finally {
@@ -85,46 +94,35 @@ onBeforeUnmount(() => {
 					<p class="text-2xl font-semibold text-[#3E3E3E]">接收方式</p>
 					<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
 						<button
+							v-for="method in ReceiveMethods"
+							:key="method.id"
 							class="flex items-center justify-center gap-4 rounded-xl border px-6 py-5 text-xl font-semibold transition"
 							:class="
-								IsEmailMode
+								ReceiveMethodValue === method.id
 									? `border-[#6B6B5C] bg-[#6B6B5C] text-white`
 									: `border-[#E7E3DD] bg-white text-[#3E3E3E] hover:bg-[#F4F2EE]`
 							"
 							type="button"
-							@click="ReceiveMethodValue = `Email`"
+							@click="ReceiveMethodValue = method.id"
 						>
 							<span
 								class="grid h-7 w-7 place-items-center rounded-full border"
-								:class="IsEmailMode ? `border-white` : `border-[#CFC8C0]`"
+								:class="
+									ReceiveMethodValue === method.id
+										? `border-white`
+										: `border-[#CFC8C0]`
+								"
 							>
 								<span
 									class="h-3.5 w-3.5 rounded-full"
-									:class="IsEmailMode ? `bg-white` : `bg-transparent`"
+									:class="
+										ReceiveMethodValue === method.id
+											? `bg-white`
+											: `bg-transparent`
+									"
 								/>
 							</span>
-							電子郵件
-						</button>
-						<button
-							class="flex items-center justify-center gap-4 rounded-xl border px-6 py-5 text-xl font-semibold transition"
-							:class="
-								!IsEmailMode
-									? `border-[#6B6B5C] bg-[#6B6B5C] text-white`
-									: `border-[#E7E3DD] bg-white text-[#3E3E3E] hover:bg-[#F4F2EE]`
-							"
-							type="button"
-							@click="ReceiveMethodValue = `Phone`"
-						>
-							<span
-								class="grid h-7 w-7 place-items-center rounded-full border"
-								:class="!IsEmailMode ? `border-white` : `border-[#CFC8C0]`"
-							>
-								<span
-									class="h-3.5 w-3.5 rounded-full"
-									:class="!IsEmailMode ? `bg-white` : `bg-transparent`"
-								/>
-							</span>
-							手機號碼
+							{{ method.label }}
 						</button>
 					</div>
 					<div class="mt-10">
@@ -173,7 +171,7 @@ onBeforeUnmount(() => {
 			<div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-[0_18px_50px_rgba(0,0,0,0.25)] ring-1 ring-[#E7E3DD]">
 				<div class="mx-auto h-20 w-20 rounded-full bg-[#ECEAE6]" />
 				<h2 class="mt-6 text-center text-3xl font-semibold text-[#3E3E3E]">
-                    發送成功
+					發送成功
 				</h2>
 				<p class="mt-3 text-center text-base font-semibold text-[#8C8C8C]">
 					我們已將密碼重設連結寄送給您
