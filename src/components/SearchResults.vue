@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import ShopCard from '@/components/ShopCard.vue'
 
 const orderTitle = ref('排序')
 const filterTitle = ref('篩選')
-const starIcon = `<span class="material-symbols-outlined">kid_star</span>`
+const sortBy = ref('rating');
 
 interface ResultItem {
   name: string
@@ -22,9 +23,7 @@ const results = ref<ResultItem[]>([
     services: ['保養', '維修'],
   },
 ])
-const getStars = (score: number) => {
-  return starIcon.repeat(score)
-}
+
 const resultsCount = computed(() => results.value.length)
 </script>
 
