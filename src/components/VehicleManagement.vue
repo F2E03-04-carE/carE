@@ -15,6 +15,22 @@ type Toast = {
 	type: "success" | "error" | "info";
 };
 
+type DeleteModalState = {
+	show: boolean;
+	vehicleId: string;
+	vehicleName: string;
+};
+
+type EditModalState = {
+	show: boolean;
+	vehicle: Vehicle | null;
+	form: {
+		brand: string;
+		model: string;
+		plate: string;
+	};
+};
+
 const props = withDefaults(
 	defineProps<{
 		title?: string;
@@ -63,7 +79,7 @@ const showToast = (message: string, type: "success" | "error" | "info" = "succes
 	}, 3000);
 };
 
-const deleteModal = ref({
+const deleteModal = ref<DeleteModalState>({
 	show: false,
 	vehicleId: ``,
 	vehicleName: ``,
@@ -97,9 +113,9 @@ const cancelDelete = () => {
 	deleteModal.value.show = false;
 };
 
-const editModal = ref({
+const editModal = ref<EditModalState>({
 	show: false,
-	vehicle: null as Vehicle | null,
+	vehicle: null,
 	form: {
 		brand: ``,
 		model: ``,
@@ -313,6 +329,7 @@ const handleSetDefault = (id: string) => {
 					</div>
 					<h3 class="text-[24px] font-extrabold text-[#2F2F2F]">編輯車輛</h3>
 				</div>
+				
 				<div class="flex flex-col gap-4 mb-6">
 					<div>
 						<label class="block mb-2 text-sm font-bold text-[#2F2F2F]">品牌</label>
