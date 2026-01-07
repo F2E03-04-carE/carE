@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 type Vehicle = {
 	id: string;
@@ -49,9 +49,7 @@ const demoVehicles: Vehicle[] = [
 const vehicleList = ref<Vehicle[]>(props.vehicles?.length ? [...props.vehicles] : (props.useDemoWhenEmpty ? [...demoVehicles] : []));
 const currentDefaultId = ref<string | null>(props.defaultId || vehicleList.value.find((v) => v.isDefault)?.id || vehicleList.value[0]?.id || null);
 
-const vehicles = computed(() => vehicleList.value);
-const defaultVehicleId = computed(() => currentDefaultId.value);
-const isDefault = (v: Vehicle) => defaultVehicleId.value === v.id;
+const isDefault = (v: Vehicle) => currentDefaultId.value === v.id;
 
 const toasts = ref<Toast[]>([]);
 let toastIdCounter = 0;
@@ -161,14 +159,6 @@ const handleAdd = () => {
 	showToast(`新增車輛成功！`, `success`);
 };
 
-const handleEdit = (id: string) => {
-	showEditModal(id);
-};
-
-const handleRemove = (id: string) => {
-	showDeleteModal(id);
-};
-
 const handleSetDefault = (id: string) => {
 	currentDefaultId.value = id;
 	emit(`set-default`, id);
@@ -197,14 +187,11 @@ const handleSetDefault = (id: string) => {
 			</button>
 			<div class="flex flex-col gap-6">
 				<article
-					v-for="v in vehicles"
+					v-for="v in vehicleList"
 					:key="v.id"
 					class="relative px-6 py-6 overflow-hidden bg-white rounded-[24px] shadow-sm"
 				>
-					<div
-						v-if="isDefault(v)"
-						class="absolute top-0 right-0 flex items-center gap-1 px-4 py-2 text-sm font-bold text-white rounded-bl-2xl bg-[#A0B4C0]"
-					>
+					<div v-if="isDefault(v)" class="absolute top-0 right-0 flex items-center gap-1 px-4 py-2 text-sm font-bold text-white rounded-bl-2xl bg-[#A0B4C0]">
 						<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">
 							star
 						</span>
@@ -244,14 +231,14 @@ const handleSetDefault = (id: string) => {
 						</button>
 						<button
 							class="flex-1 flex justify-center items-center gap-2 px-4 py-3 text-base font-bold text-[#2F2F2F] transition-colors border border-[#E2E2E2] rounded-full bg-white hover:bg-[#F9F9F9]"
-							@click="handleEdit(v.id)"
+							@click="showEditModal(v.id)"
 						>
 							<span class="material-symbols-outlined text-[20px]">edit_square</span>
 							編輯
 						</button>
 						<button
 							class="flex justify-center items-center w-[52px] h-[52px] text-[#B06A6A] transition-colors border border-[#E2E2E2] rounded-full bg-white hover:bg-[#FFF5F5]"
-							@click="handleRemove(v.id)"
+							@click="showDeleteModal(v.id)"
 						>
 							<span class="material-symbols-outlined text-[24px]">delete</span>
 						</button>
