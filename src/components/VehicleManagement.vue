@@ -329,7 +329,6 @@ const handleSetDefault = (id: string) => {
 					</div>
 					<h3 class="text-[24px] font-extrabold text-[#2F2F2F]">編輯車輛</h3>
 				</div>
-				
 				<div class="flex flex-col gap-4 mb-6">
 					<div>
 						<label class="block mb-2 text-sm font-bold text-[#2F2F2F]">品牌</label>
