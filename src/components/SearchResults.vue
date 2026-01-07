@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-const orderString = ref<string>('排序')
-const filterString = ref<string>('篩選')
+const orderTitle = ref<string>('排序')
+const filterTitle = ref<string>('篩選')
 const results = ref<object[]>([])
 const resultsCount = ref<number>(results.value.length)
 </script>
@@ -10,7 +10,7 @@ const resultsCount = ref<number>(results.value.length)
     <div class="container mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
-          <label for="order" class="py-2 pl-3">{{ orderString }}：</label>
+          <label for="order" class="py-2 pl-3">{{ orderTitle }}：</label>
           <select name="order" id="order" class="grow py-2 outline-none">
             <!-- TODO: 選項待補齊 -->
             <option value="distance" selected>距離</option>
@@ -20,7 +20,7 @@ const resultsCount = ref<number>(results.value.length)
           </select>
         </div>
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
-          <label for="filter" class="py-2 pl-3">{{ filterString }}：</label>
+          <label for="filter" class="py-2 pl-3">{{ filterTitle }}：</label>
           <select name="filter" id="filter" class="grow py-2 outline-none">
             <!-- TODO: 選項待補齊 -->
             <option value="all" selected>全部</option>
