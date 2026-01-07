@@ -107,10 +107,18 @@ onMounted(() => {
       </div>
     </div>
   </section>
-  <section class="pt-5 bg-[#f5f1ed]">
-    <div class="container mx-auto flex flex-wrap gap-5">
-      <div v-if="!resultsCount">
-        <p class="text-[#4a4a43]">查無相關結果</p>
+  <section class="pt-5 bg-[#f5f1ed] pb-10 min-h-[60vh]">
+    <div class="container mx-auto">
+      <div v-if="!resultsCount" class="text-center py-10">
+        <p class="text-[#4a4a43] text-lg">查無相關結果</p>
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <ShopCard
+          v-for="shop in results"
+          :key="shop.id"
+          :shop="shop"
+          @view-detail="handleViewDetail"
+        />
       </div>
     </div>
   </section>
