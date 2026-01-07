@@ -7,11 +7,13 @@ const filterTitle = ref('篩選')
 const sortBy = ref('rating');
 
 interface ResultItem {
-  name: string
-  score: number
-  distance: number
-  brands: string[]
-  services: string[]
+  image?: string;
+  id: number;
+  name: string;
+  score: number;
+  distance: number;
+  brands: string[];
+  services: string[];
 }
 
 const results = ref<ResultItem[]>([
@@ -58,50 +60,6 @@ const resultsCount = computed(() => results.value.length)
     <div class="container mx-auto flex flex-wrap gap-5">
       <div v-if="!resultsCount">
         <p class="text-[#4a4a43]">查無相關結果</p>
-      </div>
-      <div
-        v-for="result in results"
-        class="w-full md:w-[33.3%] lg:w-[25%] border border-[#DBCEBD] rounded-[5px] overflow-hidden hover:shadow-md duration-300"
-      >
-        <img
-          src="https://picsum.photos/300/200?random=1"
-          alt="車廠環境圖片"
-          class="w-full aspect-3/2 object-cover"
-        />
-        <div class="px-5 py-3 text-[#4a4a43]">
-          <p class="my-1">{{ result.name }}</p>
-          <p class="my-1">
-            <span v-html="getStars(result.score)"></span>
-          </p>
-          <p class="flex flex-row justify-start items-center my-1">
-            <span class="material-symbols-outlined"> location_on </span>
-            {{ result.distance }} 公里
-          </p>
-          <!-- FIXME: 一行中，最左與最右標籤貼齊外容器 -->
-          <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-            <span
-              v-for="brand in result.brands"
-              class="inline-block px-3 py-1 bg-[#8b7d6b] text-[14px] text-white rounded-[999px]"
-            >
-              {{ brand }}
-            </span>
-          </p>
-          <!-- FIXME: 一行中，最左與最右標籤貼齊外容器 -->
-          <p class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-            <span
-              v-for="service in result.services"
-              class="inline-block px-3 py-1 bg-[#f5f1ed] text-[14px] text-[#8b7d6b] border border-[#8b7d6b] rounded-[999px]"
-            >
-              {{ service }}
-            </span>
-          </p>
-          <!-- TODO: click 事件 -->
-          <button
-            class="w-full block p-3 bg-[#8b7d6b] text-[14px] text-white rounded-[8px] cursor-pointer"
-          >
-            立即預約
-          </button>
-        </div>
       </div>
     </div>
   </section>
