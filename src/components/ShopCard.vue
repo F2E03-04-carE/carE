@@ -19,9 +19,10 @@ const emit = defineEmits<{
 }>();
 // 星等邏輯
 //TODO:帶調整顯示星星數量
-const starIcon = `<span class="material-symbols-outlined">kid_star</span>`;
 const getStars = (score: number) => {
-  return starIcon.repeat(score);
+  const fullStars = `<span class="material-symbols-outlined">kid_star</span>`.repeat(score);
+  const emptyStars = `<span class="fill-icon material-symbols-outlined">kid_star</span>`.repeat(5 - score);
+  return fullStars + emptyStars;
 };
 
 // 決定要傳送哪些卡
