@@ -18,9 +18,9 @@ const emit = defineEmits<{
   viewDetail: [shopId: number]
 }>();
 // 星等邏輯
-//TODO:帶調整顯示星星數量
+//TODO:改成svg匯入
 const getStars = (score: number) => {
-  const fullStars = `<span class="material-symbols-outlined">kid_star</span>`.repeat(score);
+  const fullStars = `<span class="material-symbols-outlined text-yellow-400">kid_star</span>`.repeat(score);
   const emptyStars = `<span class="fill-icon material-symbols-outlined">kid_star</span>`.repeat(5 - score);
   return fullStars + emptyStars;
 };
@@ -40,16 +40,15 @@ const handleViewDetail = () => {
       class="w-full aspect-[3/2] object-cover"
     />
     <div class="px-5 py-3 text-[#4a4a43]">
-      <p class="my-1 font-semibold">{{ shop.name }}</p>
-      <p class="my-1">
+      <p class="my-2 font-semibold">{{ shop.name }}</p>
+      <p class="my-2">
         <span v-html="getStars(shop.score)"></span>
       </p>
         <p class="flex flex-row justify-start items-center my-1">
-        <span class="material-symbols-outlined pr-2">location_on</span>
+        <span class="material-symbols-outlined pr-2 mt-2">location_on</span>
         {{ shop.distance }} 公里
       </p>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-        //用Tag元件顯示
         <Tag
           v-for="(brand, index) in shop.brands"
           :key="`brand-${index}`"
