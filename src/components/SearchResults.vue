@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 const orderString = ref<string>('排序')
 const filterString = ref<string>('篩選')
+const results = ref<object[]>([])
+const resultsCount = ref<number>(results.value.length)
 </script>
 <template>
   <section class="pt-10 bg-[#f5f1ed]">
@@ -32,7 +34,11 @@ const filterString = ref<string>('篩選')
   </section>
   <section class="pt-5 bg-[#f5f1ed]">
     <div class="container mx-auto flex flex-wrap gap-5">
+      <div v-if="!resultsCount">
+        <p class="text-[#4a4a43]">查無相關結果</p>
+      </div>
       <div
+        v-for="result in results"
         class="w-full md:w-[33.3%] lg:w-[25%] border border-[#DBCEBD] rounded-[5px] overflow-hidden hover:shadow-md duration-300"
       >
         <img
