@@ -4,24 +4,24 @@ const orderString = ref<string>('排序')
 const filterString = ref<string>('篩選')
 </script>
 <template>
-  <section class="bg-[#f5f1ed]">
+  <section class="pt-10 bg-[#f5f1ed]">
     <div class="container mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
-        <div class="px-3 py-1 border rounded-[5px]">
-          <label for="order">{{ orderString }}：</label>
-          <select name="order" id="order" class="outline-none">
+        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
+          <label for="order" class="py-2 pl-3">{{ orderString }}：</label>
+          <select name="order" id="order" class="grow py-2 outline-none">
             <!-- TODO: 選項待補齊 -->
-            <option value="" selected>距離</option>
+            <option value="distance" selected>距離</option>
             <option value="">評價</option>
             <option value="">？？</option>
             <option value="">？？？</option>
           </select>
         </div>
-        <div class="px-3 py-1 border rounded-[5px]">
-          <label for="filter">{{ filterString }}：</label>
-          <select name="filter" id="filter" class="outline-none">
+        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
+          <label for="filter" class="py-2 pl-3">{{ filterString }}：</label>
+          <select name="filter" id="filter" class="grow py-2 outline-none">
             <!-- TODO: 選項待補齊 -->
-            <option value="" selected>全部</option>
+            <option value="all" selected>全部</option>
             <option value="">？</option>
             <option value="">？？</option>
             <option value="">？？？</option>
@@ -32,13 +32,15 @@ const filterString = ref<string>('篩選')
   </section>
   <section class="pt-5 bg-[#f5f1ed]">
     <div class="container mx-auto flex flex-wrap gap-5">
-      <div class="w-full md:w-[20%] border rounded-[5px] overflow-hidden">
+      <div
+        class="w-full md:w-[33.3%] lg:w-[25%] border border-[#DBCEBD] rounded-[5px] overflow-hidden hover:shadow-md duration-300"
+      >
         <img
           src="https://picsum.photos/300/200?random=1"
           alt="車廠環境圖片"
           class="w-full aspect-3/2 object-cover"
         />
-        <div class="px-5 py-3">
+        <div class="px-5 py-3 text-[#4a4a43]">
           <p class="my-1">維修廠名字</p>
           <p class="my-1">
             <span class="material-symbols-outlined"> kid_star </span>
