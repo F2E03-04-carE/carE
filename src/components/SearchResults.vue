@@ -13,6 +13,7 @@ interface ResultItem {
   name: string;
   score: number;
   distance: number;
+  reviewCount: number;
   brands: string[];
   services: string[];
 }
@@ -32,14 +33,14 @@ const results = computed(() => {
     } else if (sortBy.value === 'distance') {
       filtered.sort((a, b) => a.distance - b.distance);
     } else if (sortBy.value === 'reviewCount') {
-      filtered.sort((a, b) => b.score - a.score);
+      filtered.sort((a, b) => b.reviewCount - a.reviewCount);
     }
   } else {
     if (sortBy.value !== 'rating'){
       if (sortBy.value === 'distance') {
         filtered.sort((a, b) => a.distance - b.distance);
       } else if (sortBy.value === 'reviewCount') {
-        filtered.sort((a, b) => b.score - a.score);
+        filtered.sort((a, b) => b.reviewCount - a.reviewCount);
       }
     }
   }
@@ -56,6 +57,7 @@ try{
         name: '匠心汽車維修中心',
         score: 5,
         distance: 1.2,
+        reviewCount: 120,
         brands: ['Benz', 'BMW', '奧迪', '保時捷'],
         services: ['保養維護', '故障維修', '年檢服務', '鈑金噴漆', '輪胎更換', '冷氣維修'],
         image: 'https://picsum.photos/300/200?random=1'
@@ -65,6 +67,7 @@ try{
         name: '職人汽車保養廠',
         score: 4,
         distance: 2.5,
+        reviewCount: 85,
         brands: ['豐田', '本田', 'Volvo', '馬自達'],
         services: ['定期保養', '引擎維修', '變速箱維修', '煞車系統', '電路檢修', '冷氣維修'],
         image: 'https://picsum.photos/300/200?random=2'
@@ -74,6 +77,7 @@ try{
         name: '專業汽車維修站',
         score: 3,
         distance: 3.8,
+        reviewCount: 50,
         brands: ['福斯', '奧迪', '保時捷', 'BMW'],
         services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
         image: 'https://picsum.photos/300/200?random=3'
@@ -82,17 +86,6 @@ try{
 }catch(err){
   console.log('沒有符合資料的結果:', err);
   }
-};
-// 處理排序變更
-const handleSortChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  sortBy.value = target.value;
-  console.log('切換排序方式：', sortBy.value);
-};
-const handleFilterChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  filterBy.value = target.value;
-  console.log('切換篩選條件：', filterBy.value);
 };
 
 const handleViewDetail = (shopId: number) => {
@@ -117,7 +110,6 @@ onMounted(() => {
             name="order"
             id="order"
             class="grow py-2 outline-none"
-            @change="handleSortChange"
             v-model="sortBy"
             >
             <option value="rating" selected>依評價</option>
@@ -131,7 +123,6 @@ onMounted(() => {
             name="filter"
             id="filter"
             class="grow py-2 outline-none"
-            @change="handleFilterChange"
             v-model="filterBy">
             <option value="all" selected>全部</option>
             <option value="nearby">附近(3公里內)</option>
@@ -153,7 +144,7 @@ onMounted(() => {
             <span v-else>依評論數</span>
           </span>
           <span v-else>
-            // 篩選後
+            <!-- 篩選後 -->
             <span v-if="sortBy === 'rating'">原始順序</span>
             <span v-else-if="sortBy === 'distance'">依距離</span>
             <span v-else>依評論數</span>
