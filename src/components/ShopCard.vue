@@ -51,7 +51,7 @@ const handleViewDetail = () => {
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
         <Tag
           v-for="(brand, index) in shop.brands"
-          :key="`brand-${index}`"
+          :key="`brand`"
           :label="brand"
           variant="filled"
         />
@@ -59,7 +59,7 @@ const handleViewDetail = () => {
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
         <Tag
           v-for="(service, index) in shop.services"
-          :key="`service-${index}`"
+          :key="`service`"
           :label="service"
           variant="outlined"
         />
