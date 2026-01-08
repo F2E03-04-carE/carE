@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 interface CategoryTagProps {
   variant?: 'filled' | 'outlined';
   label: string;
 }
 
-const props = withDefaults(defineProps<CategoryTagProps>(),{
+const props = withDefaults(defineProps<CategoryTagProps>(), {
   variant: 'outlined',
 });
 
@@ -18,12 +18,10 @@ const tagClass = computed(() => {
     return `${baseClass} bg-[#f5f1ed] text-[#8b7d6b] border border-[#8b7d6b]`;
   }
 });
-
 </script>
 
 <template>
   <span :class="tagClass">
     {{ label }}
   </span>
-
 </template>

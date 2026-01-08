@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import ShopCard from '@/components/ShopCard.vue'
+import { ref, computed, onMounted } from 'vue';
+import ShopCard from '@/components/ui/ShopCard.vue';
 
-const orderTitle = ref('排序')
-const filterTitle = ref('篩選')
+const orderTitle = ref('排序');
+const filterTitle = ref('篩選');
 const sortBy = ref('rating');
 const filterBy = ref('all');
 
@@ -18,14 +18,14 @@ interface ResultItem {
   services: string[];
 }
 
-const allShops = ref<ResultItem[]>([])
+const allShops = ref<ResultItem[]>([]);
 
 const results = computed(() => {
   let filtered = [...allShops.value];
   if (filterBy.value === 'nearby') {
-    filtered = filtered.filter(shop => shop.distance < 3);
+    filtered = filtered.filter((shop) => shop.distance < 3);
   } else if (filterBy.value === 'ratingGood') {
-    filtered = filtered.filter(shop => shop.score >= 4);
+    filtered = filtered.filter((shop) => shop.score >= 4);
   }
   if (filterBy.value === 'all') {
     if (sortBy.value === 'rating') {
@@ -36,7 +36,7 @@ const results = computed(() => {
       filtered.sort((a, b) => b.reviewCount - a.reviewCount);
     }
   } else {
-    if (sortBy.value !== 'rating'){
+    if (sortBy.value !== 'rating') {
       if (sortBy.value === 'distance') {
         filtered.sort((a, b) => a.distance - b.distance);
       } else if (sortBy.value === 'reviewCount') {
@@ -48,10 +48,10 @@ const results = computed(() => {
 });
 const resultsCount = computed(() => results.value.length);
 const fetchShops = async () => {
-try{
-  // TODO:從API取得搜尋結果
-  // 範例資料，實際應從API取得
-      allShops.value = [
+  try {
+    // TODO:從API取得搜尋結果
+    // 範例資料，實際應從API取得
+    allShops.value = [
       {
         id: 1,
         name: '匠心汽車維修中心',
@@ -60,7 +60,7 @@ try{
         reviewCount: 120,
         brands: ['Benz', 'BMW', '奧迪', '保時捷'],
         services: ['保養維護', '故障維修', '年檢服務', '鈑金噴漆', '輪胎更換', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=1'
+        image: 'https://picsum.photos/300/200?random=1',
       },
       {
         id: 2,
@@ -70,7 +70,7 @@ try{
         reviewCount: 85,
         brands: ['豐田', '本田', 'Volvo', '馬自達'],
         services: ['定期保養', '引擎維修', '變速箱維修', '煞車系統', '電路檢修', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=2'
+        image: 'https://picsum.photos/300/200?random=2',
       },
       {
         id: 3,
@@ -80,11 +80,11 @@ try{
         reviewCount: 50,
         brands: ['福斯', '奧迪', '保時捷', 'BMW'],
         services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
-        image: 'https://picsum.photos/300/200?random=3'
+        image: 'https://picsum.photos/300/200?random=3',
       },
     ];
-}catch(err){
-  console.log('沒有符合資料的結果:', err);
+  } catch (err) {
+    console.log('沒有符合資料的結果:', err);
   }
 };
 
@@ -97,7 +97,6 @@ const handleViewDetail = (shopId: number) => {
 onMounted(() => {
   fetchShops();
 });
-
 </script>
 
 <template>
@@ -106,12 +105,7 @@ onMounted(() => {
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
           <label for="order" class="py-2 pl-3">{{ orderTitle }}：</label>
-          <select
-            name="order"
-            id="order"
-            class="grow py-2 outline-none"
-            v-model="sortBy"
-            >
+          <select name="order" id="order" class="grow py-2 outline-none" v-model="sortBy">
             <option value="rating" selected>依評價</option>
             <option value="distance">依距離</option>
             <option value="reviewCount">依評論數</option>
@@ -119,11 +113,7 @@ onMounted(() => {
         </div>
         <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
           <label for="filter" class="py-2 pl-3">{{ filterTitle }}：</label>
-          <select
-            name="filter"
-            id="filter"
-            class="grow py-2 outline-none"
-            v-model="filterBy">
+          <select name="filter" id="filter" class="grow py-2 outline-none" v-model="filterBy">
             <option value="all" selected>全部</option>
             <option value="nearby">附近(3公里內)</option>
             <option value="ratingGood">評價 4 星以上</option>
@@ -133,12 +123,12 @@ onMounted(() => {
       <div class="mt-4 text-[#4a4a43] text-sm" v-if="allShops.length > 0">
         <p>
           <span class="font-semibold">顯示：</span>
-            <span v-if="filterBy === 'all'">全部</span>
-            <span v-else-if="filterBy === 'nearby'">附近（3公里內）</span>
-            <span v-else-if="filterBy === 'ratingGood'">評價 4 星以上</span>
+          <span v-if="filterBy === 'all'">全部</span>
+          <span v-else-if="filterBy === 'nearby'">附近（3公里內）</span>
+          <span v-else-if="filterBy === 'ratingGood'">評價 4 星以上</span>
           <span class="mx-2">|</span>
           <span class="font-semibold">排序：</span>
-            <span v-if="filterBy === 'all'">
+          <span v-if="filterBy === 'all'">
             <span v-if="sortBy === 'rating'">依評價</span>
             <span v-else-if="sortBy === 'distance'">依距離</span>
             <span v-else>依評論數</span>

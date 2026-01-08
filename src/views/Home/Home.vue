@@ -335,9 +335,7 @@
         </div>
       </div>
       <a href="/" class="block w-[50%] mx-auto">
-        <button
-          class="block w-[100%] py-[2%] mx-auto text-[18px] text-[#fff] font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
-        >
+        <button class="block w-[100%] py-[2%] mx-auto text-[18px] text-[#fff] font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer">
           立即使用
         </button>
       </a>
