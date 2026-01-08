@@ -10,6 +10,7 @@ interface Props {
     name: string;
     score: number;
     distance: number;
+    reviewCount: number;
     brands: string[];
     services: string[];
   }
@@ -34,7 +35,7 @@ const handleViewDetail = () => {
       class="w-full aspect-[3/2] object-cover"
     />
     <div class="px-5 py-3 text-[#4a4a43]">
-      <p class="my-2 font-semibold">{{ shop.name }}</p>
+      <p class="my-2 font-semibold text-lg">{{ shop.name }}</p>
       <p class="my-2">
       <img
         v-for="i in 5"
@@ -44,14 +45,15 @@ const handleViewDetail = () => {
         class="w-5 h-5 inline-block"
       />
       </p>
-        <p class="flex flex-row justify-start items-center my-1">
+      <span class="px-2 text-[#8a8a7d] text-xs">({{ shop.reviewCount }})</span>
+      <p class="flex flex-row justify-start items-center my-1">
         <span class="material-symbols-outlined pr-2 mt-2">location_on</span>
         {{ shop.distance }} 公里
       </p>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
         <Tag
           v-for="(brand, index) in shop.brands"
-          :key="`brand`"
+          :key="brand"
           :label="brand"
           variant="filled"
         />
@@ -59,7 +61,7 @@ const handleViewDetail = () => {
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
         <Tag
           v-for="(service, index) in shop.services"
-          :key="`service`"
+          :key="service"
           :label="service"
           variant="outlined"
         />
