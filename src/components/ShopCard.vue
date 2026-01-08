@@ -1,8 +1,11 @@
 <script setup lang="ts">
   import Tag from './Tag.vue';
+  import emptyStar from '@/assets/icons/emptyStar.svg';
+  import filledStar from '@/assets/icons/fillStar.svg';
+
 interface Props {
   shop: {
-    image?: string;  // 圖片網址
+    image?: string;
     id: number;
     name: string;
     score: number;
@@ -11,21 +14,12 @@ interface Props {
     services: string[];
   }
 }
-// 傳遞卡片資料
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
   viewDetail: [shopId: number]
 }>();
-// 星等邏輯
-//TODO:改成svg匯入
-const getStars = (score: number) => {
-  const fullStars = `<span class="material-symbols-outlined text-yellow-400">kid_star</span>`.repeat(score);
-  const emptyStars = `<span class="fill-icon material-symbols-outlined">kid_star</span>`.repeat(5 - score);
-  return fullStars + emptyStars;
-};
 
-// 決定要傳送哪些卡
 const handleViewDetail = () => {
   emit('viewDetail', props.shop.id);
 };
@@ -42,7 +36,13 @@ const handleViewDetail = () => {
     <div class="px-5 py-3 text-[#4a4a43]">
       <p class="my-2 font-semibold">{{ shop.name }}</p>
       <p class="my-2">
-        <span v-html="getStars(shop.score)"></span>
+      <img
+        v-for="i in 5"
+        :key="i"
+        :src="i <= shop.score ? filledStar : emptyStar"
+        alt="star"
+        class="w-5 h-5 inline-block"
+      />
       </p>
         <p class="flex flex-row justify-start items-center my-1">
         <span class="material-symbols-outlined pr-2 mt-2">location_on</span>
