@@ -48,7 +48,7 @@ const results = computed(() => {
 const resultsCount = computed(() => results.value.length);
 const fetchShops = async () => {
 try{
-  //TODO:從API取得搜尋結果
+  // TODO:從API取得搜尋結果
   // 範例資料，實際應從API取得
       allShops.value = [
       {
@@ -72,7 +72,7 @@ try{
       {
         id: 3,
         name: '專業汽車維修站',
-        score: 4,
+        score: 3,
         distance: 3.8,
         brands: ['福斯', '奧迪', '保時捷', 'BMW'],
         services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
@@ -153,7 +153,7 @@ onMounted(() => {
             <span v-else>依評論數</span>
           </span>
           <span v-else>
-            <!-- 篩選後 -->
+            // 篩選後
             <span v-if="sortBy === 'rating'">原始順序</span>
             <span v-else-if="sortBy === 'distance'">依距離</span>
             <span v-else>依評論數</span>
