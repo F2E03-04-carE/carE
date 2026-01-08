@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import Tag from './Tag.vue';
-  import emptyStar from '@/assets/icons/emptyStar.svg';
-  import filledStar from '@/assets/icons/fillStar.svg';
+import Tag from './Tag.vue';
+import emptyStar from '@/assets/icons/emptyStar.svg';
+import filledStar from '@/assets/icons/fillStar.svg';
 
 interface Props {
   shop: {
@@ -13,18 +13,17 @@ interface Props {
     reviewCount: number;
     brands: string[];
     services: string[];
-  }
+  };
 }
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  viewDetail: [shopId: number]
+  viewDetail: [shopId: number];
 }>();
 
 const handleViewDetail = () => {
   emit('viewDetail', props.shop.id);
 };
-
 </script>
 
 <template>
@@ -37,13 +36,13 @@ const handleViewDetail = () => {
     <div class="px-5 py-3 text-[#4a4a43]">
       <p class="my-2 font-semibold text-lg">{{ shop.name }}</p>
       <p class="my-2">
-      <img
-        v-for="i in 5"
-        :key="i"
-        :src="i <= shop.score ? filledStar : emptyStar"
-        alt="star"
-        class="w-5 h-5 inline-block"
-      />
+        <img
+          v-for="i in 5"
+          :key="i"
+          :src="i <= shop.score ? filledStar : emptyStar"
+          alt="star"
+          class="w-5 h-5 inline-block"
+        />
       </p>
       <span class="px-2 text-[#8a8a7d] text-xs">({{ shop.reviewCount }})</span>
       <p class="flex flex-row justify-start items-center my-1">
@@ -51,12 +50,7 @@ const handleViewDetail = () => {
         {{ shop.distance }} 公里
       </p>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-        <Tag
-          v-for="(brand, index) in shop.brands"
-          :key="brand"
-          :label="brand"
-          variant="filled"
-        />
+        <Tag v-for="(brand, index) in shop.brands" :key="brand" :label="brand" variant="filled" />
       </div>
       <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
         <Tag

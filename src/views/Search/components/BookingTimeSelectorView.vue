@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DatePicker } from 'v-calendar'
-import 'v-calendar/style.css'
+import { computed } from 'vue';
+import { DatePicker } from 'v-calendar';
+import 'v-calendar/style.css';
 
 const props = defineProps<{
-  date: Date | null
-  time: string | null
-}>()
+  date: Date | null;
+  time: string | null;
+}>();
 
 const emits = defineEmits<{
-  (e: 'update:date', val: Date | null): void
-  (e: 'update:time', val: string | null): void
-}>()
+  (e: 'update:date', val: Date | null): void;
+  (e: 'update:time', val: string | null): void;
+}>();
 
 const selectedDate = computed({
   get: () => props.date,
   set: (val) => emits('update:date', val),
-})
+});
 
 const localTime = computed({
   get: () => props.time,
   set: (val) => emits('update:time', val),
-})
+});
 
-const today: Date = new Date()
+const today: Date = new Date();
 
 const formattedDate = computed<string | null>(() => {
-  if (!selectedDate.value) return null
+  if (!selectedDate.value) return null;
   return selectedDate.value.toLocaleDateString('zh-TW', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     weekday: 'long',
-  })
-})
+  });
+});
 
 // TODO: API串接
 const buttons = [
@@ -41,12 +41,12 @@ const buttons = [
   { time: '10:00 早上', status: '剩餘 3' },
   { time: '11:00 早上', status: '剩餘 3' },
   { time: '13:00 下午', status: '已額滿' },
-]
+];
 
 const setActive = (btnTime: string, status: string) => {
-  if (status === '已額滿') return
-  localTime.value = btnTime
-}
+  if (status === '已額滿') return;
+  localTime.value = btnTime;
+};
 </script>
 
 <template>
@@ -97,10 +97,7 @@ const setActive = (btnTime: string, status: string) => {
         </div>
         <div>
           <p class="mb-3 text-[14px] font-bold text-[#8A8A86]">選擇時段</p>
-          <div
-            class="rounded-[16px] border border-[#E6E6DF] p-4 transition-colors"
-            :class="{ 'bg-[#FBFBFA]': !formattedDate }"
-          >
+          <div class="rounded-[16px] border border-[#E6E6DF] p-4 transition-colors" :class="{ 'bg-[#FBFBFA]': !formattedDate }">
             <div v-if="!formattedDate" class="flex flex-col items-center justify-center py-8">
               <!-- <i class="fa-regular fa-clock text-[40px] text-[#D1D1CB]"></i> -->
               <span class="material-symbols-outlined text-[#D1D1CB] choose-time-icon">
@@ -135,18 +132,9 @@ const setActive = (btnTime: string, status: string) => {
                           : 'text-[#6B6B5C]',
                     ]"
                   ></i> -->
-                  <span
-                    class="material-symbols-outlined"
-                    :class="[
-                      localTime === btn.time
-                        ? 'text-white'
-                        : btn.status === '已額滿'
-                          ? 'text-[#B5B5AD]'
-                          : 'text-[#6B6B5C]',
-                    ]"
-                    >schedule</span
-                  >
-
+                  <span class="material-symbols-outlined" :class="[ localTime === btn.time ? 'text-white' : btn.status === '已額滿' ? 'text-[#B5B5AD]' : 'text-[#6B6B5C]',]">
+                    schedule
+                  </span>
                   <span class="text-[16px] font-bold">{{ btn.time }}</span>
                 </div>
                 <span class="text-[13px] font-medium opacity-90">{{ btn.status }}</span>
