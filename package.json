@@ -16,8 +16,13 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
     "@popperjs/core": "^2.11.8",
     "@tailwindcss/vite": "^4.1.18",
+    "chart.js": "^4.5.1",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.1.18",
     "v-calendar": "^3.1.2",
