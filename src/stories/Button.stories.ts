@@ -51,10 +51,3 @@ export const Small: Story = {
     size: 'small',
   },
 };
-
-export const A: Story = {
-  args: {
-    primary: false,
-    label: 'Button',
-  },
-};
