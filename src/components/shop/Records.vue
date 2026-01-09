@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 
-/* ========= 型別 ========= */
 type RecordItem = {
   id: number
   date: string
@@ -18,10 +17,9 @@ type Owner = {
   records: RecordItem[]
 }
 
-/* ========= 搜尋 ========= */
 const keyword = ref('')
 
-/* ========= 假資料 ========= */
+// 假資料
 const owners = reactive<Owner[]>([
   {
     id: 1,
@@ -69,7 +67,6 @@ const owners = reactive<Owner[]>([
   },
 ])
 
-/* ========= Tab 狀態（關鍵） ========= */
 const activeTabs = reactive<Record<number, 'records' | 'stats'>>({})
 
 const getTab = (id: number) => activeTabs[id] ?? 'records'
@@ -77,10 +74,9 @@ const setTab = (id: number, tab: 'records' | 'stats') => {
   activeTabs[id] = tab
 }
 
-/* ========= Computed ========= */
 const filteredOwners = computed(() => {
   if (!keyword.value) return owners
-  return owners.filter((o) => `${o.name}${o.phone}${o.car}`.includes(keyword.value))
+  return owners.filter((owner) => `${owner.name}${owner.phone}${owner.car}`.includes(keyword.value))
 })
 
 const totalPrice = (owner: Owner) => owner.records.reduce((sum, r) => sum + r.price, 0)
@@ -88,14 +84,12 @@ const totalPrice = (owner: Owner) => owner.records.reduce((sum, r) => sum + r.pr
 const lastRepairDate = (owner: Owner) =>
   owner.records.slice().sort((a, b) => b.date.localeCompare(a.date))[0]?.date ?? '-'
 
-/* ========= UI Class ========= */
 const activeTabClass = 'bg-white shadow text-gray-900 font-medium'
 const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 p-6 space-y-6">
-    <!-- 搜尋 -->
     <div class="bg-white rounded-2xl p-4 shadow-sm">
       <input
         v-model="keyword"
@@ -104,13 +98,11 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
       />
     </div>
 
-    <!-- 車主卡片 -->
     <div
       v-for="owner in filteredOwners"
       :key="owner.id"
       class="bg-white rounded-2xl shadow-sm overflow-hidden"
     >
-      <!-- Header -->
       <div class="px-6 py-4 bg-gray-100">
         <div>
           <div class="font-semibold">{{ owner.name }}</div>
@@ -118,18 +110,17 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
         </div>
       </div>
 
-      <!-- Tabs -->
       <div class="px-6 py-4">
         <div class="flex bg-gray-200 rounded-full p-1">
           <button
-            class="flex-1 py-2 rounded-full text-sm"
+            class="flex-1 py-2 rounded-full text-sm cursor-pointer"
             :class="getTab(owner.id) === 'records' ? activeTabClass : inactiveTabClass"
             @click="setTab(owner.id, 'records')"
           >
             維修歷程
           </button>
           <button
-            class="flex-1 py-2 rounded-full text-sm"
+            class="flex-1 py-2 rounded-full text-sm cursor-pointer"
             :class="getTab(owner.id) === 'stats' ? activeTabClass : inactiveTabClass"
             @click="setTab(owner.id, 'stats')"
           >
@@ -138,23 +129,21 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
         </div>
       </div>
 
-      <!-- 維修歷程 -->
       <div v-show="getTab(owner.id) === 'records'" class="px-6 pb-6 space-y-4">
         <div
-          v-for="r in owner.records"
-          :key="r.id"
+          v-for="record in owner.records"
+          :key="record.id"
           class="flex justify-between bg-gray-100 rounded-xl p-4"
         >
           <div>
-            <div class="text-sm text-gray-500">📅 {{ r.date }}</div>
-            <div class="font-medium">🔧 {{ r.title }}</div>
-            <div class="text-sm text-gray-500">{{ r.desc }}</div>
+            <div class="text-sm text-gray-500">📅 {{ record.date }}</div>
+            <div class="font-medium">🔧 {{ record.title }}</div>
+            <div class="text-sm text-gray-500">{{ record.desc }}</div>
           </div>
-          <div class="font-semibold text-green-600">NT${{ r.price.toLocaleString() }}</div>
+          <div class="font-semibold text-green-600">NT${{ record.price.toLocaleString() }}</div>
         </div>
       </div>
 
-      <!-- 統計資訊（保證有內容） -->
       <div
         v-show="getTab(owner.id) === 'stats'"
         class="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
