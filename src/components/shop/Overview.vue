@@ -1,7 +1,25 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
-// 工單
+type Status = {
+  label: string
+  value: string
+  icon: string
+  color: string
+}
+
+type OrderStatus = '進行中' | '待確認' | '已完成'
+
+type Order = {
+  id: string
+  name: string
+  car: string
+  time: string
+  status: OrderStatus
+  statusColor: (typeof statusColors)[OrderStatus]
+}
+
+// 浮窗
 const selectedOrder = ref<Order | null>(null)
 const showModal = ref(false)
 
@@ -14,30 +32,13 @@ const closeModal = () => {
   showModal.value = false
 }
 
-type Status = {
-  label: string
-  value: string
-  icon: string
-  color: string
-}
-
-type Order = {
-  id: string
-  name: string
-  car: string
-  time: string
-  status: '進行中' | '待確認' | '已完成'
-  statusColor: string
-}
-
-// 維修狀態標籤顏色
-const statusColors: Record<'進行中' | '待確認' | '已完成', string> = {
+const statusColors = {
   進行中: 'bg-green-400 text-white',
   待確認: 'bg-amber-400 text-white',
   已完成: 'bg-slate-400 text-white',
-}
+} as const
 
-// 隨機時間生成，假的，先預覽用
+// 時間格式
 function randomDate(start: Date, end: Date): string {
   const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
   const day = String(date.getDate()).padStart(2, '0')
@@ -48,10 +49,30 @@ function randomDate(start: Date, end: Date): string {
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-const startDate = new Date('2025-01-01T08:00:00')
-const endDate = new Date('2025-01-08T18:00:00')
+function isSameDay(dateStr: string, target: Date) {
+  const d = new Date(dateStr)
+  return (
+    d.getFullYear() === target.getFullYear() &&
+    d.getMonth() === target.getMonth() &&
+    d.getDate() === target.getDate()
+  )
+}
 
-// 工單資料，假的，先預覽用
+function isSameMonth(dateStr: string, target: Date) {
+  const d = new Date(dateStr)
+  return d.getFullYear() === target.getFullYear() && d.getMonth() === target.getMonth()
+}
+
+// 亂數時間（今天前後 2 天）
+const startDate = new Date()
+startDate.setDate(startDate.getDate() - 2)
+startDate.setHours(8, 0, 0, 0)
+
+const endDate = new Date()
+endDate.setDate(endDate.getDate() + 2)
+endDate.setHours(18, 0, 0, 0)
+
+// 工單資料
 const orders = ref<Order[]>([
   {
     id: 'W-2025-001',
@@ -119,30 +140,53 @@ const orders = ref<Order[]>([
   },
 ])
 
-// 隨機生成時間並排序 (由新到舊)
+// 亂數時間
 orders.value.forEach((order) => (order.time = randomDate(startDate, endDate)))
+
+// 亂數狀態
+const statusPool: OrderStatus[] = ['進行中', '待確認', '已完成'] as const
+
+orders.value.forEach((order) => {
+  const status = statusPool[Math.floor(Math.random() * statusPool.length)] as OrderStatus
+  order.status = status
+  order.statusColor = statusColors[status]
+})
+
+// 排序
 orders.value.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
 watch(
   selectedOrder,
   (order) => {
-    if (order) {
-      order.statusColor = statusColors[order.status]
-    }
+    if (order) order.statusColor = statusColors[order.status]
   },
   { immediate: true, deep: true },
 )
 
+// 統計卡片邏輯
+// 待確認
 const waitingCount = computed(() =>
   orders.value.filter((order) => order.status === '待確認').length.toString(),
 )
 
-// 統計卡片
+// 今日預約
+const todayOrderCount = computed(() => {
+  const today = new Date()
+  return orders.value.filter((order) => isSameDay(order.time, today)).length.toString()
+})
+
+// 本月完成
+const monthCompletedCount = computed(() => {
+  const now = new Date()
+  return orders.value
+    .filter((order) => order.status === '已完成' && isSameMonth(order.time, now))
+    .length.toString()
+})
+
 const stats = computed<Status[]>(() => [
-  { label: '今日預約', value: '8', icon: '📅', color: 'bg-slate-200' },
-  { label: '待處理工單', value: waitingCount.value, icon: '📋', color: 'bg-green-200' },
-  { label: '本月完成', value: '156', icon: '📈', color: 'bg-amber-200' },
-  { label: '平均處理時間', value: '2.5h', icon: '⏱️', color: 'bg-sky-200' },
+  { label: '今日預約', value: todayOrderCount.value, icon: '📅', color: 'bg-slate-200' },
+  { label: '待確認工單', value: waitingCount.value, icon: '📋', color: 'bg-green-200' },
+  { label: '本月完成', value: monthCompletedCount.value, icon: '📈', color: 'bg-amber-200' },
 ])
 </script>
 
@@ -153,7 +197,7 @@ const stats = computed<Status[]>(() => [
   </div>
 
   <!-- 統計卡片 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+  <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6 mb-10">
     <div
       v-for="item in stats"
       :key="item.label"
@@ -188,9 +232,9 @@ const stats = computed<Status[]>(() => [
       </div>
       <div class="flex items-center gap-4">
         <span class="text-slate-400 text-sm">{{ order.time }}</span>
-        <span class="px-4 py-1 rounded-full text-sm" :class="order.statusColor">{{
-          order.status
-        }}</span>
+        <span class="px-4 py-1 rounded-full text-sm" :class="order.statusColor">
+          {{ order.status }}
+        </span>
       </div>
     </div>
   </section>
@@ -215,9 +259,9 @@ const stats = computed<Status[]>(() => [
         <p><strong>預約時間：</strong>{{ selectedOrder?.time }}</p>
         <p>
           <strong>狀態：</strong>
-          <span class="px-4 py-1 rounded-full text-sm" :class="selectedOrder?.statusColor">{{
-            selectedOrder?.status
-          }}</span>
+          <span class="px-4 py-1 rounded-full text-sm" :class="selectedOrder?.statusColor">
+            {{ selectedOrder?.status }}
+          </span>
         </p>
       </div>
 
