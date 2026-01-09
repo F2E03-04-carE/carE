@@ -10,9 +10,11 @@ import { playwright } from '@vitest/browser-playwright';
 const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
+const isStorybook = process.env.npm_lifecycle_event === 'storybook' ||
+                    process.env.npm_lifecycle_event === 'build-storybook';
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [vue(), !isStorybook && vueDevTools(), tailwindcss()].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
