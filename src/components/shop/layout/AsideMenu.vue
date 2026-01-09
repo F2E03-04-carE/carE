@@ -28,8 +28,8 @@ const activeTab = computed(() => route.path)
       </button>
 
       <button
-        @click="goPage('/work-orders')"
-        :class="activeTab === '/work-orders' && 'font-bold bg-[#7B8FA1] text-white'"
+        @click="goPage('/orders')"
+        :class="activeTab === '/orders' && 'font-bold bg-[#7B8FA1] text-white'"
         class="py-3 rounded cursor-pointer hover:bg-slate-300"
       >
         📅 工單管理
@@ -52,8 +52,8 @@ const activeTab = computed(() => route.path)
       </button>
 
       <button
-        @click="goPage('/facilityInfo')"
-        :class="activeTab === '/facilityInfo' && 'font-bold bg-[#7B8FA1] text-white'"
+        @click="goPage('/edit')"
+        :class="activeTab === '/facility' && 'font-bold bg-[#7B8FA1] text-white'"
         class="py-3 rounded cursor-pointer hover:bg-slate-300"
       >
         ⏱️ 廠房資訊
