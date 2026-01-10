@@ -4,7 +4,7 @@
     <section
       class="text-center bg-[url(https://picsum.photos/id/605/1200/900)] bg-no-repeat bg-center bg-cover"
     >
-      <div class="mask flex flex-col justify-center items-center py-10 bg-[#f2f1eedd]">
+      <div class="mask flex flex-col justify-center items-center py-20 bg-[#f2f1eedd]">
         <h1 class="text-[36px] text-[#4a4a43] font-black">carE 汽車維修預約平台</h1>
         <h2 class="text-[28px] text-[#4a4a43] font-bold">尋找專業的汽車維修服務</h2>
         <h3 class="mb-[50px] text-[20px] text-[#8a8a7d] font-normal">
@@ -14,7 +14,7 @@
         <form
           action=""
           method="get"
-          class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px]"
+          class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px] font-bold"
         >
           <div class="w-full lg:w-[25%]">
             <label
@@ -133,12 +133,12 @@
         </form>
         <!-- 六大常見搜尋主題 -->
         <!-- TODO: button 待加 click event function -->
-        <h3 class="mt-[50px] text-[24px] text-[#4a4a43] font-bold">六大熱門搜尋主題</h3>
+        <h3 class="mt-[50px] text-[24px] text-[#4a4a43] pb-5 font-bold">六大熱門搜尋主題</h3>
         <div
           class="flex flex-row flex-wrap lg:flex-nowrap justify-evenly items-center w-full mt-[5%] lg:mt-[0%]"
         >
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> handyman </span>
@@ -146,7 +146,7 @@
             </p>
           </button>
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> directions_car </span>
@@ -154,7 +154,7 @@
             </p>
           </button>
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> build </span>
@@ -162,7 +162,7 @@
             </p>
           </button>
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> fragrance </span>
@@ -170,7 +170,7 @@
             </p>
           </button>
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> adjust </span>
@@ -178,7 +178,7 @@
             </p>
           </button>
           <button
-            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] rounded-[1000px] cursor-pointer"
+            class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
               <span class="six-theme-icon material-symbols-outlined"> car_crash </span>

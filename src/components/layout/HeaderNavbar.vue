@@ -38,7 +38,7 @@ const closeRegister = () => {
           <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
           <span class="text-[20px] sm:text-[24px] font-bold text-[#4a4a43]">carE</span>
         </a>
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-2 sm:gap-3 font-extrabold">
           <button
             @click="openLoginModal"
             :class="[
