@@ -35,73 +35,98 @@ const onSave = () => {
 </script>
 
 <template>
-  <!-- 廠房名稱 -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">廠房名稱</label>
-    <input
-      v-model="form.name"
-      :disabled="!isEditing"
-      class="w-full rounded-xl px-4 py-3 border-0 bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-    />
-  </div>
-
-  <!-- 電話 / 地址 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="space-y-6">
+    <!-- 廠房名稱 -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">聯絡電話</label>
+      <label class="block text-sm font-medium text-[#4a4a43] mb-2">廠房名稱</label>
       <input
-        v-model="form.phone"
+        v-model="form.name"
         :disabled="!isEditing"
-        class="w-full rounded-xl px-4 py-3 border-0 bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+        :class="[
+          'w-full rounded-2xl px-4 py-3 outline-none transition',
+          isEditing
+            ? 'bg-[#f5f4f0] text-[#4a4a43] border border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a] shadow-sm'
+            : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed',
+        ]"
       />
     </div>
 
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">廠房地址</label>
-      <input
-        v-model="form.address"
-        :disabled="!isEditing"
-        class="w-full rounded-xl px-4 py-3 border-0 bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-      />
+    <!-- 電話 / 地址 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-[#4a4a43] mb-2">聯絡電話</label>
+        <input
+          v-model="form.phone"
+          :disabled="!isEditing"
+          :class="[
+            'w-full rounded-2xl px-4 py-3 outline-none transition',
+            isEditing
+              ? 'bg-[#f5f4f0] text-[#4a4a43] border border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a] shadow-sm'
+              : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed',
+          ]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-[#4a4a43] mb-2">廠房地址</label>
+        <input
+          v-model="form.address"
+          :disabled="!isEditing"
+          :class="[
+            'w-full rounded-2xl px-4 py-3 outline-none transition',
+            isEditing
+              ? 'bg-[#f5f4f0] text-[#4a4a43] border border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a] shadow-sm'
+              : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed',
+          ]"
+        />
+      </div>
     </div>
-  </div>
 
-  <!-- 簡介 -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">廠房簡介</label>
-    <textarea
-      v-model="form.description"
-      :disabled="!isEditing"
-      rows="4"
-      class="w-full rounded-xl px-4 py-3 border-0 bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-    />
-    <p class="text-xs text-gray-400 mt-2">建議輸入您的專業特色、服務項目、經驗年資等資訊</p>
-  </div>
+    <!-- 簡介 -->
+    <div>
+      <label class="block text-sm font-medium text-[#4a4a43] mb-2">廠房簡介</label>
+      <textarea
+        v-model="form.description"
+        :disabled="!isEditing"
+        rows="4"
+        :class="[
+          'w-full rounded-2xl px-4 py-3 outline-none transition',
+          isEditing
+            ? 'bg-[#f5f4f0] text-[#4a4a43] border border-[#6b6b5a] focus:ring-2 focus:ring-[#6b6b5a] shadow-sm'
+            : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed',
+        ]"
+      />
+      <p class="text-xs mt-2" :class="isEditing ? 'text-[#8a8a7d]' : 'text-[#b0afa4]'">
+        建議輸入您的專業特色、服務項目、經驗年資等資訊
+      </p>
+    </div>
 
-  <div class="flex justify-end gap-3 pt-4">
-    <!-- 檢視模式 -->
-    <button
-      v-if="!isEditing"
-      @click="onEdit"
-      class="px-6 py-2 rounded-xl bg-yellow-400 text-black font-medium cursor-pointer hover:bg-yellow-300 transition"
-    >
-      編輯
-    </button>
-
-    <!-- 編輯模式 -->
-    <template v-else>
+    <!-- 按鈕 -->
+    <div class="flex justify-end gap-3 pt-4">
+      <!-- 檢視模式 -->
       <button
-        @click="onCancel"
-        class="px-6 py-2 rounded-xl border text-gray-600 cursor-pointer hover:bg-gray-50 transition"
+        v-if="!isEditing"
+        @click="onEdit"
+        class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white font-medium cursor-pointer hover:bg-[#57574a] transition"
       >
-        取消
+        編輯
       </button>
-      <button
-        @click="onSave"
-        class="px-6 py-2 rounded-xl bg-emerald-600 text-white cursor-pointer hover:bg-emerald-500 transition"
-      >
-        儲存變更
-      </button>
-    </template>
+
+      <!-- 編輯模式 -->
+      <template v-else>
+        <button
+          @click="onCancel"
+          class="px-6 py-2 rounded-2xl border border-[#6b6b5a] text-[#4a4a43] cursor-pointer hover:bg-[#e6e5df] transition"
+        >
+          取消
+        </button>
+        <button
+          @click="onSave"
+          class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white cursor-pointer hover:bg-[#57574a] transition"
+        >
+          儲存變更
+        </button>
+      </template>
+    </div>
   </div>
 </template>

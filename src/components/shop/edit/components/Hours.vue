@@ -31,91 +31,96 @@ const onCancel = () => {
 }
 
 const onSave = () => {
-  // TODO: 串接 API 儲存
   initialDays.splice(0, initialDays.length, ...days.value.map((d) => ({ ...d })))
   isEditing.value = false
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-lg font-medium flex items-center gap-2">⏰ 營業時間設定</h2>
+  <div class="space-y-6">
+    <!-- 標題與按鈕 -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-medium text-[#4a4a43] flex items-center gap-2">⏰ 營業時間設定</h2>
 
-    <div class="flex gap-3">
-      <button
-        v-if="!isEditing"
-        @click="onEdit"
-        class="px-5 py-2 rounded-xl bg-yellow-400 text-black font-medium cursor-pointer hover:bg-yellow-300 transition"
-      >
-        編輯
-      </button>
+      <div class="flex gap-3">
+        <button
+          v-if="!isEditing"
+          @click="onEdit"
+          class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white font-medium cursor-pointer hover:bg-[#57574a] transition"
+        >
+          編輯
+        </button>
 
-      <template v-else>
-        <button
-          @click="onCancel"
-          class="px-5 py-2 rounded-xl border text-gray-600 cursor-pointer hover:bg-gray-50 transition"
-        >
-          取消
-        </button>
-        <button
-          @click="onSave"
-          class="px-5 py-2 rounded-xl bg-emerald-600 text-white cursor-pointer hover:bg-emerald-500 transition"
-        >
-          儲存變更
-        </button>
-      </template>
+        <template v-else>
+          <button
+            @click="onCancel"
+            class="px-6 py-2 rounded-2xl border border-[#6b6b5a] text-[#4a4a43] cursor-pointer hover:bg-[#e6e5df] transition"
+          >
+            取消
+          </button>
+          <button
+            @click="onSave"
+            class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white cursor-pointer hover:bg-[#57574a] transition"
+          >
+            儲存變更
+          </button>
+        </template>
+      </div>
     </div>
-  </div>
 
-  <!-- 一周七日 v-for -->
-  <div class="space-y-4">
-    <div
-      v-for="day in days"
-      :key="day.day"
-      class="flex items-center justify-between rounded-xl px-6 py-4 bg-gray-100"
-    >
-      <!-- 星期 -->
-      <div class="flex items-center gap-4">
-        <input
-          type="checkbox"
-          v-model="day.enabled"
-          :disabled="!isEditing"
-          class="cursor-pointer disabled:cursor-not-allowed"
-        />
-        <span :class="['font-medium', !isEditing && 'text-gray-400']">
-          {{ day.day }}
-        </span>
-      </div>
-
-      <!-- 營業時間 -->
+    <!-- 一周七日 -->
+    <div class="space-y-4">
       <div
-        v-if="day.enabled"
-        class="flex items-center gap-3 text-sm px-4 py-2 rounded-xl transition"
-        :class="
-          isEditing
-            ? 'bg-white ring-2 ring-emerald-500 shadow-sm'
-            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-        "
+        v-for="(day, index) in days"
+        :key="day.day"
+        class="flex items-center justify-between rounded-2xl px-6 py-4 bg-[#f5f4f0] border border-[#e0dfd6] min-h-[56px]"
       >
-        <!-- 時間調整 -->
-        <input
-          type="time"
-          v-model="day.start"
-          :disabled="!isEditing"
-          class="rounded-lg px-2 py-1 disabled:text-gray-400 disabled:cursor-not-allowed"
-        />
-        <span>至</span>
-        <input
-          type="time"
-          v-model="day.end"
-          :disabled="!isEditing"
-          class="rounded-lg px-2 py-1 disabled:text-gray-400 disabled:cursor-not-allowed"
-        />
-      </div>
+        <!-- 星期 + checkbox (label) -->
+        <label
+          class="flex items-center gap-4"
+          :class="isEditing ? 'cursor-pointer' : 'cursor-not-allowed'"
+        >
+          <input
+            type="checkbox"
+            :id="'day-' + index"
+            v-model="day.enabled"
+            :disabled="!isEditing"
+            class="cursor-pointer disabled:cursor-not-allowed"
+          />
+          <span :class="['font-medium', !isEditing && 'text-[#8a8a7d]']">{{ day.day }}</span>
+        </label>
 
-      <span v-else class="text-sm" :class="isEditing ? 'text-gray-500' : 'text-gray-400'">
-        公休
-      </span>
+        <!-- 營業時間 / 公休 -->
+        <div
+          class="flex items-center gap-3 px-4 py-2 rounded-2xl transition justify-center"
+          :class="
+            day.enabled
+              ? isEditing
+                ? 'bg-white ring-2 ring-[#6b6b5a] shadow-sm'
+                : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed'
+              : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed'
+          "
+        >
+          <template v-if="day.enabled">
+            <input
+              type="time"
+              v-model="day.start"
+              :disabled="!isEditing"
+              class="rounded-2xl px-3 outline-none disabled:text-[#8a8a7d] disabled:cursor-not-allowed flex-1"
+            />
+            <span>至</span>
+            <input
+              type="time"
+              v-model="day.end"
+              :disabled="!isEditing"
+              class="rounded-2xl px-3 outline-none disabled:text-[#8a8a7d] disabled:cursor-not-allowed flex-1"
+            />
+          </template>
+          <template v-else>
+            <span>公休</span>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>
