@@ -203,8 +203,6 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] text-[#2F2E2A]">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 		<main class="container mx-auto max-w-6xl px-4 py-8">
 			<div class="mb-8">
 				<div class="flex flex-wrap gap-3">
