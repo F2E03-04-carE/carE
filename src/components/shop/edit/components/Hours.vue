@@ -38,11 +38,9 @@ const onSave = () => {
 </script>
 
 <template>
-  <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-lg font-medium flex items-center gap-2">⏰ 營業時間設定</h2>
 
-    <!-- Buttons -->
     <div class="flex gap-3">
       <button
         v-if="!isEditing"
@@ -69,14 +67,14 @@ const onSave = () => {
     </div>
   </div>
 
-  <!-- Days -->
+  <!-- 一周七日 v-for -->
   <div class="space-y-4">
     <div
       v-for="day in days"
       :key="day.day"
       class="flex items-center justify-between rounded-xl px-6 py-4 bg-gray-100"
     >
-      <!-- Day + Toggle -->
+      <!-- 星期 -->
       <div class="flex items-center gap-4">
         <input
           type="checkbox"
@@ -89,7 +87,7 @@ const onSave = () => {
         </span>
       </div>
 
-      <!-- Time Range -->
+      <!-- 營業時間 -->
       <div
         v-if="day.enabled"
         class="flex items-center gap-3 text-sm px-4 py-2 rounded-xl transition"
@@ -99,6 +97,7 @@ const onSave = () => {
             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
         "
       >
+        <!-- 時間調整 -->
         <input
           type="time"
           v-model="day.start"
@@ -114,7 +113,6 @@ const onSave = () => {
         />
       </div>
 
-      <!-- Closed -->
       <span v-else class="text-sm" :class="isEditing ? 'text-gray-500' : 'text-gray-400'">
         公休
       </span>

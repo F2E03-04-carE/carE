@@ -98,6 +98,7 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
       />
     </div>
 
+    <!-- 客戶基本資料（姓名、電話、車型） -->
     <div
       v-for="owner in filteredOwners"
       :key="owner.id"
@@ -110,6 +111,7 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
         </div>
       </div>
 
+      <!-- tab 切換 -->
       <div class="px-6 py-4">
         <div class="flex bg-gray-200 rounded-full p-1">
           <button
@@ -129,6 +131,7 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
         </div>
       </div>
 
+      <!-- 維修歷程（點選對應 tab 後） -->
       <div v-show="getTab(owner.id) === 'records'" class="px-6 pb-6 space-y-4">
         <div
           v-for="record in owner.records"
@@ -144,6 +147,7 @@ const inactiveTabClass = 'text-gray-500 hover:text-gray-700'
         </div>
       </div>
 
+      <!-- 統計資訊（點選對應 tab 後） -->
       <div
         v-show="getTab(owner.id) === 'stats'"
         class="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"

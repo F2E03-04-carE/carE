@@ -32,14 +32,14 @@ const onFileChange = (event: Event) => {
   input.value = ''
 }
 
-/* 刪除圖片 */
+// 刪除圖片
 const removePhoto = (index: number) => {
   URL.revokeObjectURL(previews.value[index])
   previews.value.splice(index, 1)
   files.value.splice(index, 1)
 }
 
-/* 提交表單 */
+// 提交表單
 const submitPhotos = () => {
   if (files.value.length === 0) {
     alert('請至少上傳一張廠房照片')
@@ -55,17 +55,16 @@ const submitPhotos = () => {
   alert('照片已成功送出')
 }
 
-/* 清除預覽記憶體 */
+// 清除預覽記憶體
 onBeforeUnmount(() => {
   previews.value.forEach((url) => URL.revokeObjectURL(url))
 })
 </script>
 
 <template>
-  <!-- Header -->
   <h2 class="text-lg font-medium mb-6 flex items-center gap-2 shrink-0">🖼 廠房照片</h2>
 
-  <!-- hidden input -->
+  <!-- 隱藏的上傳 input tag -->
   <input
     ref="fileInputRef"
     type="file"
@@ -75,7 +74,7 @@ onBeforeUnmount(() => {
     @change="onFileChange"
   />
 
-  <!-- Upload Area（固定高度） -->
+  <!-- 上傳功能觸發區 -->
   <div
     class="border-2 border-dashed border-gray-300 rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-50 transition shrink-0"
     @click="triggerUpload"
@@ -85,7 +84,6 @@ onBeforeUnmount(() => {
     <p class="text-sm mt-1">支援 JPG、PNG 格式，最多 3 張</p>
   </div>
 
-  <!-- Preview Area（唯一可滾動區域） -->
   <div class="flex-1 overflow-y-auto mt-6 mb-6 pr-2">
     <div class="grid grid-cols-3 gap-6">
       <div
@@ -95,7 +93,6 @@ onBeforeUnmount(() => {
       >
         <img :src="preview" class="w-full h-full object-cover" alt="preview" />
 
-        <!-- Remove -->
         <button
           class="absolute top-2 right-2 bg-black/60 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
           @click.stop="removePhoto(index)"
@@ -104,7 +101,7 @@ onBeforeUnmount(() => {
         </button>
       </div>
 
-      <!-- Empty slots -->
+      <!-- 預覽窗 -->
       <div
         v-for="n in 3 - previews.length"
         :key="'empty-' + n"
@@ -115,7 +112,6 @@ onBeforeUnmount(() => {
     </div>
   </div>
 
-  <!-- Actions（固定底部） -->
   <div class="flex justify-end shrink-0">
     <button
       class="px-6 py-2 rounded-xl bg-emerald-600 text-white cursor-pointer disabled:opacity-50"

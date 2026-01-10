@@ -26,11 +26,10 @@ const goTab = (path: string) => {
 
 <template>
   <div class="bg-gray-50 w-full">
-    <!-- Header -->
     <h1 class="text-2xl font-semibold text-gray-800 mb-1">廠房資訊</h1>
     <p class="text-gray-500 mb-6">管理維修廠的基本資訊與設定</p>
 
-    <!-- Tabs -->
+    <!-- tab -->
     <div class="flex bg-gray-200 rounded-full p-1 mb-8 w-full">
       <button
         v-for="tab in tabs"
@@ -43,7 +42,6 @@ const goTab = (path: string) => {
       </button>
     </div>
 
-    <!-- Content -->
     <div class="bg-white rounded-2xl p-8 shadow-sm">
       <div class="space-y-6">
         <router-view />
