@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 interface Order {
   id: string
@@ -12,9 +12,9 @@ interface Order {
     model: string
     service: string
   }
-  date: string // 預約日期
-  time: string // 預約時間
-  requestTime: string // 提出申請時間
+  date: string
+  time: string
+  requestTime: string
 }
 
 const keyword = ref('')
@@ -50,7 +50,7 @@ const orders = ref<Order[]>([
   },
 ])
 
-// 狀態顏色對應（列表標籤）
+// 狀態顏色對應
 const statusColors = {
   進行中: 'bg-green-400 text-white',
   待確認: 'bg-amber-400 text-white',
@@ -59,10 +59,27 @@ const statusColors = {
 
 const statusClass = (status: Order['status']) => statusColors[status] || 'bg-gray-400 text-white'
 
+// 🔍 搜尋過濾（只影響資料，不影響 UI）
+const filteredOrders = computed(() => {
+  if (!keyword.value.trim()) return orders.value
+
+  const k = keyword.value.toLowerCase()
+
+  return orders.value.filter((order) => {
+    return (
+      order.id.toLowerCase().includes(k) ||
+      order.customer.name.toLowerCase().includes(k) ||
+      order.customer.phone.includes(k) ||
+      order.vehicle.model.toLowerCase().includes(k) ||
+      order.vehicle.service.toLowerCase().includes(k)
+    )
+  })
+})
+
 // 浮窗控制
 const showDetailModal = ref(false)
 const selectedOrder = ref<Order | null>(null)
-const tempStatus = ref<Order['status']>('待確認') // 浮窗暫存狀態
+const tempStatus = ref<Order['status']>('待確認')
 
 const openModal = (order: Order) => {
   selectedOrder.value = order
@@ -75,7 +92,6 @@ const closeModal = () => {
   selectedOrder.value = null
 }
 
-// 儲存浮窗狀態變更
 const saveStatus = () => {
   if (selectedOrder.value) {
     selectedOrder.value.status = tempStatus.value
@@ -118,7 +134,7 @@ const saveStatus = () => {
   <!-- 工單列表 -->
   <div class="space-y-6">
     <div
-      v-for="order in orders"
+      v-for="order in filteredOrders"
       :key="order.id"
       class="rounded-2xl border border-[#6b6b5a]/20 bg-[#f5f4f0] p-8 shadow-right-md"
     >
@@ -226,7 +242,7 @@ const saveStatus = () => {
           </div>
         </div>
 
-        <!-- 工單資訊（可編輯狀態） -->
+        <!-- 工單資訊 -->
         <div class="rounded-xl bg-white p-5">
           <p class="mb-3 text-sm font-medium text-[#8a8a7d]">工單資訊</p>
           <div class="grid grid-cols-2 gap-4 text-[#4a4a43]">
@@ -261,7 +277,6 @@ const saveStatus = () => {
         </div>
       </div>
 
-      <!-- 按鈕 -->
       <div class="mt-8 flex justify-end gap-3">
         <button
           class="rounded-xl border border-[#4a4a43] px-6 py-3 text-[#4a4a43] hover:bg-[#f5f4f0] cursor-pointer"
