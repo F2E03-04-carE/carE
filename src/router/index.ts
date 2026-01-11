@@ -21,21 +21,21 @@ const router = createRouter({
         {
           path: 'orders',
           name: 'orders',
-          component: () => import('@/components/shop/Orders.vue'),
+          component: () => import('@/components/shop/OrdersView.vue'),
         },
         {
           path: 'schedule',
           name: 'schedule',
-          component: () => import('@/components/shop/Schedule.vue'),
+          component: () => import('@/components/shop/ScheduleView.vue'),
         },
         {
           path: 'records',
           name: 'records',
-          component: () => import('@/components/shop/Records.vue'),
+          component: () => import('@/components/shop/RecordsView.vue'),
         },
         {
           path: 'edit',
-          component: () => import('@/components/shop/edit/Edit.vue'),
+          component: () => import('@/components/shop/edit/EditView.vue'),
           children: [
             {
               path: '',
@@ -61,7 +61,7 @@ const router = createRouter({
         {
           path: 'billing',
           name: 'billing',
-          component: () => import('@/components/shop/Billing.vue'),
+          component: () => import('@/components/shop/BillingView.vue'),
         },
       ],
     },
