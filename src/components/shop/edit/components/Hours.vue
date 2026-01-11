@@ -18,7 +18,7 @@ const initialDays: DaySetting[] = [
   { day: '週日', enabled: true, start: '09:00', end: '18:00' },
 ]
 
-const days = ref<DaySetting[]>(initialDays.map((d) => ({ ...d })))
+const days = ref<DaySetting[]>(initialDays.map((day) => ({ ...day })))
 const isEditing = ref(false)
 
 const onEdit = () => {
@@ -26,12 +26,12 @@ const onEdit = () => {
 }
 
 const onCancel = () => {
-  days.value = initialDays.map((d) => ({ ...d }))
+  days.value = initialDays.map((day) => ({ ...day }))
   isEditing.value = false
 }
 
 const onSave = () => {
-  initialDays.splice(0, initialDays.length, ...days.value.map((d) => ({ ...d })))
+  initialDays.splice(0, initialDays.length, ...days.value.map((day) => ({ ...day })))
   isEditing.value = false
 }
 </script>

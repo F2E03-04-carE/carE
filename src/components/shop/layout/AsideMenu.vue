@@ -11,7 +11,8 @@ const goPage = (path: string) => {
   }
 }
 
-const activeTab = computed(() => route.path)
+// startsWith 用以支援子路由，特別是 edit/<childPath>
+const activeTab = (path: string) => route.path.startsWith(path)
 </script>
 
 <template>
@@ -23,7 +24,7 @@ const activeTab = computed(() => route.path)
     <nav class="flex flex-col px-3 gap-4">
       <button
         @click="goPage('/overview')"
-        :class="activeTab === '/overview' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/overview') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         🔍 總覽
@@ -31,7 +32,7 @@ const activeTab = computed(() => route.path)
 
       <button
         @click="goPage('/orders')"
-        :class="activeTab === '/orders' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/orders') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         📅 工單管理
@@ -39,7 +40,7 @@ const activeTab = computed(() => route.path)
 
       <button
         @click="goPage('/schedule')"
-        :class="activeTab === '/schedule' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/schedule') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         📋 行程安排
@@ -47,7 +48,7 @@ const activeTab = computed(() => route.path)
 
       <button
         @click="goPage('/records')"
-        :class="activeTab === '/records' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/records') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         📈 維修紀錄
@@ -55,7 +56,7 @@ const activeTab = computed(() => route.path)
 
       <button
         @click="goPage('/edit')"
-        :class="activeTab === '/facility' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/edit') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         ⏱️ 廠房資訊
@@ -63,7 +64,7 @@ const activeTab = computed(() => route.path)
 
       <button
         @click="goPage('/billing')"
-        :class="activeTab === '/billing' ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
+        :class="activeTab('/billing') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
       >
         💳 付費訂閱

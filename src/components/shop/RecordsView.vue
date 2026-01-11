@@ -9,7 +9,7 @@ type RecordItem = {
   price: number
 }
 
-type Owner = {
+type CarOwner = {
   id: number
   name: string
   phone: string
@@ -20,7 +20,7 @@ type Owner = {
 const keyword = ref('')
 
 // 假資料
-const owners = reactive<Owner[]>([
+const carOwners = reactive<CarOwner[]>([
   {
     id: 1,
     name: '王小明',
@@ -48,14 +48,17 @@ const setTab = (id: number, tab: 'records' | 'stats') => {
   activeTabs[id] = tab
 }
 
-const filteredOwners = computed(() => {
-  if (!keyword.value) return owners
-  return owners.filter((owner) => `${owner.name}${owner.phone}${owner.car}`.includes(keyword.value))
+const filteredCarOwners = computed(() => {
+  if (!keyword.value) return carOwners
+  return carOwners.filter((carOwner) =>
+    `${carOwner.name}${carOwner.phone}${carOwner.car}`.includes(keyword.value),
+  )
 })
 
-const totalPrice = (owner: Owner) => owner.records.reduce((sum, r) => sum + r.price, 0)
-const lastRepairDate = (owner: Owner) =>
-  owner.records.slice().sort((a, b) => b.date.localeCompare(a.date))[0]?.date ?? '-'
+const totalPrice = (carOwner: CarOwner) =>
+  carOwner.records.reduce((sum, record) => sum + record.price, 0)
+const lastRepairDate = (carOwner: CarOwner) =>
+  carOwner.records.slice().sort((a, b) => b.date.localeCompare(a.date))[0]?.date ?? '-'
 </script>
 
 <template>
@@ -93,15 +96,15 @@ const lastRepairDate = (owner: Owner) =>
 
     <!-- 客戶卡片 -->
     <div
-      v-for="owner in filteredOwners"
-      :key="owner.id"
+      v-for="carOwner in filteredCarOwners"
+      :key="carOwner.id"
       class="bg-white rounded-2xl shadow overflow-hidden"
     >
       <!-- 客戶基本資料 -->
       <div class="px-6 py-4 bg-[#f5f4f0]">
         <div>
-          <div class="font-semibold text-[#4a4a43]">{{ owner.name }}</div>
-          <div class="text-sm text-[#8a8a7d]">{{ owner.phone }} ・ {{ owner.car }}</div>
+          <div class="font-semibold text-[#4a4a43]">{{ carOwner.name }}</div>
+          <div class="text-sm text-[#8a8a7d]">{{ carOwner.phone }} ・ {{ carOwner.car }}</div>
         </div>
       </div>
 
@@ -111,22 +114,22 @@ const lastRepairDate = (owner: Owner) =>
           <button
             class="flex-1 py-2 rounded-full text-sm font-medium cursor-pointer"
             :class="
-              getTab(owner.id) === 'records'
+              getTab(carOwner.id) === 'records'
                 ? 'bg-[#6b6b5a] text-white shadow'
                 : 'bg-[#f5f4f0] text-[#4a4a43] hover:bg-[#e3e2dc]'
             "
-            @click="setTab(owner.id, 'records')"
+            @click="setTab(carOwner.id, 'records')"
           >
             維修歷程
           </button>
           <button
             class="flex-1 py-2 rounded-full text-sm font-medium cursor-pointer"
             :class="
-              getTab(owner.id) === 'stats'
+              getTab(carOwner.id) === 'stats'
                 ? 'bg-[#6b6b5a] text-white shadow'
                 : 'bg-[#f5f4f0] text-[#4a4a43] hover:bg-[#e3e2dc]'
             "
-            @click="setTab(owner.id, 'stats')"
+            @click="setTab(carOwner.id, 'stats')"
           >
             統計資訊
           </button>
@@ -134,9 +137,9 @@ const lastRepairDate = (owner: Owner) =>
       </div>
 
       <!-- 維修歷程 -->
-      <div v-show="getTab(owner.id) === 'records'" class="px-6 pb-6 space-y-4">
+      <div v-show="getTab(carOwner.id) === 'records'" class="px-6 pb-6 space-y-4">
         <div
-          v-for="record in owner.records"
+          v-for="record in carOwner.records"
           :key="record.id"
           class="flex justify-between bg-[#f5f4f0] rounded-xl p-4"
         >
@@ -151,22 +154,22 @@ const lastRepairDate = (owner: Owner) =>
 
       <!-- 統計資訊 -->
       <div
-        v-show="getTab(owner.id) === 'stats'"
+        v-show="getTab(carOwner.id) === 'stats'"
         class="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div class="bg-[#f5f4f0] rounded-xl p-4">
           <div class="text-sm text-[#8a8a7d]">總維修次數</div>
-          <div class="text-2xl font-semibold text-[#4a4a43]">{{ owner.records.length }}</div>
+          <div class="text-2xl font-semibold text-[#4a4a43]">{{ carOwner.records.length }}</div>
         </div>
         <div class="bg-[#f5f4f0] rounded-xl p-4">
           <div class="text-sm text-[#8a8a7d]">總消費金額</div>
           <div class="text-2xl font-semibold text-[#4a4a43]">
-            NT${{ totalPrice(owner).toLocaleString() }}
+            NT${{ totalPrice(carOwner).toLocaleString() }}
           </div>
         </div>
         <div class="bg-[#f5f4f0] rounded-xl p-4">
           <div class="text-sm text-[#8a8a7d]">最近維修</div>
-          <div class="text-2xl font-semibold text-[#4a4a43]">{{ lastRepairDate(owner) }}</div>
+          <div class="text-2xl font-semibold text-[#4a4a43]">{{ lastRepairDate(carOwner) }}</div>
         </div>
       </div>
     </div>
