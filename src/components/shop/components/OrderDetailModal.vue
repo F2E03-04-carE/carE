@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Order, OrderStatus } from './OrderTypeDefine'
-import { statusClass } from './OrderStatus'
+import type { Order, OrderStatus } from './orderTypeDefine'
+import { statusClass } from './orderStatus'
 
 const props = defineProps<{
   modelValue: boolean

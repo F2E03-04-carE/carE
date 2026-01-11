@@ -1,4 +1,4 @@
-import type { OrderStatus } from './OrderTypeDefine'
+import type { OrderStatus } from './orderTypeDefine'
 
 export const statusColors: Record<OrderStatus, string> = {
   進行中: 'bg-green-400 text-white',
