@@ -47,23 +47,23 @@ const calendarOptions = ref<CalendarOptions>({
 </template>
 
 <style scoped>
-::v-deep(.fc .fc-button) {
+:deep(.fc .fc-button) {
   background-color: #6b6b5a;
   border-color: #6b6b5a;
   color: #ffffff;
 }
 
-::v-deep(.fc .fc-button:hover) {
+:deep(.fc .fc-button:hover) {
   background-color: #5f5f4f;
   border-color: #5f5f4f;
 }
 
-::v-deep(.fc .fc-button.fc-button-active) {
+:deep(.fc .fc-button.fc-button-active) {
   background-color: #4f4f40;
   border-color: #4f4f40;
 }
 
-::v-deep(.fc .fc-today-button:disabled) {
+:deep(.fc .fc-today-button:disabled) {
   opacity: 0.6;
 }
 </style>
