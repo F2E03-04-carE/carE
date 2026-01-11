@@ -77,20 +77,26 @@ const onSave = () => {
         :key="day.day"
         class="flex items-center justify-between rounded-2xl px-6 py-4 bg-[#f5f4f0] border border-[#e0dfd6] min-h-[56px]"
       >
-        <!-- 星期 + checkbox (label) -->
-        <label
-          class="flex items-center gap-4"
-          :class="isEditing ? 'cursor-pointer' : 'cursor-not-allowed'"
-        >
-          <input
-            type="checkbox"
-            :id="'day-' + index"
-            v-model="day.enabled"
-            :disabled="!isEditing"
-            class="cursor-pointer disabled:cursor-not-allowed"
-          />
+        <!-- 星期 + iPhone風格 toggle -->
+        <div class="flex items-center gap-4">
           <span :class="['font-medium', !isEditing && 'text-[#8a8a7d]']">{{ day.day }}</span>
-        </label>
+          <div
+            class="relative"
+            :class="[isEditing ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed']"
+            @click="isEditing && (day.enabled = !day.enabled)"
+          >
+            <!-- 背景膠囊 -->
+            <div
+              class="w-12 h-6 rounded-full transition-colors"
+              :class="day.enabled ? 'bg-[#6b6b5a]' : 'bg-[#d1d1c1]'"
+            ></div>
+            <!-- 滑塊 -->
+            <div
+              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform"
+              :class="day.enabled ? 'translate-x-6' : 'translate-x-0'"
+            ></div>
+          </div>
+        </div>
 
         <!-- 營業時間 / 公休 -->
         <div
