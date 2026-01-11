@@ -34,8 +34,10 @@ const waitingCount = computed(
 
 const monthCompletedCount = computed(
   () =>
-    orders.value.filter((order) => order.status === '已完成' && isSameMonth(order.date, today))
-      .length,
+    orders.value.filter(
+      (order) =>
+        (order.status === '已完成' || order.status === '已取車') && isSameMonth(order.date, today),
+    ).length,
 )
 
 const stats = computed(() => [
@@ -69,6 +71,7 @@ const stats = computed(() => [
     </div>
   </div>
 
+  <h2 class="text-xl font-semibold text-[#4a4a43] mb-5">近期工單</h2>
   <!-- 工單列表 -->
   <section class="space-y-6">
     <OrderCard v-for="order in orders" :key="order.id" :order="order" @open="open" />

@@ -92,6 +92,7 @@ const save = () => emit('save', tempStatus.value)
                 <option value="待確認">待確認</option>
                 <option value="進行中">進行中</option>
                 <option value="已完成">已完成</option>
+                <option value="已取車">已取車</option>
               </select>
 
               <div
@@ -104,13 +105,21 @@ const save = () => emit('save', tempStatus.value)
 
             <div>
               <p class="text-sm text-[#8a8a7d]">提出申請時間</p>
-              <p class="font-medium text-[#4a4a43]">
-                {{ order?.requestTime }}
-              </p>
+              <p class="font-medium text-[#4a4a43]">{{ order?.requestTime }}</p>
 
               <p class="text-sm text-[#8a8a7d] mt-2">預約維修時間</p>
               <p class="font-medium text-[#4a4a43]">{{ order?.date }} {{ order?.time }}</p>
             </div>
+          </div>
+
+          <!-- 客戶備註 -->
+          <div class="mt-4">
+            <p class="text-sm text-[#8a8a7d] mb-1 font-medium">備註</p>
+            <p
+              class="w-full rounded-xl bg-[#f5f4f0] p-3 text-sm text-[#4a4a43] min-h-[3rem] whitespace-pre-wrap"
+            >
+              {{ order?.note || '無' }}
+            </p>
           </div>
         </div>
       </div>
