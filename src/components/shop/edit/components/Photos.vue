@@ -48,7 +48,7 @@ onBeforeUnmount(() => {
 
 <template>
   <h2 class="text-lg font-medium mb-6 flex items-center gap-2 shrink-0 text-[#4a4a43]">
-    🖼 廠房照片
+    <span class="material-symbols-outlined"> imagesmode </span> 廠房照片
   </h2>
 
   <!-- 隱藏的上傳 input tag -->
@@ -63,10 +63,12 @@ onBeforeUnmount(() => {
 
   <!-- 上傳功能觸發區 -->
   <div
-    class="group border-2 border-dashed border-[#e0dfd6] rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-[#57574a] transition-all duration-200 shrink-0"
+    class="group border-2 border-dashed border-[#e0dfd6] rounded-2xl h-48 flex flex-col items-center justify-center text-[#4a4a43] cursor-pointer hover:bg-[#57574a] transition-all duration-200 shrink-0"
     @click="triggerUpload"
   >
-    <div class="text-4xl mb-2 group-hover:text-[#e0dfd6]">📷</div>
+    <div class="text-4xl mb-2 group-hover:text-[#e0dfd6]">
+      <span class="choose-photo-icon material-symbols-outlined"> photo_camera_back </span>
+    </div>
     <p class="font-medium text-[#4a4a43] group-hover:text-[#e0dfd6]">點擊上傳廠房照片</p>
     <p class="text-sm mt-1 text-[#8a8a7d] group-hover:text-[#e0dfd6]">
       支援 JPG、PNG 格式，最多 3 張
@@ -96,9 +98,9 @@ onBeforeUnmount(() => {
       <div
         v-for="n in 3 - previews.length"
         :key="'empty-' + n"
-        class="aspect-square rounded-2xl flex items-center justify-center text-gray-300 border-2 border-dashed border-[#e0dfd6]"
+        class="aspect-square rounded-2xl flex items-center justify-center text-[#4a4a43] border-2 border-dashed border-[#e0dfd6]"
       >
-        🖼
+        <span class="material-symbols-outlined"> imagesmode </span>
       </div>
     </div>
   </div>

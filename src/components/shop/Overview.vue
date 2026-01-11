@@ -88,9 +88,9 @@ const monthCompletedCount = computed(
 )
 
 const stats = computed(() => [
-  { label: '今日預約', value: todayOrderCount.value, icon: '📅' },
-  { label: '待確認工單', value: waitingCount.value, icon: '📋' },
-  { label: '本月完成', value: monthCompletedCount.value, icon: '📈' },
+  { label: '今日預約', value: todayOrderCount.value, icon: 'event_note' },
+  { label: '待確認工單', value: waitingCount.value, icon: 'assignment' },
+  { label: '本月完成', value: monthCompletedCount.value, icon: 'trending_up' },
 ])
 
 // 浮窗
@@ -132,7 +132,7 @@ const save = (status: Order['status']) => {
         <p class="text-3xl font-semibold text-[#4a4a43]">{{ item.value }}</p>
       </div>
       <div class="w-12 h-12 flex items-center justify-center text-xl bg-white rounded-xl">
-        {{ item.icon }}
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
       </div>
     </div>
   </div>

@@ -40,7 +40,9 @@ const onSave = () => {
   <div class="space-y-6">
     <!-- 標題與按鈕 -->
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-medium text-[#4a4a43] flex items-center gap-2">⏰ 營業時間設定</h2>
+      <h2 class="text-lg font-medium text-[#4a4a43] flex items-center gap-2">
+        <span class="material-symbols-outlined"> alarm </span> 營業時間設定
+      </h2>
 
       <div class="flex gap-3">
         <button

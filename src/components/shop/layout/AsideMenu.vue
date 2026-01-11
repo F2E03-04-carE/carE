@@ -25,49 +25,49 @@ const activeTab = (path: string) => route.path.startsWith(path)
       <button
         @click="goPage('/overview')"
         :class="activeTab('/overview') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        🔍 總覽
+        <span class="material-symbols-outlined">search</span> 總覽
       </button>
 
       <button
         @click="goPage('/orders')"
         :class="activeTab('/orders') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        📅 工單管理
+        <span class="material-symbols-outlined">event_note</span> 工單管理
       </button>
 
       <button
         @click="goPage('/schedule')"
         :class="activeTab('/schedule') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        📋 行程安排
+        <span class="material-symbols-outlined">calendar_month</span> 行程安排
       </button>
 
       <button
         @click="goPage('/records')"
         :class="activeTab('/records') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        📈 維修紀錄
+        <span class="material-symbols-outlined">trending_up</span> 維修紀錄
       </button>
 
       <button
         @click="goPage('/edit')"
         :class="activeTab('/edit') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        ⏱️ 廠房資訊
+        <span class="material-symbols-outlined">factory</span> 廠房資訊
       </button>
 
       <button
         @click="goPage('/billing')"
         :class="activeTab('/billing') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df]"
+        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
-        💳 付費訂閱
+        <span class="material-symbols-outlined">credit_card</span> 付費訂閱
       </button>
     </nav>
 

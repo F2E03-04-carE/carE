@@ -1,3 +1,6 @@
+<!-- CarRecords.vue -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 
@@ -72,19 +75,7 @@ const lastRepairDate = (carOwner: CarOwner) =>
     <!-- 搜尋欄 -->
     <div class="mb-8 flex items-center gap-4 rounded-2xl bg-[#f5f4f0] p-6 shadow-sm">
       <div class="flex flex-1 items-center gap-3 rounded-full bg-white px-5 py-3">
-        <svg
-          class="h-5 w-5 text-[#8a8a7d]"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
-          />
-        </svg>
+        <span class="material-symbols-outlined text-[#8a8a7d]">search</span>
         <input
           v-model="keyword"
           type="text"
@@ -120,7 +111,7 @@ const lastRepairDate = (carOwner: CarOwner) =>
             "
             @click="setTab(carOwner.id, 'records')"
           >
-            維修歷程
+            <span class="material-symbols-outlined align-middle mr-1">build</span> 維修歷程
           </button>
           <button
             class="flex-1 py-2 rounded-full text-sm font-medium cursor-pointer"
@@ -131,7 +122,7 @@ const lastRepairDate = (carOwner: CarOwner) =>
             "
             @click="setTab(carOwner.id, 'stats')"
           >
-            統計資訊
+            <span class="material-symbols-outlined align-middle mr-1">insights</span> 統計資訊
           </button>
         </div>
       </div>
@@ -144,8 +135,12 @@ const lastRepairDate = (carOwner: CarOwner) =>
           class="flex justify-between bg-[#f5f4f0] rounded-xl p-4"
         >
           <div>
-            <div class="text-sm text-[#8a8a7d]">📅 {{ record.date }}</div>
-            <div class="font-medium text-[#4a4a43]">🔧 {{ record.title }}</div>
+            <div class="text-sm text-[#8a8a7d] flex items-center gap-1 mb-4">
+              <span class="material-symbols-outlined text-sm">event_note</span> {{ record.date }}
+            </div>
+            <div class="font-medium text-[#4a4a43] flex items-center gap-1 mb-4">
+              <span class="material-symbols-outlined text-sm">construction</span> {{ record.title }}
+            </div>
             <div class="text-sm text-[#8a8a7d]">{{ record.desc }}</div>
           </div>
           <div class="font-semibold text-green-600">NT${{ record.price.toLocaleString() }}</div>
@@ -158,17 +153,23 @@ const lastRepairDate = (carOwner: CarOwner) =>
         class="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div class="bg-[#f5f4f0] rounded-xl p-4">
-          <div class="text-sm text-[#8a8a7d]">總維修次數</div>
+          <div class="text-sm text-[#8a8a7d] flex items-center gap-1 mb-4">
+            <span class="material-symbols-outlined text-sm">history_edu</span> 總維修次數
+          </div>
           <div class="text-2xl font-semibold text-[#4a4a43]">{{ carOwner.records.length }}</div>
         </div>
         <div class="bg-[#f5f4f0] rounded-xl p-4">
-          <div class="text-sm text-[#8a8a7d]">總消費金額</div>
+          <div class="text-sm text-[#8a8a7d] flex items-center gap-1 mb-4">
+            <span class="material-symbols-outlined text-sm">paid</span> 總消費金額
+          </div>
           <div class="text-2xl font-semibold text-[#4a4a43]">
             NT${{ totalPrice(carOwner).toLocaleString() }}
           </div>
         </div>
         <div class="bg-[#f5f4f0] rounded-xl p-4">
-          <div class="text-sm text-[#8a8a7d]">最近維修</div>
+          <div class="text-sm text-[#8a8a7d] flex items-center gap-1 mb-4">
+            <span class="material-symbols-outlined text-sm">calendar_today</span> 最近維修
+          </div>
           <div class="text-2xl font-semibold text-[#4a4a43]">{{ lastRepairDate(carOwner) }}</div>
         </div>
       </div>
