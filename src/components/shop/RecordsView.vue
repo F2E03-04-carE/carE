@@ -1,6 +1,3 @@
-<!-- CarRecords.vue -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 
@@ -52,9 +49,12 @@ const setTab = (id: number, tab: 'records' | 'stats') => {
 }
 
 const filteredCarOwners = computed(() => {
-  if (!keyword.value) return carOwners
-  return carOwners.filter((carOwner) =>
-    `${carOwner.name}${carOwner.phone}${carOwner.car}`.includes(keyword.value),
+  const key = keyword.value.toLowerCase()
+  return carOwners.filter(
+    (owner) =>
+      owner.name.toLowerCase().includes(key) ||
+      owner.phone.includes(key) ||
+      owner.car.toLowerCase().includes(key),
   )
 })
 
