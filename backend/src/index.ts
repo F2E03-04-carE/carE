@@ -3,10 +3,8 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { serverConfig } from './configs/index.js'
 
-// 載入環境變數（從 .env 檔案）
 dotenv.config()
 
-// 建立 Express 應用程式
 const app = express()
 
 // ====== 中介軟體 (Middleware) ======
