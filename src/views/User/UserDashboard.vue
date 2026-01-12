@@ -20,14 +20,11 @@ const ToggleEditing = (): void => {
 				<h1 class="text-[#4a4540] tracking-wide">會員中心</h1>
 			</div>
 		</header>
-
 		<main class="max-w-5xl mx-auto px-6 py-8 md:py-10">
 			<div class="space-y-8">
-				<!-- 個人資料區塊 -->
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
-
 						<button
 							type="button"
 							@click="ToggleEditing"
@@ -48,7 +45,6 @@ const ToggleEditing = (): void => {
 							</template>
 						</button>
 					</div>
-
 					<div class="bg-white border border-[#e8e4dc] rounded-2xl p-6 shadow-sm">
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 							<div class="space-y-2">
@@ -63,7 +59,6 @@ const ToggleEditing = (): void => {
 									{{ Nickname }}
 								</p>
 							</div>
-
 							<div class="space-y-2">
 								<label class="block text-sm text-[#6b6460]">姓名</label>
 								<input
@@ -76,7 +71,6 @@ const ToggleEditing = (): void => {
 									{{ Name }}
 								</p>
 							</div>
-
 							<div class="space-y-2">
 								<label class="block text-sm text-[#6b6460]">電子郵件</label>
 								<input
@@ -89,7 +83,6 @@ const ToggleEditing = (): void => {
 									{{ Email }}
 								</p>
 							</div>
-
 							<div class="space-y-2">
 								<label class="block text-sm text-[#6b6460]">電話</label>
 								<input
@@ -102,7 +95,6 @@ const ToggleEditing = (): void => {
 									{{ Phone }}
 								</p>
 							</div>
-
 							<div class="space-y-2">
 								<label class="block text-sm text-[#6b6460]">車牌登記</label>
 								<input
@@ -118,31 +110,20 @@ const ToggleEditing = (): void => {
 						</div>
 					</div>
 				</section>
-
-				<!-- 移除：車輛管理（管理車輛登記） -->
-
-				<!-- 其他功能區塊 -->
 				<section class="space-y-4">
-					<button
-						type="button"
-						class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-					>
+					<button type="button" class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
 						<div class="flex items-center gap-4">
 							<div class="rounded-xl bg-[#f9f7f4] p-3">
 								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">
 									handyman
 								</span>
 							</div>
-
 							<div class="text-left">
 								<h3 class="mb-1 text-[#4a4540]">送修記錄</h3>
 								<p class="text-sm text-[#6b6460]">查看所有送修紀錄與維修進度</p>
 							</div>
 						</div>
-
-						<span
-							class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1"
-						>
+						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">
 							chevron_right
 						</span>
 					</button>
