@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 type CarItem = {
 	Id: number;
 	Brand: string;
 	Model: string;
-	Year: string;
 	LicensePlate: string;
 	Color: string;
 };
@@ -15,11 +14,14 @@ const MyCars = ref<CarItem[]>([
 		Id: 1,
 		Brand: `Toyota`,
 		Model: `Camry`,
-		Year: `2020`,
 		LicensePlate: `ABC-1234`,
 		Color: `白色`,
 	},
 ]);
+
+const PrimaryCar = computed<CarItem | null>(() => {
+	return MyCars.value[0] ?? null;
+});
 
 const IsEditing = ref(false);
 const Nickname = ref(`咪毛`);
@@ -118,42 +120,47 @@ const ToggleEditing = (): void => {
 					</div>
 				</section>
 				<section class="space-y-4">
-					<button
-						type="button"
-						class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-					>
+					<button type="button" class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
 						<div class="flex items-center gap-4">
 							<div class="rounded-xl bg-[#f9f7f4] p-3">
-								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">directions_car</span>
+								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">
+									directions_car
+								</span>
 							</div>
 							<div class="text-left">
 								<h3 class="mb-1 text-[#4a4540]">管理車輛登記</h3>
-
-								<div class="flex items-center gap-2">
+								<div v-if="PrimaryCar" class="flex items-center gap-2">
 									<p class="text-sm text-[#6b6460]">
-										{{ MyCars[0].Brand }} {{ MyCars[0].Model }} · {{ MyCars[0].LicensePlate }}
+										{{ PrimaryCar.Brand }} {{ PrimaryCar.Model }} · {{ PrimaryCar.LicensePlate }}
 									</p>
-									<span class="rounded-full bg-[#e8f0f7] px-2 py-0.5 text-xs text-[#7a9aae]">目前展示</span>
+									<span class="rounded-full bg-[#e8f0f7] px-2 py-0.5 text-xs text-[#7a9aae]">
+										目前展示
+									</span>
 								</div>
+								<p v-else class="text-sm text-[#b0a9a2]">
+									尚未登記任何車輛
+								</p>
 							</div>
 						</div>
-						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">chevron_right</span>
+						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">
+							chevron_right
+						</span>
 					</button>
-					<button
-						type="button"
-						class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-					>
+					<button type="button" class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
 						<div class="flex items-center gap-4">
 							<div class="rounded-xl bg-[#f9f7f4] p-3">
-								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">handyman</span>
+								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">
+									handyman
+								</span>
 							</div>
-
 							<div class="text-left">
 								<h3 class="mb-1 text-[#4a4540]">送修記錄</h3>
 								<p class="text-sm text-[#6b6460]">查看所有送修紀錄與維修進度</p>
 							</div>
 						</div>
-						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">chevron_right</span>
+						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">
+							chevron_right
+						</span>
 					</button>
 				</section>
 			</div>
