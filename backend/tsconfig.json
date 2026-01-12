@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    /* 編譯目標 */
+    "target": "ES2022",                 // 編譯成 ES2022 版本的 JavaScript
+    "module": "NodeNext",               // 使用 Node.js 的模組系統
+    "moduleResolution": "NodeNext",     // 模組解析方式
+
+    /* 輸出設定 */
+    "outDir": "./dist",                 // 編譯後的檔案放這裡
+    "rootDir": "./src",                 // 原始碼在這裡
+
+    /* 嚴格模式 */
+    "strict": true,                     // 啟用所有嚴格檢查
+    "esModuleInterop": true,            // 讓 CommonJS 和 ES Module 互通
+    "skipLibCheck": true,               // 跳過檢查 node_modules 的型別
+
+    /* 其他 */
+    "forceConsistentCasingInFileNames": true,  // 檔名大小寫要一致
+    "resolveJsonModule": true           // 允許 import JSON 檔案
+  },
+  "include": ["src/**/*"],              // 要編譯的檔案
+  "exclude": ["node_modules", "dist"]   // 排除的資料夾
+}
