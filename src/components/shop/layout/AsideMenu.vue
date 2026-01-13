@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { computed } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 const goPage = (path: string) => {
   if (route.path !== path) {
@@ -12,6 +15,10 @@ const goPage = (path: string) => {
 
 // startsWith 用以支援子路由，特別是 edit/<childPath>
 const activeTab = (path: string) => route.path.startsWith(path)
+
+const isMenuDisabled = computed(() => {
+  return authStore.status === 'pending_review' || authStore.status === 'onboarding'
+})
 </script>
 
 <template>
@@ -23,32 +30,48 @@ const activeTab = (path: string) => route.path.startsWith(path)
     <nav class="flex flex-col px-3 gap-4">
       <button
         @click="goPage('/overview')"
-        :class="activeTab('/overview') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
+        :class="[
+          activeTab('/overview') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+        ]"
+        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
+        :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">search</span> 總覽
       </button>
 
       <button
         @click="goPage('/orders')"
-        :class="activeTab('/orders') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
+        :class="[
+          activeTab('/orders') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+        ]"
+        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
+        :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">event_note</span> 工單管理
       </button>
 
       <button
         @click="goPage('/schedule')"
-        :class="activeTab('/schedule') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
+        :class="[
+          activeTab('/schedule') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+        ]"
+        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
+        :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">calendar_month</span> 行程安排
       </button>
 
       <button
         @click="goPage('/records')"
-        :class="activeTab('/records') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
+        :class="[
+          activeTab('/records') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+        ]"
+        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
+        :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">trending_up</span> 維修紀錄
       </button>
@@ -59,14 +82,6 @@ const activeTab = (path: string) => route.path.startsWith(path)
         class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
       >
         <span class="material-symbols-outlined">factory</span> 廠房資訊
-      </button>
-
-      <button
-        @click="goPage('/billing')"
-        :class="activeTab('/billing') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
-      >
-        <span class="material-symbols-outlined">credit_card</span> 付費訂閱
       </button>
     </nav>
 

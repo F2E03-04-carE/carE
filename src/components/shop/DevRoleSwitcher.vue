@@ -1,38 +1,40 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
-const auth = useAuthStore()
+import type { WorkshopStatus } from '@/mocks/workshop.mock'
+
+const authStore = useAuthStore()
+
+const statuses: { label: string; value: WorkshopStatus }[] = [
+  { label: '已開通', value: 'active' },
+  { label: '審核中', value: 'pending_review' },
+  { label: '尚未填資料', value: 'onboarding' },
+]
+
+const switchStatus = (status: WorkshopStatus) => {
+  authStore.setStatus(status)
+}
 </script>
 
 <template>
-  <div
-    class="fixed bottom-6 right-6 bg-white shadow-xl rounded-2xl p-4 w-56 border border-gray-200"
-  >
-    <div class="text-sm font-semibold text-gray-700 mb-3">開發模式 · 身分切換</div>
-
+  <div class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-2xl border z-50 text-sm">
+    <p class="font-bold text-base mb-3 text-[#4a4a43]">開發者工具：切換身分</p>
     <div class="flex flex-col gap-2">
       <button
-        @click="auth.useOnboarding()"
-        class="py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-left px-3 transition cursor-pointer"
+        v-for="s in statuses"
+        :key="s.value"
+        @click="switchStatus(s.value)"
+        class="px-4 py-2 text-left rounded-lg transition"
+        :class="
+          authStore.status === s.value
+            ? 'bg-[#6b6b5a] text-white font-bold shadow'
+            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+        "
       >
-        <div class="font-medium">📝 尚未填資料</div>
-        <div class="text-xs text-gray-500">onboarding</div>
+        {{ s.label }} ({{ s.value }})
       </button>
-
-      <button
-        @click="auth.usePendingReview()"
-        class="py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-left px-3 transition cursor-pointer"
-      >
-        <div class="font-medium">🕒 等待審核</div>
-        <div class="text-xs text-gray-500">pending_review</div>
-      </button>
-
-      <button
-        @click="auth.useActive()"
-        class="py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-left px-3 transition cursor-pointer"
-      >
-        <div class="font-medium">🚀 已開通</div>
-        <div class="text-xs text-gray-500">active</div>
-      </button>
+    </div>
+    <div class="mt-3 text-xs text-gray-500">
+      當前狀態: <span class="font-semibold">{{ authStore.status }}</span>
     </div>
   </div>
 </template>

@@ -8,10 +8,6 @@ const routes = [
     component: ShopAdminLayout,
     children: [
       {
-        path: '',
-        redirect: '/overview',
-      },
-      {
         path: 'overview',
         name: 'overview',
         component: () => import('@/components/shop/OverView.vue'),
@@ -33,33 +29,8 @@ const routes = [
       },
       {
         path: 'edit',
+        name: 'edit',
         component: () => import('@/components/shop/edit/EditView.vue'),
-        children: [
-          {
-            path: '',
-            redirect: { name: 'info' },
-          },
-          {
-            path: 'info',
-            name: 'info',
-            component: () => import('@/components/shop/edit/components/Info.vue'),
-          },
-          {
-            path: 'hours',
-            name: 'hours',
-            component: () => import('@/components/shop/edit/components/Hours.vue'),
-          },
-          {
-            path: 'photos',
-            name: 'photos',
-            component: () => import('@/components/shop/edit/components/Photos.vue'),
-          },
-        ],
-      },
-      {
-        path: 'billing',
-        name: 'billing',
-        component: () => import('@/components/shop/BillingView.vue'),
       },
     ],
   },
@@ -70,25 +41,29 @@ const router = createRouter({
   routes,
 })
 
-// 🟢 全局路由守衛
+// 全局路由守衛
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
-  // 尚未有 workshop → 強制 info
+  // 如果沒有 workshop 資料，強制設定為 onboarding 狀態
   if (!auth.workshop) {
-    if (to.path !== '/edit/info') return next('/edit/info')
-    return next()
+    auth.setStatus('onboarding')
   }
 
-  // 尚未填資料 / 尚未開通 → 一律跳 info
-  if (auth.workshop.status !== 'active' || !auth.workshop.profile_completed) {
-    if (!to.path.startsWith('/edit')) return next('/edit/info')
-    return next()
+  const status = auth.status
+
+  // 處理根路徑 '/' 的導向邏輯
+  if (to.path === '/') {
+    if (status === 'active') {
+      return next('/overview')
+    } else if (status === 'onboarding' || status === 'pending_review') {
+      return next('/edit')
+    }
   }
 
-  // 已開通 → 登入 / 編輯 info 頁面跳 overview
-  if (auth.workshop.status === 'active' && (to.path === '/' || to.path.startsWith('/edit/info'))) {
-    return next('/overview')
+  // 尚未開通的使用者 (onboarding 或 pending_review) 只能待在編輯頁
+  if ((status === 'onboarding' || status === 'pending_review') && to.path !== '/edit') {
+    return next('/edit')
   }
 
   // 其他路徑正常放行
