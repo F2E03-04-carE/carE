@@ -50,8 +50,6 @@ const SelectedAppointment = ref<Appointment | null>(null);
 const RatingScore = ref<number>(0);
 const HoverScore = ref<number>(0);
 const RatingComment = ref<string>(``);
-const SelectedTags = ref<string[]>([]);
-const ShopTags = [`技術專業`, `解說詳細`, `報價公道`, `服務親切`, `效率極高`, `原廠品質`];
 
 const StatusMap: Record<AppointmentStatus, { label: string; color: string }> = {
 	in_progress: { label: `維修中`, color: `text-[#2F2E2A] border-[#2F2E2A] bg-[#F7F5F0]` },
@@ -201,19 +199,12 @@ const OpenRatingModal = (Apt: Appointment) => {
 	SelectedAppointment.value = Apt;
 	RatingScore.value = 0;
 	RatingComment.value = ``;
-	SelectedTags.value = [];
 	ActiveModal.value = `rating`;
 };
 
 const CloseModal = () => {
 	ActiveModal.value = `none`;
 	SelectedAppointment.value = null;
-};
-
-const ToggleTag = (Tag: string) => {
-	const Index = SelectedTags.value.indexOf(Tag);
-	if (Index > -1) SelectedTags.value.splice(Index, 1);
-	else SelectedTags.value.push(Tag);
 };
 
 const SubmitRating = () => {
@@ -370,7 +361,7 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 							<p class="mb-4 text-sm font-bold text-[#2F2E2A]">您對本次維修服務滿意嗎？</p>
 							<div class="flex justify-center gap-2">
 								<button v-for="i in 5" :key="i" @click="RatingScore = i" @mouseenter="HoverScore = i" @mouseleave="HoverScore = 0" class="transition-transform active:scale-90">
-									<span :class="[`material-symbols-outlined text-4xl transition-colors`, (HoverScore || RatingScore) >= i ? `text-[#FFC107]` : `text-[#D9D6CF]`]" :style="`font-variation-settings: 'FILL' ${ (HoverScore || RatingScore) >= i ? 1 : 0 }` ">star</span>
+									<span :class="[`material-symbols-outlined text-4xl transition-colors`, (HoverScore || RatingScore) >= i ? `text-[#FFC107]` : `text-[#D9D6CF]`]" style="font-variation-settings: 'FILL' 1">star</span>
 								</button>
 							</div>
 							<p v-if="RatingScore > 0" class="mt-3 text-xs font-bold text-[#6B705C]">{{ [`請評分`, `非常不滿意`, `需要改進`, `服務一般`, `滿意推薦`, `完美體驗！`][RatingScore] }}</p>
