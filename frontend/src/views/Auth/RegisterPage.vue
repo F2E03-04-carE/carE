@@ -165,8 +165,6 @@ onUnmounted(() => {
 <template>
   <div class="fixed inset-0 z-[60] flex justify-center items-center bg-black/40 backdrop-blur-sm transition-opacity">
     <div class="relative w-[90%] max-w-[450px] p-6 sm:p-8 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
-      
-      <!-- Close Button -->
       <button
         @click="HandleClose"
         class="absolute top-4 right-4 z-50 w-10 h-10 flex justify-center items-center rounded-full bg-gray-200 hover:bg-gray-300 text-black cursor-pointer transition-colors"
@@ -184,8 +182,6 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-
-      <!-- Success View -->
       <div v-if="IsSubmitted" class="text-center py-4">
         <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#6B6B5C]/10">
           <i class="text-2xl fa-solid fa-check text-[#6B6B5C]" aria-hidden="true"></i>
@@ -203,8 +199,6 @@ onUnmounted(() => {
           立即登入
         </button>
       </div>
-
-      <!-- Register Form View -->
       <div v-else>
         <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員註冊</h2>
         <form class="space-y-4" @submit.prevent="HandleSubmit">
@@ -274,7 +268,6 @@ onUnmounted(() => {
               {{ Errors.ConfirmPassword }}
             </p>
           </div>
-          
           <button
             type="submit"
             :disabled="IsLoading"
@@ -286,8 +279,6 @@ onUnmounted(() => {
             <span v-else>確認送出</span>
           </button>
         </form>
-
-        <!-- Switch to Login -->
         <div class="relative flex justify-center items-center my-6">
           <div class="absolute inset-0 flex items-center">
             <div class="w-full border-t border-gray-300"></div>
