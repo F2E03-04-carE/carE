@@ -6,13 +6,16 @@
         <div class="flex-1 w-full min-w-0 space-y-6">
           <section class="p-6 bg-white rounded-2xl shadow-sm">
             <div class="flex items-start justify-between">
-              <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
+              <div class="flex items-end gap-3">
+                <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
+                <span class="text-xs text-gray-500 mb-1">台北市咪咪毛毛區 123 號</span>
+              </div>
               <div class="text-yellow-400">★★★★★</div>
             </div>
             <div class="mt-4 space-y-2 text-sm text-gray-600">
               <div class="flex items-center gap-2">
-                <span>店家地址:</span>
-                <span>台北市咪咪毛毛區 123 號</span>
+                <span>店長姓名:</span>
+                <span>陳大明</span>
               </div>
               <div class="flex items-center gap-2">
                 <span>聯絡電話:</span>
@@ -53,7 +56,7 @@
             </div>
             <div class="mt-6">
               <h3 class="mb-2 font-medium text-gray-800">服務項目</h3>
-              <div class="flex flex-col gap-2 text-sm text-gray-700 sm:flex-row sm:gap-12">
+              <div class="flex flex-row gap-8 text-sm text-gray-700 sm:gap-12">
                 <ul class="pl-4 space-y-1 list-disc">
                   <li>定期保養</li>
                   <li>變速箱維修</li>
