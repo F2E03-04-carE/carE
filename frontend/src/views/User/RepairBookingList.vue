@@ -370,29 +370,14 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 							<p class="mb-4 text-sm font-bold text-[#2F2E2A]">您對本次維修服務滿意嗎？</p>
 							<div class="flex justify-center gap-2">
 								<button v-for="i in 5" :key="i" @click="RatingScore = i" @mouseenter="HoverScore = i" @mouseleave="HoverScore = 0" class="transition-transform active:scale-90">
-									<span :class="[`material-symbols-outlined text-4xl transition-colors`, (HoverScore || RatingScore) >= i ? `text-[#6B705C]` : `text-[#D9D6CF]`]" :style="`font-variation-settings: 'FILL' ${ (HoverScore || RatingScore) >= i ? 1 : 0 }` ">star</span>
+									<span :class="[`material-symbols-outlined text-4xl transition-colors`, (HoverScore || RatingScore) >= i ? `text-[#FFC107]` : `text-[#D9D6CF]`]" :style="`font-variation-settings: 'FILL' ${ (HoverScore || RatingScore) >= i ? 1 : 0 }` ">star</span>
 								</button>
 							</div>
 							<p v-if="RatingScore > 0" class="mt-3 text-xs font-bold text-[#6B705C]">{{ [`請評分`, `非常不滿意`, `需要改進`, `服務一般`, `滿意推薦`, `完美體驗！`][RatingScore] }}</p>
 						</div>
 						<div class="mb-8">
-							<p class="mb-4 text-sm font-bold text-[#2F2E2A]">選擇店家印象標籤</p>
-							<div class="flex flex-wrap gap-2">
-								<button v-for="Tag in ShopTags" :key="Tag" @click="ToggleTag(Tag)" :class="[`rounded-full border px-4 py-1.5 text-xs font-medium transition-all`, SelectedTags.includes(Tag) ? `border-[#6B705C] bg-[#6B705C] text-white` : `border-[#E2DED6] bg-white text-[#6B705C] hover:border-[#6B6B5C]`]">
-									{{ Tag }}
-								</button>
-							</div>
-						</div>
-						<div class="mb-8">
 							<p class="mb-3 text-sm font-bold text-[#2F2E2A]">詳細評論內容</p>
 							<textarea v-model="RatingComment" placeholder="分享您的維修心得與感受..." class="h-32 w-full resize-none rounded-xl border border-[#E2DED6] bg-white p-4 text-sm focus:border-[#6B705C] focus:outline-none"></textarea>
-						</div>
-						<div>
-							<p class="mb-3 text-sm font-bold text-[#2F2E2A]">上傳照片 (選填)</p>
-							<div class="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#D9D6CF] text-[#6B705C] hover:bg-[#EFECE6]">
-								<span class="material-symbols-outlined text-2xl">add_a_photo</span>
-								<span class="text-[10px] mt-1">點擊上傳</span>
-							</div>
 						</div>
 					</div>
 					<div class="flex gap-3 border-t border-[#E2DED6] bg-[#F7F5F0] px-8 py-5">
