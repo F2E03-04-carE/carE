@@ -19,6 +19,28 @@
                 <span>(02) 2345-6789</span>
               </div>
             </div>
+
+            <div class="mt-6">
+              <h3 class="mb-2 font-medium text-gray-800">環境照片</h3>
+              <div class="grid grid-cols-4 gap-2 h-32">
+                <div class="rounded-lg overflow-hidden bg-gray-100">
+                  <img src="https://picsum.photos/300/200?random=10" alt="環境照片1" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div class="rounded-lg overflow-hidden bg-gray-100">
+                  <img src="https://picsum.photos/300/200?random=11" alt="環境照片2" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div class="rounded-lg overflow-hidden bg-gray-100">
+                  <img src="https://picsum.photos/300/200?random=12" alt="環境照片3" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div class="relative rounded-lg overflow-hidden bg-gray-100 cursor-pointer group">
+                  <img src="https://picsum.photos/300/200?random=13" alt="環境照片4" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    +5 張
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="mt-6">
               <h3 class="mb-2 font-medium text-gray-800">專修品牌</h3>
               <div class="flex flex-wrap gap-2">
