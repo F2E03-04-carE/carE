@@ -16,7 +16,7 @@ const switchStatus = (status: WorkshopStatus) => {
 </script>
 
 <template>
-  <div class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-2xl border z-50 text-sm">
+  <div class="fixed bottom-15 left-4 bg-white p-4 rounded-lg shadow-2xl border z-50 text-sm">
     <p class="font-bold text-base mb-3 text-[#4a4a43]">開發者工具：切換身分</p>
     <div class="flex flex-col gap-2">
       <button
