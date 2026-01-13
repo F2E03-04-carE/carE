@@ -2,14 +2,22 @@
 import { ref } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import zhTw from '@fullcalendar/core/locales/zh-tw'
 import type { CalendarOptions, DayCellMountArg, EventMountArg } from '@fullcalendar/core'
 
+const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
+
 const calendarOptions = ref<CalendarOptions>({
-  plugins: [dayGridPlugin, interactionPlugin],
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
   locale: zhTw,
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek',
+  },
 
   // 今日格子底色
   dayCellDidMount(arg: DayCellMountArg) {
@@ -25,24 +33,24 @@ const calendarOptions = ref<CalendarOptions>({
     }
   },
 
-  // 事件顏色
-  eventDidMount(arg: EventMountArg) {
-    arg.el.style.backgroundColor = '#6b6b5a'
-    arg.el.style.borderColor = '#6b6b5a'
-    arg.el.style.color = '#ffffff'
-  },
+  eventColor: '#6b6b5a',
 
   // events array 要撈資料庫，目前寫死以預覽
   events: [
-    { title: 'Event 1', date: '2026-01-05' },
-    { title: 'Event 2', date: '2026-01-12' },
+    { title: '換機油', start: '2026-01-05T10:00:00', end: '2026-01-05T11:00:00' },
+    { title: '檢查煞車', start: '2026-01-05T14:00:00', end: '2026-01-05T15:30:00' },
+    { title: '輪胎更換', start: '2026-01-12T09:30:00', end: '2026-01-12T11:30:00' },
+    { title: '例行保養', start: '2026-01-19T13:00:00', end: '2026-01-19T16:00:00' },
+    { title: '引擎維修', start: '2026-01-20T10:00:00', end: '2026-01-20T17:00:00' },
+    { title: '車身鈑金', date: '2026-01-26', allDay: true },
+    { title: '空調檢查', start: '2026-02-01T10:00:00', end: '2026-02-01T12:00:00' },
   ],
 })
 </script>
 
 <template>
   <div>
-    <FullCalendar :options="calendarOptions" />
+    <FullCalendar :options="calendarOptions" ref="calendarRef" />
   </div>
 </template>
 
