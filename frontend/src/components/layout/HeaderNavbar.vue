@@ -24,6 +24,11 @@ const handleGoToRegister = () => {
   window.scrollTo(0, 0);
 };
 
+const handleBackToLogin = () => {
+  isShowRegister.value = false;
+  isShowLoginModal.value = true;
+};
+
 const closeRegister = () => {
   isShowRegister.value = false;
 };
@@ -65,17 +70,10 @@ const closeRegister = () => {
       @close="closeLoginModal"
       @switch-to-signup="handleGoToRegister"
     />
-    <div v-if="isShowRegister" class="fixed inset-0 z-[100] bg-white overflow-y-auto">
-      <div class="fixed top-0 right-0 p-4 z-[101]">
-        <button
-          @click="closeRegister"
-          class="text-gray-500 hover:text-black font-bold px-4 py-2 bg-gray-100 rounded-lg cursor-pointer flex items-center shadow-md border border-gray-200"
-        >
-          <i class="fa-solid fa-xmark mr-2"></i>
-          關閉 / 返回
-        </button>
-      </div>
-      <RegisterPage />
-    </div>
+    <RegisterPage
+      v-if="isShowRegister"
+      @close="closeRegister"
+      @switch-to-login="handleBackToLogin"
+    />
   </header>
 </template>

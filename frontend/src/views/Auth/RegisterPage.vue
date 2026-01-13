@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 type FieldKey = `Email` | `Phone` | `Password` | `ConfirmPassword`;
 
-const Router = useRouter();
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'switch-to-login'): void;
+}>();
 
 const IsSubmitted = ref(false);
 const DidSubmitAttempt = ref(false);
@@ -105,11 +107,12 @@ function HandleClose() {
     Touched[key as FieldKey] = false;
   });
 
-  try {
-    Router.push(`/`);
-  } catch (error) {
-    console.warn(`Navigation failed`, error);
-  }
+  emit('close');
+}
+
+function HandleSwitchToLogin() {
+  if (Timer) clearInterval(Timer);
+  emit('switch-to-login');
 }
 
 function StartRedirectTimer() {
@@ -120,7 +123,7 @@ function StartRedirectTimer() {
   Timer = window.setInterval(() => {
     Countdown.value -= 1;
     if (Countdown.value <= 0) {
-      HandleClose();
+      HandleSwitchToLogin();
     }
   }, 1000);
 }
@@ -160,42 +163,53 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen px-4 py-12 text-[#3d3d3d] bg-[#FAF8F5]">
-    <div class="w-full max-w-md">
-      <div v-if="IsSubmitted" class="relative p-8 text-center bg-white border border-[#e0ddd5] rounded-2xl shadow-sm md:p-10">
-        <button
-          type="button"
-          class="absolute top-4 right-4 text-[#8a8a7e] transition-colors hover:text-[#3d3d3d]"
-          @click="HandleClose"
+  <div class="fixed inset-0 z-[60] flex justify-center items-center bg-black/40 backdrop-blur-sm transition-opacity">
+    <div class="relative w-[90%] max-w-[450px] p-6 sm:p-8 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Close Button -->
+      <button
+        @click="HandleClose"
+        class="absolute top-4 right-4 z-50 w-10 h-10 flex justify-center items-center rounded-full bg-gray-200 hover:bg-gray-300 text-black cursor-pointer transition-colors"
+        type="button"
+        aria-label="關閉"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
+          class="w-5 h-5"
         >
-          <i class="text-xl fa-solid fa-xmark"></i>
-        </button>
-        <div class="mb-6">
-          <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#6B6B5C]/10">
-            <i class="text-2xl fa-solid fa-check text-[#6B6B5C]" aria-hidden="true"></i>
-          </div>
-          <h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">註冊成功</h2>
-          <p class="mb-4 text-[#8a8a7e]">感謝您的註冊，我們已收到您的資料</p>
-          <p class="text-[#8a8a7e]">
-            將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後返回首頁...
-          </p>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Success View -->
+      <div v-if="IsSubmitted" class="text-center py-4">
+        <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#6B6B5C]/10">
+          <i class="text-2xl fa-solid fa-check text-[#6B6B5C]" aria-hidden="true"></i>
         </div>
+        <h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">註冊成功</h2>
+        <p class="mb-4 text-[#8a8a7e]">感謝您的註冊，我們已收到您的資料</p>
+        <p class="text-[#8a8a7e] mb-6">
+          將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後自動前往登入...
+        </p>
         <button
           type="button"
-          @click="HandleClose"
-          class="w-full px-6 py-2 mt-2 font-medium text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#6B6B5C]/90"
+          @click="HandleSwitchToLogin"
+          class="w-full px-6 py-2.5 font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md"
         >
-          立即返回
+          立即登入
         </button>
       </div>
-      <div v-else class="p-8 bg-white border border-[#e0ddd5] rounded-2xl shadow-sm md:p-10">
-        <div class="mb-8">
-          <h1 class="mb-2 text-3xl font-medium text-[#3d3d3d]">會員註冊</h1>
-          <p class="text-[#8a8a7e]">請填寫以下資訊完成註冊</p>
-        </div>
-        <form class="space-y-6" @submit.prevent="HandleSubmit">
+
+      <!-- Register Form View -->
+      <div v-else>
+        <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員註冊</h2>
+        <form class="space-y-4" @submit.prevent="HandleSubmit">
           <div>
-            <label for="email" class="block mb-2 text-base font-medium text-[#3d3d3d]">
+            <label for="email" class="block mb-1 text-[16px] font-medium text-gray-700">
               電子信箱
             </label>
             <input
@@ -204,14 +218,14 @@ onUnmounted(() => {
               type="email"
               autocomplete="username"
               placeholder="example@email.com"
-              class="w-full px-4 py-3 text-base transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
+              class="w-full px-4 py-2 text-[16px] transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
               :class="InputBorderClass(`Email`)"
               @blur="Touched.Email = true"
             />
-            <p v-if="ShowError(`Email`)" class="mt-2 text-[#c97d7d]">{{ Errors.Email }}</p>
+            <p v-if="ShowError(`Email`)" class="mt-1 text-[14px] text-[#c97d7d]">{{ Errors.Email }}</p>
           </div>
           <div>
-            <label for="phone" class="block mb-2 text-base font-medium text-[#3d3d3d]">
+            <label for="phone" class="block mb-1 text-[16px] font-medium text-gray-700">
               電話號碼
             </label>
             <input
@@ -220,14 +234,14 @@ onUnmounted(() => {
               type="tel"
               autocomplete="tel"
               placeholder="0912345678"
-              class="w-full px-4 py-3 text-base transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
+              class="w-full px-4 py-2 text-[16px] transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
               :class="InputBorderClass(`Phone`)"
               @blur="Touched.Phone = true"
             />
-            <p v-if="ShowError(`Phone`)" class="mt-2 text-[#c97d7d]">{{ Errors.Phone }}</p>
+            <p v-if="ShowError(`Phone`)" class="mt-1 text-[14px] text-[#c97d7d]">{{ Errors.Phone }}</p>
           </div>
           <div>
-            <label for="password" class="block mb-2 text-base font-medium text-[#3d3d3d]">
+            <label for="password" class="block mb-1 text-[16px] font-medium text-gray-700">
               密碼
             </label>
             <input
@@ -235,15 +249,15 @@ onUnmounted(() => {
               v-model="Form.Password"
               type="password"
               autocomplete="new-password"
-              placeholder="至少8個字元"
-              class="w-full px-4 py-3 text-base transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
+              placeholder="至少8個字元，含一大寫"
+              class="w-full px-4 py-2 text-[16px] transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
               :class="InputBorderClass(`Password`)"
               @blur="Touched.Password = true"
             />
-            <p v-if="ShowError(`Password`)" class="mt-2 text-[#c97d7d]">{{ Errors.Password }}</p>
+            <p v-if="ShowError(`Password`)" class="mt-1 text-[14px] text-[#c97d7d]">{{ Errors.Password }}</p>
           </div>
           <div>
-            <label for="confirmPassword" class="block mb-2 text-base font-medium text-[#3d3d3d]">
+            <label for="confirmPassword" class="block mb-1 text-[16px] font-medium text-gray-700">
               確認密碼
             </label>
             <input
@@ -252,18 +266,19 @@ onUnmounted(() => {
               type="password"
               autocomplete="new-password"
               placeholder="再次輸入密碼"
-              class="w-full px-4 py-3 text-base transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
+              class="w-full px-4 py-2 text-[16px] transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
               :class="InputBorderClass(`ConfirmPassword`)"
               @blur="Touched.ConfirmPassword = true"
             />
-            <p v-if="ShowError(`ConfirmPassword`)" class="mt-2 text-[#c97d7d]">
+            <p v-if="ShowError(`ConfirmPassword`)" class="mt-1 text-[14px] text-[#c97d7d]">
               {{ Errors.ConfirmPassword }}
             </p>
           </div>
+          
           <button
             type="submit"
             :disabled="IsLoading"
-            class="w-full px-6 py-3 mt-8 text-base font-medium text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#6B6B5C]/90 focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+            class="w-full px-6 py-2.5 mt-6 text-[16px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
           >
             <span v-if="IsLoading">
               <i class="mr-2 fa-solid fa-spinner fa-spin"></i>處理中...
@@ -271,6 +286,24 @@ onUnmounted(() => {
             <span v-else>確認送出</span>
           </button>
         </form>
+
+        <!-- Switch to Login -->
+        <div class="relative flex justify-center items-center my-6">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative px-4 text-[14px] text-gray-500 bg-white/0 backdrop-blur-md">
+            已經有帳號了嗎？
+          </div>
+        </div>
+        <div class="text-center">
+          <button
+            @click="HandleSwitchToLogin"
+            class="text-[16px] font-bold text-[#6b6b5a] hover:underline cursor-pointer"
+          >
+            立即登入
+          </button>
+        </div>
       </div>
     </div>
   </div>
