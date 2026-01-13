@@ -30,7 +30,7 @@ const routes = [
       {
         path: 'edit',
         name: 'edit',
-        component: () => import('@/components/shop/edit/EditView.vue'),
+        component: () => import('@/components/shop/EditView.vue'),
       },
     ],
   },
