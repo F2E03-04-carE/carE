@@ -340,29 +340,9 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 								<span class="material-symbols-outlined text-[#6B705C] transition-transform duration-300" :class="{ 'rotate-180': ShowQuoteDetails }">expand_more</span>
 							</button>
 							<div v-if="ShowQuoteDetails" class="mt-4 overflow-hidden rounded-2xl border border-[#E2DED6] bg-white p-6 transition-all duration-300">
-								<div v-if="QuoteGroups.base.length > 0" class="mb-6">
-									<h6 class="mb-3 text-xs font-bold text-[#6B705C] uppercase tracking-wider">基本項目</h6>
-									<div class="space-y-2">
-										<div v-for="(Item, idx) in QuoteGroups.base" :key="idx" class="flex justify-between items-center text-sm">
-											<span class="text-[#2F2E2A]">{{ Item.name }}</span>
-											<span class="font-bold text-[#2F2E2A]">{{ typeof Item.price === 'number' ? FormatCurrency(Item.price) : '免費/內含' }}</span>
-										</div>
-									</div>
-								</div>
-								
-								<div v-if="QuoteGroups.addon.length > 0" class="mb-6">
-									<h6 class="mb-3 text-xs font-bold text-[#6B705C] uppercase tracking-wider">加購項目</h6>
-									<div class="space-y-2">
-										<div v-for="(Item, idx) in QuoteGroups.addon" :key="idx" class="flex justify-between items-center text-sm">
-											<span class="text-[#2F2E2A]">{{ Item.name }}</span>
-											<span class="font-bold text-[#2F2E2A]">{{ typeof Item.price === 'number' ? FormatCurrency(Item.price) : '免費/內含' }}</span>
-										</div>
-									</div>
-								</div>
-
-								<div class="flex justify-between items-center border-t border-[#E2DED6] pt-4">
-									<span class="text-base font-bold text-[#2F2E2A]">總計金額</span>
-									<span class="text-xl font-bold text-[#6B705C]">{{ FormatCurrency(QuoteTotal) }}</span>
+								<div class="flex flex-col items-center justify-center gap-2 py-2">
+									<span class="text-base font-bold text-[#2F2E2A]">預估總計金額</span>
+									<span class="text-3xl font-bold text-[#6B705C]">{{ FormatCurrency(QuoteTotal) }}</span>
 								</div>
 							</div>
 						</div>
