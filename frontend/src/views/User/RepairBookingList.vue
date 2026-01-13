@@ -330,7 +330,6 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 								<p class="text-sm text-[#2F2E2A]">{{ SelectedAppointment.notes }}</p>
 							</div>
 						</div>
-
 						<div class="mb-6">
 							<button @click="ShowQuoteDetails = !ShowQuoteDetails" class="flex w-full items-center justify-between rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] px-6 py-4 transition-colors hover:bg-[#EFECE6]">
 								<div class="flex items-center gap-2">
