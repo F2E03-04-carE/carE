@@ -315,7 +315,7 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 						<button @click="CloseModal" class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E2DED6] transition-colors hover:bg-[#EFECE6]"><span class="material-symbols-outlined">close</span></button>
 					</div>
 					<div class="max-h-[78vh] overflow-y-auto px-6 py-6">
-						<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+						<div class="mb-6 flex flex-row justify-between items-start gap-4">
 							<div class="min-w-0 flex-1">
 								<div class="mb-2 flex items-center gap-3">
 									<h4 class="text-lg font-bold">{{ SelectedAppointment.carModel }}</h4>
@@ -337,24 +337,12 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 								<p class="text-sm text-[#2F2E2A]">{{ SelectedAppointment.notes }}</p>
 							</div>
 						</div>
-						<div class="rounded-2xl bg-[#EFECE6]/60 p-6 text-[#2F2E2A]">
-							<div class="mb-4 flex items-center justify-between">
-								<h5 class="text-base font-bold">報價明細</h5>
-								<div class="text-sm font-bold">合計：{{ FormatCurrency(QuoteTotal) }}</div>
-							</div>
-							<div v-for="Grp in [{t:`基本維修`, d:QuoteGroups.base}, {t:`加購項目`, d:QuoteGroups.addon}]" :key="Grp.t" class="mb-6">
-								<p class="mb-3 text-[12px] font-bold text-[#6B705C]">{{ Grp.t }}</p>
-								<div v-if="Grp.d.length > 0" class="space-y-3">
-									<div v-for="(Item, Idx) in Grp.d" :key="Idx" class="flex justify-between text-sm py-1">
-										<span>{{ Item.name }}</span>
-										<span class="font-medium">{{ Item.price ? FormatCurrency(Item.price) : `待報價` }}</span>
-									</div>
-								</div>
-							</div>
-							<p class="mt-4 text-[12px] text-[#6B705C]">※ 此為展示用假資料（純切版）</p>
-						</div>
 					</div>
-					<div class="flex justify-end border-t border-[#E2DED6] bg-[#F7F5F0] px-6 py-4">
+					<div class="flex items-center justify-between border-t border-[#E2DED6] bg-[#F7F5F0] px-6 py-4">
+						<a href="#" class="flex items-center gap-2 text-sm font-medium text-[#6B705C] transition-colors hover:text-[#2F2E2A]">
+							<span class="material-symbols-outlined text-xl">download</span>
+							下載報價單
+						</a>
 						<button @click="CloseModal" class="rounded-xl border border-[#E2DED6] px-8 py-2.5 text-sm font-medium transition-colors hover:bg-[#EFECE6]">關閉</button>
 					</div>
 				</div>
