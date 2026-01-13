@@ -73,7 +73,7 @@ const lastRepairDate = (carOwner: CarOwner) =>
     </div>
 
     <!-- 搜尋欄 -->
-    <div class="mb-8 flex items-center gap-4 rounded-2xl bg-[#f5f4f0] p-6 shadow-sm">
+    <div class="flex items-center gap-4 rounded-2xl bg-[#f5f4f0] p-6 shadow-sm">
       <div class="flex flex-1 items-center gap-3 rounded-full bg-white px-5 py-3">
         <span class="material-symbols-outlined text-[#8a8a7d]">search</span>
         <input

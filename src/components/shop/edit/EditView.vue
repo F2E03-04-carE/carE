@@ -162,26 +162,29 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="p-6 bg-[#f5f4f0] min-h-screen">
-    <div class="max-w-4xl mx-auto">
+  <div class="min-h-screen">
+    <div class="space-y-6">
       <div
         v-if="status === 'pending_review'"
-        class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-r-lg"
+        class="bg-[#f5f4f0] border-l-4 border-[#8a8a7d] text-[#4a4a43] p-4 rounded-r-lg"
       >
         <h3 class="font-bold">審核中</h3>
         <p>您的資料已提交，正在等待平台管理員審核。在審核期間，所有資料將無法修改。</p>
       </div>
       <div
         v-if="status === 'onboarding'"
-        class="bg-[#f5f4f0] border-l-4 border-[#6b6b5a] text-[#4a4a43] p-4 mb-6 rounded-r-lg"
+        class="bg-[#f5f4f0] border-l-4 border-[#6b6b5a] text-[#4a4a43] p-4 rounded-r-lg"
       >
         <h3 class="font-bold">歡迎！請完成您的廠房資料</h3>
         <p>請填寫以下所有資訊，完成後點擊最下方的「儲存並提交審核」按鈕。</p>
       </div>
 
-      <h1 class="text-2xl font-bold text-[#4a4a43] mb-8">廠房資訊</h1>
+      <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-[#4a4a43]">廠房資訊</h1>
+        <p class="mt-1 text-[#8a8a7d]">管理與編輯您的廠房詳細資訊</p>
+      </div>
 
-      <section class="bg-white p-8 rounded-2xl shadow-sm mb-8">
+      <section class="bg-[#f5f4f0] p-8 rounded-2xl shadow-sm">
         <div class="space-y-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-medium text-[#4a4a43] flex items-center gap-2">
@@ -337,7 +340,7 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <section class="bg-white p-8 rounded-2xl shadow-sm mb-8">
+      <section class="bg-[#f5f4f0] p-8 rounded-2xl shadow-sm">
         <div class="space-y-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-medium text-[#4a4a43] flex items-center gap-2">
@@ -425,6 +428,90 @@ onBeforeUnmount(() => {
                   <span>公休</span>
                 </template>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-[#f5f4f0] p-8 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-medium flex items-center gap-2 shrink-0 text-[#4a4a43]">
+            <span class="material-symbols-outlined">imagesmode</span> 廠房照片
+          </h2>
+          <div v-if="status === 'active'" class="flex justify-end gap-3">
+            <button
+              v-if="!isPhotosEditing"
+              @click="isPhotosEditing = true"
+              class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white font-medium cursor-pointer hover:bg-[#57574a] transition"
+            >
+              編輯
+            </button>
+            <template v-else>
+              <button
+                @click="onCancel"
+                class="px-6 py-2 rounded-2xl border border-[#6b6b5a] text-[#4a4a43] cursor-pointer hover:bg-[#e6e5df] transition"
+              >
+                取消
+              </button>
+              <button
+                @click="onSave('photos')"
+                class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white cursor-pointer hover:bg-[#57574a] transition"
+              >
+                儲存變更
+              </button>
+            </template>
+          </div>
+        </div>
+        <input
+          ref="fileInputRef"
+          type="file"
+          accept="image/png,image/jpeg"
+          multiple
+          class="hidden"
+          @change="onFileChange"
+        />
+        <div
+          :class="[
+            'group border-2 border-dashed border-[#e0dfd6] rounded-2xl h-48 flex flex-col items-center justify-center text-[#4a4a43] transition-all duration-200 shrink-0',
+            !isPhotoUploadDisabled
+              ? 'cursor-pointer hover:bg-[#f0f0f0]'
+              : 'opacity-50 cursor-not-allowed',
+          ]"
+          @click="triggerUpload"
+        >
+          <div
+            :class="[
+              'text-4xl mb-2 text-[#b0afa4]',
+              !isPhotoUploadDisabled && 'group-hover:text-[#6b6b5a]',
+            ]"
+          >
+            <span class="material-symbols-outlined">add_a_photo</span>
+          </div>
+          <p class="font-medium text-[#4a4a43]">點擊上傳廠房照片</p>
+          <p class="text-sm mt-1 text-[#8a8a7d]">支援 JPG、PNG 格式，最多 3 張</p>
+        </div>
+        <div class="flex-1 overflow-y-auto mt-6 mb-6">
+          <div class="grid grid-cols-3 gap-6">
+            <div
+              v-for="(preview, index) in previews"
+              :key="preview"
+              class="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group"
+            >
+              <img :src="preview" class="w-full h-full object-cover" alt="preview" />
+              <button
+                v-if="!isPhotoUploadDisabled"
+                class="absolute top-2 right-2 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                @click.stop="removePhoto(index)"
+              >
+                ✕
+              </button>
+            </div>
+            <div
+              v-for="n in 3 - previews.length"
+              :key="'empty-' + n"
+              class="aspect-square rounded-2xl flex items-center justify-center bg-[#f5f4f0] border border-[#e0dfd6]"
+            >
+              <span class="material-symbols-outlined text-[#d1d1c1]">image</span>
             </div>
           </div>
         </div>
