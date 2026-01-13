@@ -2,10 +2,12 @@
 import { ref, computed, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import type { WorkshopProfile } from '@/stores/auth'
+import { trialWorkshop } from '@/mocks/workshop.mock'
 
 const authStore = useAuthStore()
 
 const localProfile = ref<WorkshopProfile>(JSON.parse(JSON.stringify(authStore.profile)))
+const selectedPlan = ref<'trial' | 'paid' | null>(null)
 
 watch(
   () => authStore.profile,
@@ -16,11 +18,12 @@ watch(
 )
 
 const status = computed(() => authStore.status)
+const subscriptionStatus = computed(() => authStore.subscriptionStatus)
 
 watch(status, (newStatus, oldStatus) => {
   if (oldStatus === 'onboarding' && newStatus === 'pending_review') {
     nextTick(() => {
-      window.scrollTo({ top: 0 })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     })
   }
 })
@@ -54,6 +57,10 @@ const isPhotoUploadDisabled = computed(
   () => isReadOnly.value || (status.value === 'active' && !isPhotosEditing.value),
 )
 
+const isSubscriptionSectionDisabled = computed(() => status.value === 'pending_review')
+const isTrialUser = computed(() => authStore.workshop?.id === trialWorkshop.id)
+const isPaid = computed(() => status.value === 'active' && subscriptionStatus.value === 'paid')
+
 const onCancel = () => {
   isInfoEditing.value = false
   isHoursEditing.value = false
@@ -68,7 +75,16 @@ const onSave = (section: 'info' | 'hours' | 'photos') => {
   if (section === 'photos') isPhotosEditing.value = false
 }
 const onOnboardingSave = () => {
-  authStore.updateProfile(JSON.parse(JSON.stringify(localProfile.value)))
+  if (!selectedPlan.value) {
+    alert('請選擇一個訂閱方案！')
+    return
+  }
+
+  if (selectedPlan.value === 'paid') {
+    alert('將為您導向至綠界金流進行付款...')
+  }
+
+  authStore.updateProfile(JSON.parse(JSON.stringify(localProfile.value)), selectedPlan.value)
 }
 
 // 標籤
@@ -170,8 +186,7 @@ onBeforeUnmount(() => {
 
 const redirectToECPay = (plan: 'trial' | 'onetime') => {
   if (plan === 'trial') {
-    alert('啟用 30 天免費試用！')
-    // 啟用試用版的邏輯
+    authStore.setStatus('active', 'trial')
   } else {
     alert('將為您導向至綠界金流進行付款...')
     // 呼叫後端 API，產生一個帶有加密參數的表單，然後自動提交以重定向到綠界
@@ -180,6 +195,7 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
       price: 500,
       user: authStore.profile.name,
     })
+    authStore.setStatus('active', 'paid')
   }
 }
 </script>
@@ -192,6 +208,9 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
         class="bg-[#f5f4f0] border-l-4 border-[#8a8a7d] text-[#4a4a43] p-4 rounded-r-lg"
       >
         <h3 class="font-bold">審核中</h3>
+        <p v-if="subscriptionStatus" class="font-bold">
+          您選擇的方案是：{{ subscriptionStatus === 'trial' ? '免費試用' : '進階方案' }}
+        </p>
         <p>您的資料已提交，正在等待平台管理員審核。在審核期間，所有資料將無法修改。</p>
       </div>
       <div
@@ -540,22 +559,36 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
         </div>
       </section>
 
-      <div v-if="status === 'onboarding'" class="flex justify-end mt-8">
-        <button
-          @click="onOnboardingSave"
-          class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold cursor-pointer hover:bg-[#57574a] transition"
-        >
-          儲存並提交審核
-        </button>
-      </div>
-
       <section class="bg-[#f5f4f0] p-8 rounded-2xl shadow-sm mt-6">
         <h2 class="text-2xl font-semibold text-[#4a4a43] mb-6">訂閱付費方案</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div v-if="isPaid" class="text-center p-6 bg-[#f5f4f0] border border-[#d1d1c1] rounded-2xl">
+          <h3 class="text-xl font-bold text-[#6b6b5a]">您已開通 VIP 會員</h3>
+          <p class="text-[#8a8a7d] mt-2">感謝您的支持！您現在可以享受所有進階功能。</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- 30 天免費試用 -->
           <div
-            class="border border-[#e0dfd6] rounded-2xl p-6 flex flex-col items-center text-center"
+            :class="[
+              'border rounded-2xl p-6 flex flex-col items-center text-center transition relative',
+              isSubscriptionSectionDisabled
+                ? 'opacity-50'
+                : status === 'onboarding'
+                  ? 'cursor-pointer'
+                  : '',
+              isTrialUser || (status === 'onboarding' && selectedPlan === 'trial')
+                ? 'border-2 border-[#6b6b5a] bg-[#f5f4f0]'
+                : 'border-[#e0dfd6]',
+            ]"
+            @click="status === 'onboarding' && (selectedPlan = 'trial')"
           >
+            <div
+              v-if="isTrialUser"
+              class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8b7d6b] text-white text-xs font-bold px-3 py-1 rounded-full"
+            >
+              目前方案
+            </div>
             <h3 class="text-xl font-bold text-[#6b6b5a] mb-2">免費試用</h3>
             <p class="text-[#4a4a43] mb-4">30 天全功能免費體驗</p>
             <ul class="text-[#8a8a7d] text-sm space-y-2 mb-6">
@@ -564,17 +597,48 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
               <li>優先搜尋排名</li>
               <li>專屬推廣活動</li>
             </ul>
+
             <button
-              @click="redirectToECPay('trial')"
-              class="px-6 py-2 rounded-2xl bg-[#8b7d6b] text-white font-medium hover:bg-[#7a6d5b] transition"
+              v-if="status === 'onboarding'"
+              class="px-6 py-2 rounded-2xl font-medium transition"
+              :class="
+                selectedPlan === 'trial'
+                  ? 'bg-[#6b6b5a] text-white cursor-default'
+                  : 'bg-[#8b7d6b] text-white hover:bg-[#7a6d5b]'
+              "
             >
-              啟用免費試用
+              {{ selectedPlan === 'trial' ? '已選擇' : '選擇此方案' }}
             </button>
+            <template v-else>
+              <button
+                v-if="!isTrialUser"
+                @click="redirectToECPay('trial')"
+                :disabled="isSubscriptionSectionDisabled || isPaid || isTrialUser"
+                class="px-6 py-2 rounded-2xl bg-[#8b7d6b] text-white font-medium hover:bg-[#7a6d5b] transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                啟用免費試用
+              </button>
+              <div v-else class="text-center">
+                <p class="font-bold text-[#6b6b5a]">正在試用中</p>
+                <p class="text-xs text-[#8a8a7d] mt-1">一個帳號僅限一次</p>
+              </div>
+            </template>
           </div>
 
           <!-- 買斷制 -->
           <div
-            class="border border-[#6b6b5a] rounded-2xl p-6 flex flex-col items-center text-center relative"
+            :class="[
+              'border rounded-2xl p-6 flex flex-col items-center text-center relative transition',
+              isSubscriptionSectionDisabled
+                ? 'opacity-50'
+                : status === 'onboarding'
+                  ? 'cursor-pointer'
+                  : '',
+              isPaid || (status === 'onboarding' && selectedPlan === 'paid')
+                ? 'border-2 border-[#6b6b5a] bg-[#f5f4f0]'
+                : 'border-[#6b6b5a]',
+            ]"
+            @click="status === 'onboarding' && (selectedPlan = 'paid')"
           >
             <div
               class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#6b6b5a] text-white text-xs font-bold px-3 py-1 rounded-full"
@@ -590,12 +654,34 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
               <li>專屬推廣活動</li>
             </ul>
             <button
+              v-if="status === 'onboarding'"
+              class="px-6 py-2 rounded-2xl font-medium transition"
+              :class="
+                selectedPlan === 'paid'
+                  ? 'bg-[#6b6b5a] text-white cursor-default'
+                  : 'bg-[#8b7d6b] text-white hover:bg-[#7a6d5b]'
+              "
+            >
+              {{ selectedPlan === 'paid' ? '已選擇' : '選擇此方案' }}
+            </button>
+            <button
+              v-else
               @click="redirectToECPay('onetime')"
-              class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white font-medium hover:bg-[#57574a] transition"
+              :disabled="isSubscriptionSectionDisabled || isPaid"
+              class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white font-medium hover:bg-[#57574a] transition disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               立即升級
             </button>
           </div>
+        </div>
+
+        <div v-if="status === 'onboarding'" class="flex justify-end mt-8">
+          <button
+            @click="onOnboardingSave"
+            class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold cursor-pointer hover:bg-[#57574a] transition"
+          >
+            儲存並提交審核
+          </button>
         </div>
       </section>
     </div>

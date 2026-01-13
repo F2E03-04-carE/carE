@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Workshop, WorkshopStatus } from '@/mocks/workshop.mock'
-import { activeWorkshop, pendingReviewWorkshop, onboardingWorkshop } from '@/mocks/workshop.mock'
+import {
+  activeWorkshop,
+  pendingReviewWorkshop,
+  onboardingWorkshop,
+  trialWorkshop,
+} from '@/mocks/workshop.mock'
 
 export interface WorkshopProfile {
   name: string
@@ -64,39 +69,80 @@ const defaultFullProfile: WorkshopProfile = {
 }
 
 export const useAuthStore = defineStore('auth', () => {
+  // 目前登入使用者的維修廠資料
   const workshop = ref<Workshop | null>(activeWorkshop)
+
+  // 維修廠編輯用的表單資料
   const profile = ref<WorkshopProfile>(defaultFullProfile)
 
+  // 目前維修廠狀態
   const status = computed(() => workshop.value?.status as WorkshopStatus)
 
-  function setStatus(newStatus: WorkshopStatus) {
+  // 目前訂閱狀態
+  const subscriptionStatus = computed(() => workshop.value?.subscription_status)
+
+  // 目前維修廠狀態，用於 DevRoleSwitcher 顯示用
+  const displayStatus = computed(() => {
+    if (workshop.value?.id === trialWorkshop.id) {
+      return 'active_trial'
+    }
+    return status.value
+  })
+
+  // 切換維修廠狀態（測試 / 模擬用）
+  function setStatus(newStatus: WorkshopStatus, subStatus?: 'trial' | 'paid') {
     if (newStatus === 'active') {
-      workshop.value = activeWorkshop
-      profile.value = { ...defaultFullProfile }
+      // active 狀態（依是否試用切換資料）
+      if (subStatus === 'trial') {
+        workshop.value = trialWorkshop
+        profile.value = { ...defaultFullProfile }
+      } else {
+        workshop.value = activeWorkshop
+        profile.value = { ...defaultFullProfile }
+      }
     } else if (newStatus === 'pending_review') {
+      // 等待審核狀態
       workshop.value = pendingReviewWorkshop
       profile.value = { ...defaultFullProfile }
     } else if (newStatus === 'onboarding') {
+      // 新註冊狀態
       workshop.value = onboardingWorkshop
       profile.value = { ...defaultEmptyProfile }
     }
   }
 
-  function updateProfile(newProfile: WorkshopProfile) {
+  // 更新維修廠資料
+  function updateProfile(newProfile: WorkshopProfile, plan?: 'trial' | 'paid' | null) {
+    // 更新表單資料
     profile.value = newProfile
-    console.log('Profile updated:', profile.value)
 
-    if (status.value === 'onboarding') {
-      console.log('Status changed from onboarding to pending_review')
-      workshop.value = pendingReviewWorkshop
+    // onboarding 完成後送出審核
+    if (status.value === 'onboarding' && plan) {
+      const newPendingWorkshop: Workshop = {
+        ...(workshop.value as Workshop),
+        ...newProfile,
+        status: 'pending_review',
+        profile_completed: true,
+        subscription_status: plan,
+        subscription_plan: 'pro',
+      }
+      workshop.value = newPendingWorkshop
+
+      // 非 onboarding 狀態僅更新資料
+    } else if (status.value !== 'onboarding') {
+      if (workshop.value) {
+        workshop.value = { ...workshop.value, ...newProfile }
+      }
     }
-    alert('資料已儲存！')
   }
 
+  // 對外暴露狀態與方法
   return {
     workshop,
     profile,
     status,
+    displayStatus,
+    subscriptionStatus,
     setStatus,
     updateProfile,
   }

@@ -4,14 +4,19 @@ import type { WorkshopStatus } from '@/mocks/workshop.mock'
 
 const authStore = useAuthStore()
 
-const statuses: { label: string; value: WorkshopStatus }[] = [
-  { label: '已開通', value: 'active' },
+const statuses: { label: string; value: WorkshopStatus | 'active_trial'; subStatus?: 'trial' }[] = [
+  { label: '已開通 VIP', value: 'active' },
+  { label: '免費試用', value: 'active_trial', subStatus: 'trial' },
   { label: '審核中', value: 'pending_review' },
   { label: '尚未填資料', value: 'onboarding' },
 ]
 
-const switchStatus = (status: WorkshopStatus) => {
-  authStore.setStatus(status)
+const switchStatus = (status: WorkshopStatus | 'active_trial', subStatus?: 'trial') => {
+  if (status === 'active_trial') {
+    authStore.setStatus('active', 'trial')
+  } else {
+    authStore.setStatus(status)
+  }
 }
 </script>
 
@@ -25,7 +30,7 @@ const switchStatus = (status: WorkshopStatus) => {
         @click="switchStatus(s.value)"
         class="px-4 py-2 text-left rounded-lg transition"
         :class="
-          authStore.status === s.value
+          authStore.displayStatus === s.value
             ? 'bg-[#6b6b5a] text-white font-bold shadow'
             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
         "
@@ -34,7 +39,7 @@ const switchStatus = (status: WorkshopStatus) => {
       </button>
     </div>
     <div class="mt-3 text-xs text-gray-500">
-      當前狀態: <span class="font-semibold">{{ authStore.status }}</span>
+      當前狀態: <span class="font-semibold">{{ authStore.displayStatus }}</span>
     </div>
   </div>
 </template>

@@ -85,3 +85,21 @@ export const rejectedWorkshop: Workshop = {
   skills: ['引擎維修', '電系/電子系統'],
   description: '資料送審未通過，需要更新完整資訊再重新送審。',
 }
+
+// 免費試用範例
+export const trialWorkshop: Workshop = {
+  id: 16,
+  name: '新手上路維修站',
+  owner_user_id: 9,
+  status: 'active',
+  profile_completed: true,
+  subscription_plan: 'pro',
+  subscription_status: 'trial',
+  taxId: '12345678',
+  address: '台北市信義區信義路五段7號',
+  phone: '02-8101-8888',
+  vat_number: '12345678',
+  brands: ['Toyota', 'Honda'],
+  skills: ['汽車保養/定期檢查'],
+  description: '新開張！熱情服務中！',
+}
