@@ -7,7 +7,7 @@
           <section class="p-6 bg-white rounded-2xl shadow-sm">
             <div class="flex items-start justify-between">
               <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
-              <div class="text-gray-500">★★★★★</div>
+              <div class="text-yellow-400">★★★★★</div>
             </div>
             <div class="mt-4 space-y-2 text-sm text-gray-600">
               <div class="flex items-center gap-2">
@@ -62,7 +62,7 @@
                       <span class="font-medium">U貓貓</span>
                       <span class="text-gray-400">2025-12-27</span>
                     </div>
-                    <div class="text-gray-500">★★★★★</div>
+                    <div class="text-yellow-400">★★★★★</div>
                   </div>
                   <p class="mt-2 text-sm leading-relaxed text-gray-600">
                     老闆技術很好，檢查很仔細，雖然是老車但也修得跟新的一樣！原本以為變速箱要大修，結果只是小零件問題，非常誠實的店家，大推！
@@ -87,7 +87,7 @@
                       <span class="font-medium">D貓貓</span>
                       <span class="text-gray-400">2025-12-20</span>
                     </div>
-                    <div class="text-gray-500">★★★★★</div>
+                    <div class="text-yellow-400">★★★★★</div>
                   </div>
                   <p class="mt-2 text-sm leading-relaxed text-gray-600">
                     冷氣突然不冷，跑了好幾家都說要換整組，這裡師傅幫我抓到是管路洩漏，補好灌冷媒就超級冷，省了一大筆錢！休息區還有路易莎咖啡可以喝，很貼心。
@@ -112,7 +112,7 @@
                       <span class="font-medium">T貓貓</span>
                       <span class="text-gray-400">2025-12-15</span>
                     </div>
-                    <div class="text-gray-500">★★★★☆</div>
+                    <div class="text-yellow-400">★★★★☆</div>
                   </div>
                   <p class="mt-2 text-sm leading-relaxed text-gray-600">
                     定期保養速度很快，價格公道透明。唯一的缺點是假日人有點多，建議大家要提早預約才不會等太久。
