@@ -47,6 +47,7 @@ const ActiveFilter = ref<FilterType>(`all`);
 const SearchQuery = ref<string>(``);
 const ActiveModal = ref<`none` | `detail` | `rating`>(`none`);
 const SelectedAppointment = ref<Appointment | null>(null);
+const ShowQuoteDetails = ref<boolean>(false);
 const RatingScore = ref<number>(0);
 const HoverScore = ref<number>(0);
 const RatingComment = ref<string>(``);
@@ -192,6 +193,7 @@ const GetProgressWidth = (Steps: ProgressStep[]) => {
 
 const OpenDetailModal = (Apt: Appointment) => {
 	SelectedAppointment.value = Apt;
+	ShowQuoteDetails.value = false;
 	ActiveModal.value = `detail`;
 };
 
@@ -326,6 +328,42 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 							<div class="rounded-2xl bg-[#EFECE6]/60 p-6">
 								<h5 class="mb-4 text-base font-bold text-[#2F2E2A]">備註</h5>
 								<p class="text-sm text-[#2F2E2A]">{{ SelectedAppointment.notes }}</p>
+							</div>
+						</div>
+
+						<div class="mb-6">
+							<button @click="ShowQuoteDetails = !ShowQuoteDetails" class="flex w-full items-center justify-between rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] px-6 py-4 transition-colors hover:bg-[#EFECE6]">
+								<div class="flex items-center gap-2">
+									<span class="material-symbols-outlined text-[#6B705C]">request_quote</span>
+									<span class="font-bold text-[#2F2E2A]">查看預估報價單</span>
+								</div>
+								<span class="material-symbols-outlined text-[#6B705C] transition-transform duration-300" :class="{ 'rotate-180': ShowQuoteDetails }">expand_more</span>
+							</button>
+							<div v-if="ShowQuoteDetails" class="mt-4 overflow-hidden rounded-2xl border border-[#E2DED6] bg-white p-6 transition-all duration-300">
+								<div v-if="QuoteGroups.base.length > 0" class="mb-6">
+									<h6 class="mb-3 text-xs font-bold text-[#6B705C] uppercase tracking-wider">基本項目</h6>
+									<div class="space-y-2">
+										<div v-for="(Item, idx) in QuoteGroups.base" :key="idx" class="flex justify-between items-center text-sm">
+											<span class="text-[#2F2E2A]">{{ Item.name }}</span>
+											<span class="font-bold text-[#2F2E2A]">{{ typeof Item.price === 'number' ? FormatCurrency(Item.price) : '免費/內含' }}</span>
+										</div>
+									</div>
+								</div>
+								
+								<div v-if="QuoteGroups.addon.length > 0" class="mb-6">
+									<h6 class="mb-3 text-xs font-bold text-[#6B705C] uppercase tracking-wider">加購項目</h6>
+									<div class="space-y-2">
+										<div v-for="(Item, idx) in QuoteGroups.addon" :key="idx" class="flex justify-between items-center text-sm">
+											<span class="text-[#2F2E2A]">{{ Item.name }}</span>
+											<span class="font-bold text-[#2F2E2A]">{{ typeof Item.price === 'number' ? FormatCurrency(Item.price) : '免費/內含' }}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="flex justify-between items-center border-t border-[#E2DED6] pt-4">
+									<span class="text-base font-bold text-[#2F2E2A]">總計金額</span>
+									<span class="text-xl font-bold text-[#6B705C]">{{ FormatCurrency(QuoteTotal) }}</span>
+								</div>
 							</div>
 						</div>
 					</div>
