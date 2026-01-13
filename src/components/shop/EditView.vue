@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import type { WorkshopProfile } from '@/stores/auth'
 
@@ -16,6 +16,14 @@ watch(
 )
 
 const status = computed(() => authStore.status)
+
+watch(status, (newStatus, oldStatus) => {
+  if (oldStatus === 'onboarding' && newStatus === 'pending_review') {
+    nextTick(() => {
+      window.scrollTo({ top: 0 })
+    })
+  }
+})
 
 const isReadOnly = computed(() => status.value === 'pending_review')
 
