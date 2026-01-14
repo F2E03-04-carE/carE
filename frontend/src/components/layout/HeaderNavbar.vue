@@ -39,8 +39,7 @@ const closeRegister = () => {
     <nav class="max-w-[1440px] mx-auto px-[5%] sm:px-[8%] lg:px-[5%]">
       <div class="flex justify-between items-center h-[60px] sm:h-[70px]">
         <a href="/" class="flex items-center gap-2">
-          <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
-          <span class="text-[20px] sm:text-[24px] font-bold text-[#4a4a43]">carE</span>
+          <img src="@/assets/icons/carE_logo_green.png" alt="carE logo" class="h-15 w-auto object-contain"> </img>
         </a>
         <div class="flex items-center gap-2 sm:gap-3 font-extrabold">
           <div calss="flex items-center">
