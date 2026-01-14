@@ -593,9 +593,6 @@ const redirectToECPay = (plan: 'trial' | 'onetime') => {
             <p class="text-[#4a4a43] mb-4">30 天全功能免費體驗</p>
             <ul class="text-[#8a8a7d] text-sm space-y-2 mb-6">
               <li>體驗所有進階功能</li>
-              <li>無限預約管理</li>
-              <li>優先搜尋排名</li>
-              <li>專屬推廣活動</li>
             </ul>
 
             <button
