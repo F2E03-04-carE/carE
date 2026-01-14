@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import ShopAdminLayout from '@/components/shop/layout/ShopAdminLayout.vue';
+import ShopAdminLayout from '@/views/ShopAdmin/layout/ShopAdminLayout.vue';
 
 const routes = [
   {
@@ -10,27 +10,27 @@ const routes = [
       {
         path: 'overview',
         name: 'overview',
-        component: () => import('@/components/shop/OverView.vue'),
+        component: () => import('@/views/ShopAdmin/OverView.vue'),
       },
       {
         path: 'orders',
         name: 'orders',
-        component: () => import('@/components/shop/OrdersView.vue'),
+        component: () => import('@/views/ShopAdmin/OrdersView.vue'),
       },
       {
         path: 'schedule',
         name: 'schedule',
-        component: () => import('@/components/shop/ScheduleView.vue'),
+        component: () => import('@/views/ShopAdmin/ScheduleView.vue'),
       },
       {
         path: 'records',
         name: 'records',
-        component: () => import('@/components/shop/RecordsView.vue'),
+        component: () => import('@/views/ShopAdmin/RecordsView.vue'),
       },
       {
         path: 'edit',
         name: 'edit',
-        component: () => import('@/components/shop/EditView.vue'),
+        component: () => import('@/views/ShopAdmin/EditView.vue'),
       },
     ],
   },
