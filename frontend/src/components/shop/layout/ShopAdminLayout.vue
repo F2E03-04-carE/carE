@@ -23,12 +23,15 @@ watch(
 </script>
 
 <template>
-  <div class="relative min-h-screen flex text-[#4a4a43]">
-    <AsideMenu />
-    <DevRoleSwitcher />
+  <div class="min-h-screen text-[#4a4a43] relative">
+    <div class="flex min-h-screen">
+      <AsideMenu />
 
-    <main class="w-[80%] ml-[20%] px-8 py-4 bg-white rounded-xl shadow-sm">
-      <router-view />
-    </main>
+      <main class="flex-1 px-8 py-4 bg-white">
+        <router-view />
+      </main>
+    </div>
+
+    <DevRoleSwitcher />
   </div>
 </template>

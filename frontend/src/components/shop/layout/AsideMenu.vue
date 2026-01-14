@@ -23,11 +23,11 @@ const isMenuDisabled = computed(() => {
 
 <template>
   <aside
-    class="fixed w-[20%] h-screen bg-[#f5f4f0] shadow-[8px_0_10px_-3px_rgba(0,0,0,0.25)] flex flex-col"
+    class="sticky top-[70px] w-[20%] h-screen bg-[#f5f4f0] shadow-[8px_0_10px_-3px_rgba(0,0,0,0.25)] flex flex-col"
   >
     <div class="px-6 py-6 text-xl font-semibold text-[#4a4a43]">維修廠後台</div>
 
-    <nav class="flex flex-col px-3 gap-4">
+    <nav class="flex-1 overflow-y-auto px-3 gap-4 flex flex-col">
       <button
         @click="goPage('/overview')"
         :class="[
