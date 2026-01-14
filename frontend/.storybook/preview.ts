@@ -1,4 +1,6 @@
 import type { Preview } from '@storybook/vue3-vite';
+// 引入 Tailwind CSS 和全域樣式
+import '../src/main.css';
 
 const preview: Preview = {
   parameters: {

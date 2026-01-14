@@ -4,8 +4,8 @@ import LoginMode from '@/views/Auth/LoginMode.vue';
 import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
 const baseButtonClass =
-  'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] rounded-lg sm:rounded-xl transition-colors duration-200 cursor-pointer';
-
+  'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[16px] lg:text-[18px] rounded-lg sm:rounded-xl transition-colors duration-200 cursor-pointer';
+const textOnlyButtonClass = 'px-2 py-2 sm:px-4 sm:py-2 lg:px-3 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] cursor-pointer'
 const isShowLoginModal = ref(false);
 const isShowRegister = ref(false);
 
@@ -39,11 +39,28 @@ const closeRegister = () => {
     <nav class="max-w-[1440px] mx-auto px-[5%] sm:px-[8%] lg:px-[5%]">
       <div class="flex justify-between items-center h-[60px] sm:h-[70px]">
         <a href="/" class="flex items-center gap-2">
-          <!-- <i class="fa-solid fa-car text-[#6b6b5a] text-[20px] sm:text-[24px]"></i> -->
           <span class="logo material-symbols-outlined text-[#6b6b5a]"> directions_car </span>
           <span class="text-[20px] sm:text-[24px] font-bold text-[#4a4a43]">carE</span>
         </a>
         <div class="flex items-center gap-2 sm:gap-3 font-extrabold">
+          <div calss="flex items-center">
+          <button
+            :class="[
+              textOnlyButtonClass,
+              'text-[#6b6b5a] hover:scale-110',
+            ]"
+          >
+            尋找維修廠
+          </button>
+          <button
+            :class="[
+              textOnlyButtonClass,
+              'text-[#6b6b5a] hover:scale-110',
+            ]"
+          >
+            刊登維修廠
+          </button>
+          </div>
           <button
             @click="openLoginModal"
             :class="[
@@ -57,7 +74,7 @@ const closeRegister = () => {
             @click="handleGoToRegister"
             :class="[
               baseButtonClass,
-              'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 font-medium border border-transparent',
+              'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 border border-transparent',
             ]"
           >
             加入會員
