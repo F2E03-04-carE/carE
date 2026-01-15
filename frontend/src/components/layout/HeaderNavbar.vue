@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useUserStore } from '@/stores/user';
 import LoginMode from '@/views/Auth/LoginMode.vue';
 import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
@@ -9,6 +10,12 @@ export interface HeaderNavbarProps {
 
 const props = withDefaults(defineProps<HeaderNavbarProps>(), {
   userRole: 'guest',
+});
+
+const userStore = useUserStore();
+
+const currentUserRole = computed(() => {
+  return userStore.userRole || props.userRole;
 });
 
 const baseButtonClass =
@@ -97,7 +104,7 @@ const handleLogout = () => {
             尋找維修廠
           </button>
 
-          <template v-if="userRole === 'guest'">
+          <template v-if="currentUserRole === 'guest'">
             <button
               :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
             >
@@ -123,7 +130,7 @@ const handleLogout = () => {
             </button>
           </template>
 
-          <template v-else-if="userRole === 'member'">
+          <template v-else-if="currentUserRole === 'member'">
             <div
               class="relative group"
               @mouseenter="openDropdown"
@@ -175,7 +182,7 @@ const handleLogout = () => {
             </button>
           </template>
 
-          <template v-else-if="userRole === 'garage'">
+          <template v-else-if="currentUserRole === 'garage'">
             <div
               class="relative group"
               @mouseenter="openDropdown"
@@ -250,7 +257,7 @@ const handleLogout = () => {
           尋找維修廠
         </button>
 
-        <template v-if="userRole === 'guest'">
+        <template v-if="currentUserRole === 'guest'">
           <button
             @click="closeMobileMenu"
             class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
@@ -271,7 +278,7 @@ const handleLogout = () => {
           </button>
         </template>
 
-        <template v-else-if="userRole === 'member'">
+        <template v-else-if="currentUserRole === 'member'">
           <div class="flex flex-col gap-2">
             <button
               @click="toggleMobileAccordion"
@@ -321,7 +328,7 @@ const handleLogout = () => {
           </button>
         </template>
 
-        <template v-else-if="userRole === 'garage'">
+        <template v-else-if="currentUserRole === 'garage'">
           <div class="flex flex-col gap-2">
             <button
               @click="toggleMobileAccordion"
