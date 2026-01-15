@@ -1,4 +1,4 @@
-export type WorkshopStatus = 'onboarding' | 'pending_review' | 'rejected' | 'active';
+export type WorkshopStatus = 'onboarding' | 'pending_review' | 'active';
 
 export interface Workshop {
   id: number;
@@ -68,23 +68,6 @@ export const activeWorkshop: Workshop = {
   description: '專注高效率維修，擁有先進設備及專業技師團隊。',
 };
 
-// 被退件（審核未通過）範例
-export const rejectedWorkshop: Workshop = {
-  id: 20,
-  name: '快修汽車中心',
-  owner_user_id: 11,
-  status: 'rejected',
-  profile_completed: true,
-  subscription_plan: 'pro',
-  subscription_status: 'paid',
-  taxId: '33445566',
-  address: '台北市大安區和平東路45號',
-  phone: '02-2765-3344',
-  vat_number: '33445566',
-  brands: ['Toyota', 'Honda'],
-  skills: ['引擎維修', '電系/電子系統'],
-  description: '資料送審未通過，需要更新完整資訊再重新送審。',
-};
 
 // 免費試用範例
 export const trialWorkshop: Workshop = {

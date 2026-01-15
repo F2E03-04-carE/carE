@@ -13,8 +13,7 @@ const goPage = (path: string) => {
   }
 };
 
-// startsWith 用以支援子路由，特別是 edit/<childPath>
-const activeTab = (path: string) => route.path.startsWith(path);
+const activeTab = (path: string) => route.path === path;
 
 const isMenuDisabled = computed(() => {
   return authStore.status === 'pending_review' || authStore.status === 'onboarding';

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Order } from './components/orderTypeDefine';
 import { useOrders } from './components/useOrderModal';
 import OrderCard from './components/OrderCard.vue';
 import OrderDetailModal from './components/OrderDetailModal.vue';
@@ -25,7 +24,7 @@ const isSameMonth = (dateStr: string, target: Date) => {
 
 // 統計卡
 const todayOrderCount = computed(
-  () => orders.value.filter((order) => isSameDay(order.date, today)).length,
+  () => orders.value.filter((order) => isSameDay(order.scheduledDate, today)).length,
 );
 
 const waitingCount = computed(
@@ -36,7 +35,8 @@ const monthCompletedCount = computed(
   () =>
     orders.value.filter(
       (order) =>
-        (order.status === '已完成' || order.status === '已取車') && isSameMonth(order.date, today),
+        (order.status === '已完成' || order.status === '已取車') &&
+        isSameMonth(order.scheduledDate, today),
     ).length,
 );
 

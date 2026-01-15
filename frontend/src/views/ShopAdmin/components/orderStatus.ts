@@ -1,4 +1,5 @@
-import type { OrderStatus } from './orderTypeDefine';
+// 根據工單狀態決定標籤顏色
+export type OrderStatus = '進行中' | '待確認' | '已完成' | '已取車';
 
 export const statusColors: Record<OrderStatus, string> = {
   進行中: 'bg-green-400 text-white',

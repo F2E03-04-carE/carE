@@ -1,30 +1,35 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { Order, OrderStatus } from './orderTypeDefine';
 import { statusClass } from './orderStatus';
+
+type OrderStatus = '進行中' | '待確認' | '已完成' | '已取車';
 
 const props = defineProps<{
   modelValue: boolean;
-  order: Order | null;
+  order: any | null;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void;
-  (e: 'save', status: OrderStatus): void;
+  (e: 'save', status: OrderStatus, note?: string): void;
 }>();
 
 const tempStatus = ref<OrderStatus>('待確認');
+const tempNote = ref<string | undefined>('');
 
 watch(
   () => props.order,
   (o) => {
-    if (o) tempStatus.value = o.status;
+    if (o) {
+      tempStatus.value = o.status;
+      tempNote.value = o.note;
+    }
   },
   { immediate: true },
 );
 
 const close = () => emit('update:modelValue', false);
-const save = () => emit('save', tempStatus.value);
+const save = () => emit('save', tempStatus.value, tempNote.value);
 </script>
 
 <template>
@@ -74,7 +79,7 @@ const save = () => emit('save', tempStatus.value);
             </div>
             <div>
               <p class="text-sm text-[#8a8a7d]">服務項目</p>
-              <p class="font-medium">{{ order?.vehicle.service }}</p>
+              <p class="font-medium">{{ order?.serviceType }}</p>
             </div>
           </div>
         </div>
@@ -108,18 +113,21 @@ const save = () => emit('save', tempStatus.value);
               <p class="font-medium text-[#4a4a43]">{{ order?.requestTime }}</p>
 
               <p class="text-sm text-[#8a8a7d] mt-2">預約維修時間</p>
-              <p class="font-medium text-[#4a4a43]">{{ order?.date }} {{ order?.time }}</p>
+              <p class="font-medium text-[#4a4a43]">
+                {{ order?.scheduledDate }} {{ order?.scheduledTime }}
+              </p>
             </div>
           </div>
 
           <!-- 客戶備註 -->
           <div class="mt-4">
-            <p class="text-sm text-[#8a8a7d] mb-1 font-medium">備註</p>
-            <p
-              class="w-full rounded-xl bg-[#f5f4f0] p-3 text-sm text-[#4a4a43] min-h-[3rem] whitespace-pre-wrap"
-            >
-              {{ order?.note || '無' }}
-            </p>
+            <p class="text-sm text-[#8a8a7d] mb-1 font-medium">廠房內部備註</p>
+            <textarea
+              v-model="tempNote"
+              rows="3"
+              class="w-full rounded-xl bg-[#f5f4f0] p-3 text-sm text-[#4a4a43] whitespace-pre-wrap outline-none focus:ring-2 focus:ring-[#6b6b5a]"
+              placeholder="可在此輸入內部溝通事項或備註..."
+            ></textarea>
           </div>
         </div>
       </div>

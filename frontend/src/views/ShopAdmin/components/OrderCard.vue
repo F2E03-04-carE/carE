@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { Order } from './orderTypeDefine';
 import { statusClass } from './orderStatus';
 
 defineProps<{
-  order: Order;
+  order: any; // The type will be inferred from the parent
 }>();
 
 defineEmits<{
-  (e: 'open', order: Order): void;
+  (e: 'open', order: any): void;
 }>();
 </script>
 
@@ -54,7 +53,7 @@ defineEmits<{
           <p class="font-medium text-[#4a4a43]">{{ order.requestTime }}</p>
 
           <p class="text-sm text-[#8a8a7d] mt-2">預約維修時間</p>
-          <p class="font-medium text-[#4a4a43]">{{ order.date }} {{ order.time }}</p>
+          <p class="font-medium text-[#4a4a43]">{{ order.scheduledDate }} {{ order.scheduledTime }}</p>
         </div>
 
         <button

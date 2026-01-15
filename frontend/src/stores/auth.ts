@@ -24,7 +24,7 @@ export interface WorkshopProfile {
     end: string;
   }[];
   // 照片
-  photos: (File | string)[];
+  photos: string[];
 }
 
 // 假資料
@@ -147,3 +147,5 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
   };
 });
+
+export type AuthStore = ReturnType<typeof useAuthStore>;
