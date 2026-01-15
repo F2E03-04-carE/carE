@@ -3,6 +3,14 @@ import { ref } from 'vue';
 import LoginMode from '@/views/Auth/LoginMode.vue';
 import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
+export interface HeaderNavbarProps {
+  userRole?: 'guest' | 'member' | 'garage';
+}
+
+const props = withDefaults(defineProps<HeaderNavbarProps>(), {
+  userRole: 'guest',
+});
+
 const baseButtonClass =
   'px-3 py-3 sm:px-4 sm:py-2 lg:px-5 lg:py-2 text-[14px] sm:text-[16px] lg:text-[18px] rounded-lg sm:rounded-xl transition-colors duration-200 cursor-pointer';
 const textOnlyButtonClass =
@@ -11,13 +19,31 @@ const textOnlyButtonClass =
 const isMobileMenuOpen = ref(false);
 const isShowLoginModal = ref(false);
 const isShowRegister = ref(false);
+const isDropdownOpen = ref(false);
+const isMobileAccordionOpen = ref(false);
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  if (!isMobileMenuOpen.value) {
+    isMobileAccordionOpen.value = false;
+  }
 };
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
+  isMobileAccordionOpen.value = false;
+};
+
+const toggleMobileAccordion = () => {
+  isMobileAccordionOpen.value = !isMobileAccordionOpen.value;
+};
+
+const openDropdown = () => {
+  isDropdownOpen.value = true;
+};
+
+const closeDropdown = () => {
+  isDropdownOpen.value = false;
 };
 
 const openLoginModal = () => {
@@ -45,6 +71,11 @@ const handleBackToLogin = () => {
 const closeRegister = () => {
   isShowRegister.value = false;
 };
+
+const handleLogout = () => {
+  closeMobileMenu();
+  closeDropdown();
+};
 </script>
 
 <template>
@@ -65,29 +96,136 @@ const closeRegister = () => {
           >
             尋找維修廠
           </button>
-          <button
-            :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
-          >
-            刊登維修廠
-          </button>
-          <button
-            @click="openLoginModal"
-            :class="[
-              baseButtonClass,
-              'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
-            ]"
-          >
-            登入
-          </button>
-          <button
-            @click="handleGoToRegister"
-            :class="[
-              baseButtonClass,
-              'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 border border-transparent',
-            ]"
-          >
-            加入會員
-          </button>
+
+          <template v-if="userRole === 'guest'">
+            <button
+              :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+            >
+              刊登維修廠
+            </button>
+            <button
+              @click="openLoginModal"
+              :class="[
+                baseButtonClass,
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
+              ]"
+            >
+              登入
+            </button>
+            <button
+              @click="handleGoToRegister"
+              :class="[
+                baseButtonClass,
+                'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 border border-transparent',
+              ]"
+            >
+              加入會員
+            </button>
+          </template>
+
+          <template v-else-if="userRole === 'member'">
+            <div
+              class="relative group"
+              @mouseenter="openDropdown"
+              @mouseleave="closeDropdown"
+            >
+              <button
+                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+              >
+                會員管理
+              </button>
+              <div
+                v-if="isDropdownOpen"
+                class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
+              >
+                <a
+                  href="/member/profile"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  會員基本資料
+                </a>
+                <a
+                  href="/member/bookings"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  預約紀錄
+                </a>
+                <a
+                  href="/member/history"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  維修歷史
+                </a>
+                <a
+                  href="/member/post-garage"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  刊登維修廠
+                </a>
+              </div>
+            </div>
+            <button
+              @click="handleLogout"
+              :class="[
+                baseButtonClass,
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
+              ]"
+            >
+              登出
+            </button>
+          </template>
+
+          <template v-else-if="userRole === 'garage'">
+            <div
+              class="relative group"
+              @mouseenter="openDropdown"
+              @mouseleave="closeDropdown"
+            >
+              <button
+                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+              >
+                商家管理
+              </button>
+              <div
+                v-if="isDropdownOpen"
+                class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
+              >
+                <a
+                  href="/garage/dashboard"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  今日總覽
+                </a>
+                <a
+                  href="/garage/profile"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  商家基本資料
+                </a>
+                <a
+                  href="/garage/schedule"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  預約排程
+                </a>
+                <a
+                  href="/garage/orders"
+                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                >
+                  歷史訂單
+                </a>
+              </div>
+            </div>
+            <button
+              @click="handleLogout"
+              :class="[
+                baseButtonClass,
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
+              ]"
+            >
+              登出
+            </button>
+          </template>
         </div>
 
         <button
@@ -111,24 +249,127 @@ const closeRegister = () => {
         >
           尋找維修廠
         </button>
-        <button
-          @click="closeMobileMenu"
-          class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-        >
-          刊登維修廠
-        </button>
-        <button
-          @click="openLoginModal"
-          class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors"
-        >
-          登入
-        </button>
-        <button
-          @click="handleGoToRegister"
-          class="w-full py-3 text-[16px] bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] rounded-lg transition-colors"
-        >
-          加入會員
-        </button>
+
+        <template v-if="userRole === 'guest'">
+          <button
+            @click="closeMobileMenu"
+            class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+          >
+            刊登維修廠
+          </button>
+          <button
+            @click="openLoginModal"
+            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
+          >
+            登入
+          </button>
+          <button
+            @click="handleGoToRegister"
+            class="w-full py-3 text-[16px] bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] rounded-lg transition-colors text-center"
+          >
+            加入會員
+          </button>
+        </template>
+
+        <template v-else-if="userRole === 'member'">
+          <div class="flex flex-col gap-2">
+            <button
+              @click="toggleMobileAccordion"
+              class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+            >
+              會員管理
+            </button>
+            <div
+              v-if="isMobileAccordionOpen"
+              class="flex flex-col gap-2 pl-4"
+            >
+              <a
+                href="/member/profile"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                會員基本資料
+              </a>
+              <a
+                href="/member/bookings"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                預約紀錄
+              </a>
+              <a
+                href="/member/history"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                維修歷史
+              </a>
+              <a
+                href="/member/post-garage"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                刊登維修廠
+              </a>
+            </div>
+          </div>
+          <button
+            @click="handleLogout"
+            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
+          >
+            登出
+          </button>
+        </template>
+
+        <template v-else-if="userRole === 'garage'">
+          <div class="flex flex-col gap-2">
+            <button
+              @click="toggleMobileAccordion"
+              class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+            >
+              商家管理
+            </button>
+            <div
+              v-if="isMobileAccordionOpen"
+              class="flex flex-col gap-2 pl-4"
+            >
+              <a
+                href="/garage/dashboard"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                今日總覽
+              </a>
+              <a
+                href="/garage/profile"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                商家基本資料
+              </a>
+              <a
+                href="/garage/schedule"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                預約排程
+              </a>
+              <a
+                href="/garage/orders"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
+                @click="closeMobileMenu"
+              >
+                歷史訂單
+              </a>
+            </div>
+          </div>
+          <button
+            @click="handleLogout"
+            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
+          >
+            登出
+          </button>
+        </template>
       </div>
     </nav>
 

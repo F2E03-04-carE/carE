@@ -8,22 +8,40 @@ const meta = {
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
+  argTypes: {
+    userRole: {
+      control: 'select',
+      options: ['guest', 'member', 'garage'],
+      description: '用戶身份類型',
+    },
+  },
 } satisfies Meta<typeof HeaderNavbar>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Desktop: Story = {
-  args: {},
-  parameters: {
-    viewport: {
-      defaultViewport: 'responsive',
-    },
+export const Guest: Story = {
+  args: {
+    userRole: 'guest',
   },
 };
 
-export const Mobile: Story = {
-  args: {},
+export const Member: Story = {
+  args: {
+    userRole: 'member',
+  },
+};
+
+export const Garage: Story = {
+  args: {
+    userRole: 'garage',
+  },
+};
+
+export const GuestMobile: Story = {
+  args: {
+    userRole: 'guest',
+  },
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
@@ -31,27 +49,24 @@ export const Mobile: Story = {
   },
 };
 
-export const Tablet: Story = {
-  args: {},
-  parameters: {
-    viewport: {
-      defaultViewport: 'tablet',
-    },
+export const MemberMobile: Story = {
+  args: {
+    userRole: 'member',
   },
-};
-
-export const MobileMenuOpen: Story = {
-  args: {},
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
     },
   },
-  play: async ({ canvasElement }) => {
-    const canvas = canvasElement as HTMLElement;
-    const menuButton = canvas.querySelector('button[aria-label="開啟選單"]') as HTMLButtonElement;
-    if (menuButton) {
-      menuButton.click();
-    }
+};
+
+export const GarageMobile: Story = {
+  args: {
+    userRole: 'garage',
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
   },
 };
