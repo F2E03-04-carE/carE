@@ -15,7 +15,10 @@ const props = withDefaults(defineProps<HeaderNavbarProps>(), {
 const userStore = useUserStore();
 
 const currentUserRole = computed(() => {
-  return userStore.userRole || props.userRole;
+  if (userStore.isLoggedIn) {
+    return userStore.userRole;
+  }
+  return props.userRole;
 });
 
 const baseButtonClass =
@@ -83,6 +86,40 @@ const handleLogout = () => {
   closeMobileMenu();
   closeDropdown();
 };
+
+interface MenuItem {
+  label: string;
+  href: string;
+}
+
+const menuConfig = {
+  member: {
+    title: '會員管理',
+    items: [
+      { label: '會員基本資料', href: '/member/profile' },
+      { label: '預約紀錄', href: '/member/bookings' },
+      { label: '維修歷史', href: '/member/history' },
+      { label: '刊登維修廠', href: '/member/post-garage' },
+    ],
+  },
+  garage: {
+    title: '商家管理',
+    items: [
+      { label: '今日總覽', href: '/garage/dashboard' },
+      { label: '商家基本資料', href: '/garage/profile' },
+      { label: '預約排程', href: '/garage/schedule' },
+      { label: '歷史訂單', href: '/garage/orders' },
+    ],
+  },
+};
+
+const currentMenu = computed(() => {
+  const role = currentUserRole.value;
+  if (role === 'member' || role === 'garage') {
+    return menuConfig[role];
+  }
+  return null;
+});
 </script>
 
 <template>
@@ -130,7 +167,7 @@ const handleLogout = () => {
             </button>
           </template>
 
-          <template v-else-if="currentUserRole === 'member'">
+          <template v-else-if="currentMenu">
             <div
               class="relative group"
               @mouseenter="openDropdown"
@@ -139,87 +176,19 @@ const handleLogout = () => {
               <button
                 :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
               >
-                會員管理
+                {{ currentMenu.title }}
               </button>
               <div
                 v-if="isDropdownOpen"
                 class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
               >
                 <a
-                  href="/member/profile"
+                  v-for="item in currentMenu.items"
+                  :key="item.href"
+                  :href="item.href"
                   class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
                 >
-                  會員基本資料
-                </a>
-                <a
-                  href="/member/bookings"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  預約紀錄
-                </a>
-                <a
-                  href="/member/history"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  維修歷史
-                </a>
-                <a
-                  href="/member/post-garage"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  刊登維修廠
-                </a>
-              </div>
-            </div>
-            <button
-              @click="handleLogout"
-              :class="[
-                baseButtonClass,
-                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
-              ]"
-            >
-              登出
-            </button>
-          </template>
-
-          <template v-else-if="currentUserRole === 'garage'">
-            <div
-              class="relative group"
-              @mouseenter="openDropdown"
-              @mouseleave="closeDropdown"
-            >
-              <button
-                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
-              >
-                商家管理
-              </button>
-              <div
-                v-if="isDropdownOpen"
-                class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
-              >
-                <a
-                  href="/garage/dashboard"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  今日總覽
-                </a>
-                <a
-                  href="/garage/profile"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  商家基本資料
-                </a>
-                <a
-                  href="/garage/schedule"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  預約排程
-                </a>
-                <a
-                  href="/garage/orders"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
-                >
-                  歷史訂單
+                  {{ item.label }}
                 </a>
               </div>
             </div>
@@ -278,95 +247,26 @@ const handleLogout = () => {
           </button>
         </template>
 
-        <template v-else-if="currentUserRole === 'member'">
+        <template v-else-if="currentMenu">
           <div class="flex flex-col gap-2">
             <button
               @click="toggleMobileAccordion"
               class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
             >
-              會員管理
+              {{ currentMenu.title }}
             </button>
             <div
               v-if="isMobileAccordionOpen"
               class="flex flex-col gap-2 pl-4"
             >
               <a
-                href="/member/profile"
+                v-for="item in currentMenu.items"
+                :key="item.href"
+                :href="item.href"
                 class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
                 @click="closeMobileMenu"
               >
-                會員基本資料
-              </a>
-              <a
-                href="/member/bookings"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                預約紀錄
-              </a>
-              <a
-                href="/member/history"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                維修歷史
-              </a>
-              <a
-                href="/member/post-garage"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                刊登維修廠
-              </a>
-            </div>
-          </div>
-          <button
-            @click="handleLogout"
-            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
-          >
-            登出
-          </button>
-        </template>
-
-        <template v-else-if="currentUserRole === 'garage'">
-          <div class="flex flex-col gap-2">
-            <button
-              @click="toggleMobileAccordion"
-              class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-            >
-              商家管理
-            </button>
-            <div
-              v-if="isMobileAccordionOpen"
-              class="flex flex-col gap-2 pl-4"
-            >
-              <a
-                href="/garage/dashboard"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                今日總覽
-              </a>
-              <a
-                href="/garage/profile"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                商家基本資料
-              </a>
-              <a
-                href="/garage/schedule"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                預約排程
-              </a>
-              <a
-                href="/garage/orders"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                歷史訂單
+                {{ item.label }}
               </a>
             </div>
           </div>
