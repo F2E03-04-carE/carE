@@ -17,14 +17,20 @@ const emit = defineEmits(['update:modelValue']);
 const onDayEnableToggle = (dayIndex: number) => {
   if (props.areHoursDisabled) return;
   const newHours = [...props.modelValue];
-  newHours[dayIndex].enabled = !newHours[dayIndex].enabled;
-  emit('update:modelValue', newHours);
+  const day = newHours[dayIndex];
+  if (day) {
+    day.enabled = !day.enabled;
+    emit('update:modelValue', newHours);
+  }
 };
 
 const onTimeChange = (dayIndex: number, timeType: 'start' | 'end', value: string) => {
   const newHours = [...props.modelValue];
-  newHours[dayIndex][timeType] = value;
-  emit('update:modelValue', newHours);
+  const day = newHours[dayIndex];
+  if (day) {
+    day[timeType] = value;
+    emit('update:modelValue', newHours);
+  }
 };
 </script>
 <template>
