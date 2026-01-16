@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import EditSection from './components/EditSection.vue';
 import InfoSection from './components/InfoSection.vue';
 import HoursSection from './components/HoursSection.vue';
@@ -35,6 +36,9 @@ const {
   toggleSkill,
   redirectToECPay,
 } = useWorkshopForm();
+
+// 接收來自 HoursSection 的錯誤狀態
+const hoursHaveError = ref(false);
 </script>
 
 <template>
@@ -90,10 +94,15 @@ const {
         icon="alarm"
         :status="status"
         v-model:is-editing="isHoursEditing"
+        :is-save-disabled="hoursHaveError"
         @save="onSave('hours')"
         @cancel="onCancel('hours')"
       >
-        <HoursSection v-model="localProfile.hours" :are-hours-disabled="areHoursDisabled" />
+        <HoursSection
+          v-model="localProfile.hours"
+          v-model:hasError="hoursHaveError"
+          :are-hours-disabled="areHoursDisabled"
+        />
       </EditSection>
 
       <EditSection
@@ -121,7 +130,13 @@ const {
       <div v-if="status === 'onboarding'" class="flex justify-end mt-8">
         <button
           @click="onOnboardingSave"
-          class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold cursor-pointer hover:bg-[#57574a] transition"
+          :disabled="hoursHaveError"
+          class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold transition"
+          :class="[
+            hoursHaveError
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#6b6b5a] hover:bg-[#57574a] cursor-pointer',
+          ]"
         >
           儲存並提交審核
         </button>

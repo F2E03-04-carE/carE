@@ -6,6 +6,7 @@ defineProps<{
   icon: string;
   isEditing: boolean;
   status: Exclude<WorkshopStatus, 'rejected'>;
+  isSaveDisabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -43,7 +44,13 @@ const startEditing = () => {
             </button>
             <button
               @click="$emit('save')"
-              class="px-6 py-2 rounded-2xl bg-[#6b6b5a] text-white cursor-pointer hover:bg-[#57574a] transition"
+              :disabled="isSaveDisabled"
+              class="px-6 py-2 rounded-2xl text-white transition"
+              :class="[
+                isSaveDisabled
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#6b6b5a] hover:bg-[#57574a] cursor-pointer',
+              ]"
             >
               儲存變更
             </button>
