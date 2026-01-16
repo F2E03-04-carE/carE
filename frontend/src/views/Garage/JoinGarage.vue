@@ -178,7 +178,7 @@ const handleRegisterSuccess = () => {
       v-if="isShowRegister"
       user-type="garage"
       @close="closeRegisterModal"
-      @switch-to-login="handleRegisterSuccess"
+      @register-success="handleRegisterSuccess"
     />
   </Teleport>
 </template>
