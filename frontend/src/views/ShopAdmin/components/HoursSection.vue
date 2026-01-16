@@ -1,37 +1,23 @@
 <script setup lang="ts">
-import type { PropType } from 'vue';
+import { toRef } from 'vue';
 import type { WorkshopProfile } from '@/stores/auth';
+import { useHours } from '../composables/useHours';
 
 type Hours = WorkshopProfile['hours'];
 
+const modelValue = defineModel<Hours>({ required: true });
+const hasError = defineModel<boolean>('hasError');
+
 const props = defineProps({
-  modelValue: {
-    type: Array as PropType<Hours>,
-    required: true,
-  },
   areHoursDisabled: Boolean,
 });
 
-const emit = defineEmits(['update:modelValue']);
-
-const onDayEnableToggle = (dayIndex: number) => {
-  if (props.areHoursDisabled) return;
-  const newHours = [...props.modelValue];
-  const day = newHours[dayIndex];
-  if (day) {
-    day.enabled = !day.enabled;
-    emit('update:modelValue', newHours);
-  }
-};
-
-const onTimeChange = (dayIndex: number, timeType: 'start' | 'end', value: string) => {
-  const newHours = [...props.modelValue];
-  const day = newHours[dayIndex];
-  if (day) {
-    day[timeType] = value;
-    emit('update:modelValue', newHours);
-  }
-};
+// 從 composable/useHours.ts 獲取所有邏輯和響應式狀態
+const { timeRangeErrors, onDayEnableToggle } = useHours(
+  modelValue,
+  hasError,
+  toRef(props, 'areHoursDisabled'),
+);
 </script>
 <template>
   <div class="space-y-4">
@@ -65,6 +51,10 @@ const onTimeChange = (dayIndex: number, timeType: 'start' | 'end', value: string
           ></div>
         </div>
       </div>
+      <!-- 當營業時間晚於打烊時間，顯示紅色提示文字 -->
+      <span v-if="timeRangeErrors[index]" class="text-red-500 mr-2"
+        >時間錯誤！營業時間不可晚於打烊時間</span
+      >
       <div
         class="flex items-center gap-3 px-4 py-2 rounded-2xl transition justify-center"
         :class="
@@ -76,16 +66,14 @@ const onTimeChange = (dayIndex: number, timeType: 'start' | 'end', value: string
         <template v-if="day.enabled">
           <input
             type="time"
-            :value="day.start"
-            @input="onTimeChange(index, 'start', ($event.target as HTMLInputElement).value)"
+            v-model="day.start"
             :disabled="areHoursDisabled"
             class="bg-transparent rounded-lg px-2 outline-none disabled:text-[#8a8a7d] disabled:cursor-not-allowed"
           />
           <span>至</span>
           <input
             type="time"
-            :value="day.end"
-            @input="onTimeChange(index, 'end', ($event.target as HTMLInputElement).value)"
+            v-model="day.end"
             :disabled="areHoursDisabled"
             class="bg-transparent rounded-lg px-2 outline-none disabled:text-[#8a8a7d] disabled:cursor-not-allowed"
           />
