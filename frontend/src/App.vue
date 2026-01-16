@@ -14,12 +14,12 @@ import JoinGarage from './views/Garage/JoinGarage.vue';
   <div class="overflow-x-hidden">
   <HeaderNavbar />
   <Home />
-  <Footer />
   <SearchResults />
   <DetailView />
   <ServiceSearchFlow />
   <VehicleManagement />
   <JoinGarage />
+  <Footer />
   </div>
 </template>
 
