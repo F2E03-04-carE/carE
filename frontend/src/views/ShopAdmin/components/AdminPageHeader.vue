@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:keyword', value: string): void;
+  (event: 'update:keyword', value: string): void;
 }>();
 
 const onInput = (event: Event) => {

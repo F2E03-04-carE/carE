@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { statusClass } from './orderStatus';
-
-type OrderStatus = '進行中' | '待確認' | '已完成' | '已取車';
+import { statusClass, type OrderStatus } from './orderStatus';
+import type { Order } from '../composables/useOrderModal';
 
 const props = defineProps<{
   modelValue: boolean;
-  order: any | null;
+  order: Order | null;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: boolean): void;
-  (e: 'save', status: OrderStatus, note?: string): void;
+  (event: 'update:modelValue', vavlue: boolean): void;
+  (event: 'save', status: OrderStatus, note?: string): void;
 }>();
 
 const tempStatus = ref<OrderStatus>('待確認');
@@ -19,10 +18,10 @@ const tempNote = ref<string | undefined>('');
 
 watch(
   () => props.order,
-  (o) => {
-    if (o) {
-      tempStatus.value = o.status;
-      tempNote.value = o.note;
+  (order) => {
+    if (order) {
+      tempStatus.value = order.status;
+      tempNote.value = order.note;
     }
   },
   { immediate: true },

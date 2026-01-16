@@ -25,17 +25,17 @@ const switchStatus = (status: WorkshopStatus | 'active_trial', subStatus?: 'tria
     <p class="font-bold text-base mb-3 text-[#4a4a43]">開發者工具：切換身分</p>
     <div class="flex flex-col gap-2">
       <button
-        v-for="s in statuses"
-        :key="s.value"
-        @click="switchStatus(s.value)"
+        v-for="status in statuses"
+        :key="status.value"
+        @click="switchStatus(status.value)"
         class="px-4 py-2 text-left rounded-lg transition"
         :class="
-          authStore.displayStatus === s.value
+          authStore.displayStatus === status.value
             ? 'bg-[#6b6b5a] text-white font-bold shadow'
             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
         "
       >
-        {{ s.label }} ({{ s.value }})
+        {{ status.label }} ({{ status.value }})
       </button>
     </div>
     <div class="mt-3 text-xs text-gray-500">

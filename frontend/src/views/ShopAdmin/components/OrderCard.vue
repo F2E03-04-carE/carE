@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { statusClass } from './orderStatus';
+import type { Order } from '../composables/useOrderModal';
 
 defineProps<{
-  order: any; // The type will be inferred from the parent
+  order: Order;
 }>();
 
 defineEmits<{
-  (e: 'open', order: any): void;
+  (event: 'open', order: Order): void;
 }>();
 </script>
 
@@ -42,7 +43,7 @@ defineEmits<{
         </p>
         <p class="mt-4 mb-1 text-[#8a8a7d] font-medium">維修項目</p>
         <p class="text-[#4a4a43]">
-          {{ order.vehicle.service }}
+          {{ order.serviceType }}
         </p>
       </div>
 
@@ -53,7 +54,9 @@ defineEmits<{
           <p class="font-medium text-[#4a4a43]">{{ order.requestTime }}</p>
 
           <p class="text-sm text-[#8a8a7d] mt-2">預約維修時間</p>
-          <p class="font-medium text-[#4a4a43]">{{ order.scheduledDate }} {{ order.scheduledTime }}</p>
+          <p class="font-medium text-[#4a4a43]">
+            {{ order.scheduledDate }} {{ order.scheduledTime }}
+          </p>
         </div>
 
         <button

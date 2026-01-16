@@ -1,11 +1,9 @@
 import type { Ref } from 'vue';
-import type { AuthStore } from '@/stores/auth';
+import type { AuthStore, WorkshopProfile } from '@/stores/auth';
 
-// composable 的參數可以更具體，例如只傳入需要的部分 store
-// 但為了簡化，我們先傳入整個 store
 export function useSubscription(
   authStore: AuthStore,
-  localProfile: Ref<any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  localProfile: Ref<WorkshopProfile>,
   selectedPlan: Ref<'trial' | 'paid' | null>,
 ) {
   const submitOnboarding = () => {
@@ -29,7 +27,7 @@ export function useSubscription(
     }
   };
 
-  // 這個函數是用於 onboarding 之後，active user 想從 trial 升級到 paid
+  // 用於 onboarding 之後，active user 想從 trial 升級到 paid
   const redirectToECPay = (plan: 'trial' | 'onetime') => {
     if (plan === 'trial') {
       // 理論上 active user 不會再點 trial

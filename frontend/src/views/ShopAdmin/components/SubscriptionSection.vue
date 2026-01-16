@@ -12,9 +12,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: 'trial' | 'paid' | null): void;
-  (e: 'redirectToECPay', plan: 'trial' | 'onetime'): void;
-  (e: 'onboardingSave'): void;
+  (event: 'update:modelValue', value: 'trial' | 'paid' | null): void;
+  (event: 'redirectToECPay', plan: 'trial' | 'onetime'): void;
+  (event: 'onboardingSave'): void;
 }>();
 
 const selectedPlan = computed({

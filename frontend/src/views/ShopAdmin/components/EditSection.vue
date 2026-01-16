@@ -9,9 +9,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:isEditing', value: boolean): void;
-  (e: 'save'): void;
-  (e: 'cancel'): void;
+  (event: 'update:isEditing', value: boolean): void;
+  (event: 'save'): void;
+  (event: 'cancel'): void;
 }>();
 
 const startEditing = () => {

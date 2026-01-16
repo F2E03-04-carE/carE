@@ -20,7 +20,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const updateModelValue = (key: keyof WorkshopProfile, value: any) => {
+const updateModelValue = (
+  key: keyof WorkshopProfile,
+  value: WorkshopProfile[keyof WorkshopProfile],
+) => {
   emit('update:modelValue', { ...props.modelValue, [key]: value });
 };
 </script>
@@ -86,9 +89,7 @@ const updateModelValue = (key: keyof WorkshopProfile, value: any) => {
           : 'bg-[#e0dfd6] text-[#8a8a7d] cursor-not-allowed',
       ]"
     />
-    <p v-if="isTaxIdDisabled" class="text-xs mt-2 text-[#b0afa4]">
-      若要更改統編，請聯繫平台管理員
-    </p>
+    <p v-if="isTaxIdDisabled" class="text-xs mt-2 text-[#b0afa4]">若要更改統編，請聯繫平台管理員</p>
   </div>
   <!-- 簡介 -->
   <div>
