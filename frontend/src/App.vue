@@ -6,6 +6,8 @@ import SearchResults from './views/Search/SearchResults.vue';
 import DetailView from './views/Search/components/DetailView.vue';
 import ServiceSearchFlow from './components/service-search/ServiceSearchFlow.vue';
 import VehicleManagement from './views/User/VehicleManagement.vue';
+import JoinGarage from './views/Garage/JoinGarage.vue';
+
 </script>
 
 <template>
@@ -17,6 +19,7 @@ import VehicleManagement from './views/User/VehicleManagement.vue';
   <DetailView />
   <ServiceSearchFlow />
   <VehicleManagement />
+  <JoinGarage />
   </div>
 </template>
 
