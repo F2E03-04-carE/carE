@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import PricingCard from '@/components/ui/PricingCard.vue';
+import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
 const pricingPlans = [
   {
@@ -28,6 +30,22 @@ const pricingPlans = [
     isRecommended: true,
   },
 ];
+
+const isShowRegister = ref(false);
+const openRegisterModal = () => {
+  isShowRegister.value = true;
+};
+const closeRegisterModal = () => {
+  isShowRegister.value = false;
+};
+
+// 處理註冊成功後的導向（導向商家基本資料審核頁面）
+// TODO: 之後需要建立商家審核頁面並使用 router.push
+const handleRegisterSuccess = () => {
+  closeRegisterModal();
+  console.log('註冊成功，將導向商家基本資料審核頁面');
+  // TODO: router.push('/garage/profile-review');
+};
 </script>
 
 <template>
@@ -47,12 +65,12 @@ const pricingPlans = [
         <p class="text-[16px] sm:text-[18px] text-[#8a8a7d] mb-8 max-w-2xl px-4">
           加入 carE 平台，接觸更多潛在客戶，建立專業形象，輕鬆管理預約與評價
         </p>
-        <a
-          href="#register"
-          class="px-8 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors"
+        <button
+          @click="openRegisterModal"
+          class="px-8 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即加入
-        </a>
+        </button>
       </div>
     </section>
 
@@ -127,6 +145,7 @@ const pricingPlans = [
           :button-text="plan.buttonText"
           :color="plan.color"
           :is-recommended="plan.isRecommended"
+          @button-click="openRegisterModal"
         />
       </div>
     </section>
@@ -139,12 +158,12 @@ const pricingPlans = [
         <p class="text-[16px] sm:text-[18px] text-[#8a8a7d] mb-8 max-w-2xl mx-auto">
           立即註冊，三分鐘完成設定，開始接收預約
         </p>
-        <a
-          href="#register"
-          class="inline-block px-10 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors"
+        <button
+          @click="openRegisterModal"
+          class="inline-block px-10 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即開始
-        </a>
+        </button>
         <p class="mt-6 text-[14px] text-[#8a8a7d]">
           有任何問題？
           <a href="#contact" class="text-[#6b6b5a] hover:underline font-bold">聯絡我們</a>
@@ -152,5 +171,15 @@ const pricingPlans = [
       </div>
     </section>
   </main>
+
+  <!-- 使用 Teleport 將 RegisterPage 模態框渲染到 body -->
+  <Teleport to="body">
+    <RegisterPage
+      v-if="isShowRegister"
+      user-type="garage"
+      @close="closeRegisterModal"
+      @switch-to-login="handleRegisterSuccess"
+    />
+  </Teleport>
 </template>
 

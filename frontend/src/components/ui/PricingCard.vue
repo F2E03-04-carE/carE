@@ -17,6 +17,14 @@ const props = withDefaults(defineProps<PricingCardProps>(), {
   isRecommended: false,
 });
 
+const emit = defineEmits<{
+  (e: 'button-click'): void;
+}>();
+
+const handleButtonClick = () => {
+  emit('button-click');
+};
+
 const colorClasses = computed(() => {
   const colors = {
     blue: {
@@ -78,6 +86,7 @@ const formattedPrice = computed(() => {
         </li>
       </ul>
       <button
+        @click="handleButtonClick"
         class="w-full py-4 text-[16px] sm:text-[18px] font-bold text-white bg-gradient-to-r rounded-xl transition-all"
         :class="colorClasses.button"
       >
