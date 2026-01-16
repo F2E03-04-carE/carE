@@ -8,7 +8,7 @@ const router = createRouter({
       name: 'JoinGarage',
       component: () => import('@/views/Garage/JoinGarage.vue'),
       meta: {
-        title: '加入維修廠 - carE',
+        title: '刊登維修廠 - carE',
       },
     },
   ],

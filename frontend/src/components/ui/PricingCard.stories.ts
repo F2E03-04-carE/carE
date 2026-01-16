@@ -32,7 +32,7 @@ export const FreeTrial: Story = {
     priceUnit: '30 天試用',
     features: ['完整預約管理功能', '評價系統功能', '商家資料展示',],
     buttonText: '開始免費試用',
-    color: 'blue',
+    color: 'orange',
     isRecommended: false,
   },
 };

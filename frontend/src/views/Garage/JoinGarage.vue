@@ -11,7 +11,7 @@ const pricingPlans = [
     priceUnit: '30 天試用',
     features: ['完整預約管理功能', '評價系統功能', '商家資料展示 （試用期滿僅剩此功能）'],
     buttonText: '開始免費試用',
-    color: 'blue' as const,
+    color: 'orange' as const,
     isRecommended: false,
   },
   {

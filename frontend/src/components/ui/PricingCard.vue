@@ -8,12 +8,12 @@ export interface PricingCardProps {
   priceUnit: string;
   features: string[];
   buttonText: string;
-  color?: 'blue' | 'green';
+  color?: 'orange' | 'green';
   isRecommended?: boolean;
 }
 
 const props = withDefaults(defineProps<PricingCardProps>(), {
-  color: 'blue',
+  color: 'orange',
   isRecommended: false,
 });
 
@@ -27,7 +27,7 @@ const handleButtonClick = () => {
 
 const colorClasses = computed(() => {
   const colors = {
-    blue: {
+    orange: {
       gradient: 'from-[#DB914B] to-[#E0A975]',
       icon: 'text-[#DB914B]',
       button: 'from-[#DB914B] to-[#E0A975] hover:from-[#D6853A] hover:to-[#D4985F]',
