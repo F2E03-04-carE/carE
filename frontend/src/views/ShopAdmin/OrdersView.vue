@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import OrderCard from './components/OrderCard.vue';
 import OrderDetailModal from './components/OrderDetailModal.vue';
-import { useOrders } from './components/useOrderModal';
+import { useOrders } from './composables/useOrderModal';
 import AdminPageHeader from './components/AdminPageHeader.vue';
 import { useSearch } from './composables/useSearch';
-import type { Order } from './components/useOrderModal';
+import type { Order } from './composables/useOrderModal';
 
 const { orders, selectedOrder, showModal, open, save } = useOrders();
 

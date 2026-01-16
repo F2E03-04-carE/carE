@@ -1,26 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useOrders } from './components/useOrderModal';
+import { useOrders } from './composables/useOrderModal';
 import OrderCard from './components/OrderCard.vue';
 import OrderDetailModal from './components/OrderDetailModal.vue';
+import { isSameDay, isSameMonth } from '@/views/ShopAdmin/composables/date';
 
 const { orders, selectedOrder, showModal, open, save } = useOrders();
 
 const today = new Date();
-
-const isSameDay = (dateStr: string, target: Date) => {
-  const date = new Date(dateStr);
-  return (
-    date.getFullYear() === target.getFullYear() &&
-    date.getMonth() === target.getMonth() &&
-    date.getDate() === target.getDate()
-  );
-};
-
-const isSameMonth = (dateStr: string, target: Date) => {
-  const date = new Date(dateStr);
-  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
-};
 
 // 統計卡
 const todayOrderCount = computed(
