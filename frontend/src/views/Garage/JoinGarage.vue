@@ -7,7 +7,7 @@ const pricingPlans = [
     subtitle: '先試用，滿意再升級',
     price: 0,
     priceUnit: '30 天試用',
-    features: ['完整預約管理功能', '評價系統功能', '商家資料展示'],
+    features: ['完整預約管理功能', '評價系統功能', '商家資料展示 （試用期滿僅剩此功能）'],
     buttonText: '開始免費試用',
     color: 'blue' as const,
     isRecommended: false,
@@ -107,14 +107,14 @@ const pricingPlans = [
       </div>
     </section>
 
-    <section class="max-w-[1440px] mx-auto py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+    <section class="max-w-[1440px] mx-auto py-12 sm:py-24 px-4 sm:px-6 lg:px-8">
       <h3 class="text-[28px] sm:text-[32px] lg:text-[36px] text-[#4a4a43] font-bold text-center mb-4">
         選擇適合您的方案
       </h3>
       <p class="text-[16px] sm:text-[18px] text-[#8a8a7d] text-center mb-12 max-w-3xl mx-auto">
         兩種方案，讓您的維修廠輕鬆上線
       </p>
-      
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <PricingCard
           v-for="(plan, index) in pricingPlans"
