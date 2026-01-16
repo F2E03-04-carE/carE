@@ -9,7 +9,6 @@ import VehicleManagement from './views/User/VehicleManagement.vue';
 </script>
 
 <template>
-  <div class="overflow-x-hidden">
   <HeaderNavbar />
   <Home />
   <Footer />
@@ -17,7 +16,7 @@ import VehicleManagement from './views/User/VehicleManagement.vue';
   <DetailView />
   <ServiceSearchFlow />
   <VehicleManagement />
-  </div>
+  <RouterView />
 </template>
 
 <style scoped></style>

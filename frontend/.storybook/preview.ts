@@ -1,11 +1,4 @@
 import type { Preview } from '@storybook/vue3-vite';
-import { setup } from '@storybook/vue3';
-import { createPinia } from 'pinia';
-import '../src/main.css';
-
-setup((app) => {
-  app.use(createPinia());
-});
 
 const preview: Preview = {
   parameters: {
@@ -17,6 +10,9 @@ const preview: Preview = {
     },
 
     a11y: {
+      // 'todo' - show a11y violations in the test UI only
+      // 'error' - fail CI on a11y violations
+      // 'off' - skip a11y checks entirely
       test: 'todo',
     },
   },
