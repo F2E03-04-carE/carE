@@ -3,6 +3,15 @@ import { computed, onUnmounted, reactive, ref } from 'vue';
 
 type FieldKey = `Email` | `Phone` | `Password` | `ConfirmPassword`;
 
+//從JoinGarage.vue的按鈕點入都直接判斷車廠身份
+export interface RegisterPageProps {
+  userType?: 'member' | 'garage';
+}
+
+const props = withDefaults(defineProps<RegisterPageProps>(), {
+  userType: 'member',
+});
+
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'switch-to-login'): void;
@@ -145,6 +154,7 @@ async function HandleSubmit() {
     console.log(`註冊成功 (Safe Log):`, {
       email: Form.Email,
       phone: Form.Phone,
+      userType: props.userType, // 帶上用戶類型
     });
 
     IsSubmitted.value = true;
@@ -187,20 +197,24 @@ onUnmounted(() => {
           <i class="text-2xl fa-solid fa-check text-[#6B6B5C]" aria-hidden="true"></i>
         </div>
         <h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">註冊成功</h2>
-        <p class="mb-4 text-[#8a8a7e]">感謝您的註冊，我們已收到您的資料</p>
+        <p class="mb-4 text-[#8a8a7e]">
+          {{ userType === 'garage' ? '感謝您的註冊，接下來請完善商家資料' : '感謝您的註冊，我們已收到您的資料' }}
+        </p>
         <p class="text-[#8a8a7e] mb-6">
-          將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後自動前往登入...
+          將在 <span class="font-bold text-[#6B6B5C]">{{ Countdown }}</span> 秒後自動{{ userType === 'garage' ? '前往商家資料審核頁面' : '前往登入' }}...
         </p>
         <button
           type="button"
           @click="HandleSwitchToLogin"
           class="w-full px-6 py-2.5 font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md"
         >
-          立即登入
+          {{ userType === 'garage' ? '前往填寫商家資料' : '立即登入' }}
         </button>
       </div>
       <div v-else>
-        <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員註冊</h2>
+        <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">
+          {{ userType === 'garage' ? '商家註冊' : '會員註冊' }}
+        </h2>
         <form class="space-y-4" @submit.prevent="HandleSubmit">
           <div>
             <label for="email" class="block mb-1 text-[16px] font-medium text-gray-700">
