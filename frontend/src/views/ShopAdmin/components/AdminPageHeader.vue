@@ -3,16 +3,9 @@ const props = defineProps<{
   title: string;
   subtitle: string;
   placeholder: string;
-  keyword: string;
 }>();
 
-const emit = defineEmits<{
-  (event: 'update:keyword', value: string): void;
-}>();
-
-const onInput = (event: Event) => {
-  emit('update:keyword', (event.target as HTMLInputElement).value);
-};
+const keyword = defineModel<string>('keyword');
 </script>
 
 <template>
@@ -28,8 +21,7 @@ const onInput = (event: Event) => {
       <span class="material-symbols-outlined">search</span>
 
       <input
-        :value="props.keyword"
-        @input="onInput"
+        v-model="keyword"
         type="text"
         :placeholder="props.placeholder"
         class="w-full bg-transparent text-[#4a4a43] placeholder-[#8a8a7d] outline-none"

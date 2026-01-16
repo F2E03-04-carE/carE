@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { PropType } from 'vue';
+
+const modelValue = defineModel<string[]>({ required: true });
 
 const props = defineProps({
-  modelValue: {
-    type: Array as PropType<string[]>,
-    required: true,
-  },
   isPhotoUploadDisabled: Boolean,
 });
-
-const emit = defineEmits(['update:modelValue']);
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
@@ -20,10 +15,11 @@ const triggerUpload = () => {
 };
 
 const onFileChange = (event: Event) => {
-  const files = (event.target as HTMLInputElement).files;
-  if (!files) return;
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || !target.files) return;
 
-  const currentPhotos = [...props.modelValue];
+  const files = target.files;
+  const currentPhotos = [...modelValue.value];
 
   // 計算還可以上傳多少張照片
   const remainingSlots = 3 - currentPhotos.length;
@@ -32,13 +28,19 @@ const onFileChange = (event: Event) => {
   // 只取使用者選取檔案中，可以填滿剩餘空位的部分
   const filesToProcess = Array.from(files).slice(0, remainingSlots);
 
+  const newPhotos = [...currentPhotos];
+  let processedCount = 0;
+
   filesToProcess.forEach((file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
-        currentPhotos.push(e.target.result as string);
-        // 每次成功讀取一張，就發出一次更新
-        emit('update:modelValue', [...currentPhotos]);
+        newPhotos.push(e.target.result as string);
+      }
+      processedCount++;
+      // 當所有檔案都處理完畢後，再一次性更新
+      if (processedCount === filesToProcess.length) {
+        modelValue.value = newPhotos;
       }
     };
     reader.readAsDataURL(file);
@@ -51,9 +53,7 @@ const onFileChange = (event: Event) => {
 };
 
 const removePhoto = (index: number) => {
-  const newPhotos = [...props.modelValue];
-  newPhotos.splice(index, 1);
-  emit('update:modelValue', newPhotos);
+  modelValue.value.splice(index, 1);
 };
 </script>
 
