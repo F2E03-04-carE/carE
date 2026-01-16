@@ -7,17 +7,20 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
+const isMenuDisabled = computed(() => {
+  return authStore.status === 'pending_review' || authStore.status === 'onboarding';
+});
+
 const goPage = (path: string) => {
+  if (isMenuDisabled.value && path !== '/edit') {
+    return;
+  }
   if (route.path !== path) {
     router.push(path);
   }
 };
 
 const activeTab = (path: string) => route.path === path;
-
-const isMenuDisabled = computed(() => {
-  return authStore.status === 'pending_review' || authStore.status === 'onboarding';
-});
 </script>
 
 <template>
@@ -30,10 +33,16 @@ const isMenuDisabled = computed(() => {
       <button
         @click="goPage('/overview')"
         :class="[
+          'py-3',
+          'rounded',
+          'flex',
+          'items-center',
+          'justify-center',
+          'gap-2',
+          'transition-colors',
           activeTab('/overview') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
-          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : (activeTab('/overview') ? '' : 'hover:bg-[#e5e3df] cursor-pointer'),
         ]"
-        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
         :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">search</span> 總覽
@@ -42,10 +51,16 @@ const isMenuDisabled = computed(() => {
       <button
         @click="goPage('/orders')"
         :class="[
+          'py-3',
+          'rounded',
+          'flex',
+          'items-center',
+          'justify-center',
+          'gap-2',
+          'transition-colors',
           activeTab('/orders') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
-          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : (activeTab('/orders') ? '' : 'hover:bg-[#e5e3df] cursor-pointer'),
         ]"
-        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
         :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">event_note</span> 工單管理
@@ -54,10 +69,16 @@ const isMenuDisabled = computed(() => {
       <button
         @click="goPage('/schedule')"
         :class="[
+          'py-3',
+          'rounded',
+          'flex',
+          'items-center',
+          'justify-center',
+          'gap-2',
+          'transition-colors',
           activeTab('/schedule') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
-          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : (activeTab('/schedule') ? '' : 'hover:bg-[#e5e3df] cursor-pointer'),
         ]"
-        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
         :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">calendar_month</span> 行程安排
@@ -66,10 +87,16 @@ const isMenuDisabled = computed(() => {
       <button
         @click="goPage('/records')"
         :class="[
+          'py-3',
+          'rounded',
+          'flex',
+          'items-center',
+          'justify-center',
+          'gap-2',
+          'transition-colors',
           activeTab('/records') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]',
-          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e5e3df]',
+          isMenuDisabled ? 'opacity-50 cursor-not-allowed' : (activeTab('/records') ? '' : 'hover:bg-[#e5e3df] cursor-pointer'),
         ]"
-        class="py-3 rounded cursor-pointer flex items-center justify-center gap-2 transition-colors"
         :disabled="isMenuDisabled"
       >
         <span class="material-symbols-outlined">trending_up</span> 維修紀錄
@@ -77,8 +104,18 @@ const isMenuDisabled = computed(() => {
 
       <button
         @click="goPage('/edit')"
-        :class="activeTab('/edit') ? 'font-bold bg-[#6b6b5a] text-white' : 'text-[#4a4a43]'"
-        class="py-3 rounded cursor-pointer hover:bg-[#e5e3df] flex items-center justify-center gap-2"
+        :class="[
+          'py-3',
+          'rounded',
+          'flex',
+          'items-center',
+          'justify-center',
+          'gap-2',
+          'transition-colors',
+          activeTab('/edit')
+            ? 'font-bold bg-[#6b6b5a] text-white'
+            : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
+        ]"
       >
         <span class="material-symbols-outlined">factory</span> 廠房資訊
       </button>
