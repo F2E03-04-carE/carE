@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import LoginMode from '@/views/Auth/LoginMode.vue';
 import RegisterPage from '@/views/Auth/RegisterPage.vue';
@@ -12,6 +13,7 @@ const props = withDefaults(defineProps<HeaderNavbarProps>(), {
   userRole: 'guest',
 });
 
+const router = useRouter();
 const userStore = useUserStore();
 
 const currentUserRole = computed(() => {
@@ -87,6 +89,12 @@ const handleLogout = () => {
   closeDropdown();
 };
 
+// 導航到「加入維修廠」頁面
+const handleGoToJoinGarage = () => {
+  closeMobileMenu();
+  router.push('/join-garage');
+};
+
 interface MenuItem {
   label: string;
   href: string;
@@ -143,6 +151,7 @@ const currentMenu = computed(() => {
 
           <template v-if="currentUserRole === 'guest'">
             <button
+              @click="handleGoToJoinGarage"
               :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
             >
               刊登維修廠
@@ -228,7 +237,7 @@ const currentMenu = computed(() => {
 
         <template v-if="currentUserRole === 'guest'">
           <button
-            @click="closeMobileMenu"
+            @click="handleGoToJoinGarage"
             class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
           >
             刊登維修廠
