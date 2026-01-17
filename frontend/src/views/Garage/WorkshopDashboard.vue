@@ -1,819 +1,564 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, reactive } from 'vue';
 
-type NavKey = 'dashboard' | 'orders' | 'schedule' | 'records' | 'shop';
+type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings';
 
-type OrderStatus = 'in_progress' | 'pending_confirm' | 'completed' | 'cancelled';
+type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
 
-type Order = {
+type Appointment = {
 	id: string;
 	customerName: string;
 	phone: string;
 	carModel: string;
 	licensePlate: string;
-	service: string;
-	appointmentDate: string;
-	appointmentTime: string;
-	status: OrderStatus;
-	estimateMin: number;
-	amount: number;
-	notes?: string;
-};
-
-type ScheduleItem = {
-	id: string;
+	serviceType: string;
 	date: string;
 	time: string;
-	bay: 'A1' | 'A2' | 'B1' | 'B2';
-	tech: string;
-	title: string;
-	customerName: string;
-	carModel: string;
-	status: 'upcoming' | 'doing' | 'done';
+	tech?: string;
+	bay?: string;
+	status: ApptStatus;
+	notes?: string;
+	estimatedCost: number;
 };
 
 type RecordItem = {
 	id: string;
 	customerName: string;
-	phone: string;
 	carModel: string;
 	licensePlate: string;
 	date: string;
 	items: Array<{ name: string; price: number; type: 'base' | 'addon' }>;
+	total: number;
+	tech: string;
 	notes: string;
 };
 
-type ShopInfo = {
+type TechInfo = {
+	id: number;
+	name: string;
+	level: '資深' | '中階' | '新手';
+	status: 'active' | 'leave';
+};
+
+type ShopSettings = {
 	name: string;
 	address: string;
 	phone: string;
-	businessHours: Array<{ day: string; open: string; close: string }>;
-	bays: Array<{ bay: string; status: 'available' | 'busy' | 'maintenance' }>;
-	techs: Array<{ name: string; level: '資深' | '中階' | '新手'; todayJobs: number }>;
+	bays: number;
+	businessHours: Array<{ day: string; open: string; close: string; isClosed: boolean }>;
+	techs: TechInfo[];
 };
 
 const activeNav = ref<NavKey>('dashboard');
 
-const stats = ref({
-	todayBookings: 8,
-	pendingOrders: 12,
-	monthCompleted: 156,
-	avgHandlingTime: '2.5h',
-});
-
-const recentOrders = ref([
-	{ id: 'W-2024-001', customerName: '王小明', carModel: 'Toyota Camry', time: '09:30', status: 'in_progress' as const },
-	{ id: 'W-2024-002', customerName: '李大華', carModel: 'Honda CR-V', time: '10:00', status: 'pending_confirm' as const },
-	{ id: 'W-2024-003', customerName: '張美玲', carModel: 'Mazda 3', time: '11:15', status: 'completed' as const },
-]);
-
-const orderQuery = ref('');
-const orderStatusFilter = ref<OrderStatus | 'all'>('all');
-
-const orders = ref<Order[]>([
-	{
-		id: 'W-2024-001',
-		customerName: '王小明',
-		phone: '0912-345-678',
-		carModel: 'Toyota Camry',
-		licensePlate: 'ABC-1234',
-		service: '定期保養',
-		appointmentDate: '2024-12-01',
-		appointmentTime: '09:30',
-		status: 'in_progress',
-		estimateMin: 90,
-		amount: 3500,
-		notes: '更換機油、機油濾芯',
-	},
-	{
-		id: 'W-2024-002',
-		customerName: '李大華',
-		phone: '0923-456-789',
-		carModel: 'Honda CR-V',
-		licensePlate: 'KLM-7788',
-		service: '煞車檢修',
-		appointmentDate: '2024-12-01',
-		appointmentTime: '10:00',
-		status: 'pending_confirm',
-		estimateMin: 60,
-		amount: 2800,
-		notes: '車主回報煞車異音',
-	},
-	{
-		id: 'W-2024-003',
-		customerName: '張美玲',
-		phone: '0934-567-890',
-		carModel: 'Mazda 3',
-		licensePlate: 'QWE-5566',
-		service: '輪胎更換',
-		appointmentDate: '2024-12-01',
-		appointmentTime: '11:15',
-		status: 'completed',
-		estimateMin: 45,
-		amount: 12000,
-		notes: '四輪更換 + 定位',
-	},
-	{
-		id: 'W-2024-004',
-		customerName: '陳冠宇',
-		phone: '0988-112-233',
-		carModel: 'Nissan Kicks',
-		licensePlate: 'ZXC-9090',
-		service: '冷氣保養',
-		appointmentDate: '2024-12-02',
-		appointmentTime: '14:00',
-		status: 'cancelled',
-		estimateMin: 40,
-		amount: 1800,
-		notes: '客戶臨時取消',
-	},
-]);
-
-const filteredOrders = computed(() => {
-	const q = orderQuery.value.trim().toLowerCase();
-	const status = orderStatusFilter.value;
-
-	return orders.value.filter((o) => {
-		const matchQ =
-			!q ||
-			o.customerName.toLowerCase().includes(q) ||
-			o.phone.includes(orderQuery.value.trim()) ||
-			o.carModel.toLowerCase().includes(q) ||
-			o.licensePlate.toLowerCase().includes(q) ||
-			o.id.toLowerCase().includes(q);
-
-		const matchStatus = status === 'all' ? true : o.status === status;
-		return matchQ && matchStatus;
-	});
-});
-
-const scheduleDate = ref('2024-12-01');
-const schedules = ref<ScheduleItem[]>([
-	{
-		id: 'S-001',
-		date: '2024-12-01',
-		time: '09:30',
-		bay: 'A1',
-		tech: '阿哲',
-		title: '定期保養',
-		customerName: '王小明',
-		carModel: 'Toyota Camry',
-		status: 'doing',
-	},
-	{
-		id: 'S-002',
-		date: '2024-12-01',
-		time: '10:00',
-		bay: 'A2',
-		tech: '小安',
-		title: '煞車檢修',
-		customerName: '李大華',
-		carModel: 'Honda CR-V',
-		status: 'upcoming',
-	},
-	{
-		id: 'S-003',
-		date: '2024-12-01',
-		time: '11:15',
-		bay: 'B1',
-		tech: '阿哲',
-		title: '輪胎更換',
-		customerName: '張美玲',
-		carModel: 'Mazda 3',
-		status: 'done',
-	},
-	{
-		id: 'S-004',
-		date: '2024-12-02',
-		time: '14:00',
-		bay: 'B2',
-		tech: '阿凱',
-		title: '冷氣保養',
-		customerName: '陳冠宇',
-		carModel: 'Nissan Kicks',
-		status: 'upcoming',
-	},
-]);
-
-const schedulesOfDay = computed(() => schedules.value.filter((s) => s.date === scheduleDate.value));
-
-const recordQuery = ref('');
-const records = ref<RecordItem[]>([
-	{
-		id: 'R-2024-001',
-		customerName: '王小明',
-		phone: '0912-345-678',
-		carModel: 'Toyota Camry',
-		licensePlate: 'ABC-1234',
-		date: '2024-11-15',
-		items: [
-			{ name: '機油更換', price: 1800, type: 'base' },
-			{ name: '機油濾芯', price: 400, type: 'base' },
-			{ name: '冷氣濾網', price: 650, type: 'addon' },
-		],
-		notes: '建議下次保養檢查煞車皮厚度',
-	},
-	{
-		id: 'R-2024-002',
-		customerName: '李大華',
-		phone: '0923-456-789',
-		carModel: 'Honda CR-V',
-		licensePlate: 'KLM-7788',
-		date: '2024-10-05',
-		items: [
-			{ name: '煞車來令片', price: 2400, type: 'base' },
-			{ name: '煞車碟盤研磨', price: 1200, type: 'addon' },
-		],
-		notes: '異音已排除，回廠再確認',
-	},
-	{
-		id: 'R-2024-003',
-		customerName: '張美玲',
-		phone: '0934-567-890',
-		carModel: 'Mazda 3',
-		licensePlate: 'QWE-5566',
-		date: '2024-12-01',
-		items: [
-			{ name: '輪胎更換（四輪）', price: 9800, type: 'base' },
-			{ name: '四輪定位', price: 2200, type: 'addon' },
-		],
-		notes: '胎壓已校正',
-	},
-]);
-
-const filteredRecords = computed(() => {
-	const q = recordQuery.value.trim().toLowerCase();
-	if (!q) return records.value;
-
-	return records.value.filter((r) => {
-		return (
-			r.customerName.toLowerCase().includes(q) ||
-			r.phone.includes(recordQuery.value.trim()) ||
-			r.carModel.toLowerCase().includes(q) ||
-			r.licensePlate.toLowerCase().includes(q) ||
-			r.id.toLowerCase().includes(q)
-		);
-	});
-});
-
-const shopInfo = ref<ShopInfo>({
-	name: '晴天維修廠',
-	address: '台北市中山區某某路 100 號',
+const shopSettings = reactive<ShopSettings>({
+	name: '晴天自動車',
+	address: '台北市中山區職人路 100 號',
 	phone: '02-1234-5678',
+	bays: 4,
 	businessHours: [
-		{ day: '週一', open: '09:00', close: '18:00' },
-		{ day: '週二', open: '09:00', close: '18:00' },
-		{ day: '週三', open: '09:00', close: '18:00' },
-		{ day: '週四', open: '09:00', close: '18:00' },
-		{ day: '週五', open: '09:00', close: '18:00' },
-		{ day: '週六', open: '10:00', close: '17:00' },
-		{ day: '週日', open: '休息', close: '—' },
-	],
-	bays: [
-		{ bay: 'A1', status: 'busy' },
-		{ bay: 'A2', status: 'available' },
-		{ bay: 'B1', status: 'maintenance' },
-		{ bay: 'B2', status: 'available' },
+		{ day: '週一', open: '09:00', close: '18:00', isClosed: false },
+		{ day: '週二', open: '09:00', close: '18:00', isClosed: false },
+		{ day: '週三', open: '09:00', close: '18:00', isClosed: false },
+		{ day: '週四', open: '09:00', close: '18:00', isClosed: false },
+		{ day: '週五', open: '09:00', close: '18:00', isClosed: false },
+		{ day: '週六', open: '10:00', close: '17:00', isClosed: false },
+		{ day: '週日', open: '00:00', close: '00:00', isClosed: true },
 	],
 	techs: [
-		{ name: '阿哲', level: '資深', todayJobs: 3 },
-		{ name: '小安', level: '中階', todayJobs: 2 },
-		{ name: '阿凱', level: '新手', todayJobs: 1 },
+		{ id: 1, name: '阿哲', level: '資深', status: 'active' },
+		{ id: 2, name: '小安', level: '中階', status: 'active' },
+		{ id: 3, name: '阿凱', level: '新手', status: 'active' },
 	],
 });
 
-function statusText(s: OrderStatus): string {
-	switch (s) {
-		case 'in_progress':
-			return '進行中';
-		case 'pending_confirm':
-			return '待確認';
-		case 'completed':
-			return '已完成';
-		case 'cancelled':
-			return '已取消';
-		default:
-			return '—';
-	}
-}
+const appointments = ref<Appointment[]>([
+	{
+		id: 'APT-2026-001',
+		customerName: '王小明',
+		phone: '0912-345-678',
+		carModel: 'Toyota Camry',
+		licensePlate: 'ABC-1234',
+		serviceType: '定期保養',
+		date: '2026-01-18',
+		time: '09:30',
+		tech: '阿哲',
+		bay: 'A1',
+		status: 'servicing',
+		estimatedCost: 3500,
+		notes: '自備機油',
+	},
+	{
+		id: 'APT-2026-002',
+		customerName: '李大華',
+		phone: '0923-456-789',
+		carModel: 'Honda CR-V',
+		licensePlate: 'KLM-7788',
+		serviceType: '煞車異音檢查',
+		date: '2026-01-18',
+		time: '10:30',
+		tech: '小安',
+		bay: 'A2',
+		status: 'confirmed',
+		estimatedCost: 1200,
+		notes: '右前輪有異音',
+	},
+	{
+		id: 'APT-2026-003',
+		customerName: '陳冠宇',
+		phone: '0988-112-233',
+		carModel: 'Tesla Model 3',
+		licensePlate: 'EAA-9999',
+		serviceType: '輪胎更換',
+		date: '2026-01-18',
+		time: '14:00',
+		status: 'pending',
+		estimatedCost: 18000,
+	},
+	{
+		id: 'APT-2026-004',
+		customerName: '林雅婷',
+		phone: '0955-666-777',
+		carModel: 'Mini Cooper',
+		licensePlate: 'MIN-5678',
+		serviceType: '冷氣健檢',
+		date: '2026-01-19',
+		time: '11:00',
+		status: 'pending',
+		estimatedCost: 800,
+	},
+]);
 
-function statusClass(s: OrderStatus): string {
-	switch (s) {
-		case 'in_progress':
-			return 'bg-[#8fb6a1] text-white';
-		case 'pending_confirm':
-			return 'bg-[#7f93a4] text-white';
-		case 'completed':
-			return 'bg-[#e7e5e4] text-[#6b7280]';
-		case 'cancelled':
-			return 'bg-[#f1c0c0] text-[#7a2e2e]';
-		default:
-			return 'bg-zinc-200 text-zinc-700';
-	}
-}
+const records = ref<RecordItem[]>([
+	{
+		id: 'REC-2025-888',
+		customerName: '張美玲',
+		carModel: 'Mazda 3',
+		licensePlate: 'QWE-5566',
+		date: '2025-12-20',
+		tech: '阿哲',
+		items: [
+			{ name: '四輪定位', price: 2000, type: 'base' },
+			{ name: '雨刷更換', price: 800, type: 'addon' },
+		],
+		total: 2800,
+		notes: '建議下次更換電瓶',
+	},
+	{
+		id: 'REC-2025-887',
+		customerName: '王小明',
+		carModel: 'Toyota Camry',
+		licensePlate: 'ABC-1234',
+		date: '2025-11-15',
+		tech: '小安',
+		items: [
+			{ name: '小保養套餐', price: 3000, type: 'base' },
+		],
+		total: 3000,
+		notes: '',
+	},
+]);
 
-function scheduleBadgeClass(s: ScheduleItem['status']): string {
-	switch (s) {
-		case 'doing':
-			return 'bg-[#8fb6a1] text-white';
-		case 'upcoming':
-			return 'bg-[#7f93a4] text-white';
-		case 'done':
-			return 'bg-[#e7e5e4] text-[#6b7280]';
-		default:
-			return 'bg-zinc-200 text-zinc-700';
-	}
-}
+const dashboardStats = computed(() => {
+	const today = '2026-01-18'; 
+	const todayAppts = appointments.value.filter(a => a.date === today);
+	const pending = appointments.value.filter(a => a.status === 'pending');
+	const servicing = appointments.value.filter(a => a.status === 'servicing');
+	
+	return {
+		todayCount: todayAppts.length,
+		pendingCount: pending.length,
+		servicingCount: servicing.length,
+		techActiveCount: shopSettings.techs.filter(t => t.status === 'active').length
+	};
+});
 
-function bayStatusClass(s: ShopInfo['bays'][number]['status']): string {
-	switch (s) {
-		case 'available':
-			return 'bg-[#e6f2ec] text-[#2f3b35]';
-		case 'busy':
-			return 'bg-[#8fb6a1] text-white';
-		case 'maintenance':
-			return 'bg-[#c7ab7a] text-[#3f3f46]';
-		default:
-			return 'bg-zinc-200 text-zinc-700';
-	}
-}
+const apptFilterStatus = ref<ApptStatus | 'all'>('all');
+const apptSearch = ref('');
 
-function formatCurrency(n: number): string {
+const filteredAppointments = computed(() => {
+	let list = appointments.value;
+	
+	if (apptFilterStatus.value !== 'all') {
+		list = list.filter(a => a.status === apptFilterStatus.value);
+	}
+	
+	const q = apptSearch.value.trim().toLowerCase();
+	if (q) {
+		list = list.filter(a => 
+			a.customerName.toLowerCase().includes(q) ||
+			a.licensePlate.toLowerCase().includes(q) ||
+			a.phone.includes(q)
+		);
+	}
+
+	return list.sort((a, b) => {
+		return new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime();
+	});
+});
+
+const recordSearch = ref('');
+const filteredRecords = computed(() => {
+	const q = recordSearch.value.trim().toLowerCase();
+	if (!q) return records.value;
+	return records.value.filter(r => 
+		r.customerName.toLowerCase().includes(q) || 
+		r.licensePlate.toLowerCase().includes(q)
+	);
+});
+
+function formatCurrency(n: number) {
 	return `NT$${n.toLocaleString('zh-Hant-TW')}`;
 }
 
-function sumRecord(items: RecordItem['items']): number {
-	return items.reduce((sum, i) => sum + i.price, 0);
+function getStatusLabel(s: ApptStatus) {
+	const map: Record<ApptStatus, string> = {
+		pending: '待確認',
+		confirmed: '已排程',
+		servicing: '作業中',
+		completed: '已完工',
+		cancelled: '已取消',
+	};
+	return map[s];
 }
 
-const pageTitle = computed(() => {
+function getStatusClass(s: ApptStatus) {
+	switch (s) {
+		case 'pending': return 'bg-[#E8DCC2] text-[#8C7B5D]';
+		case 'confirmed': return 'bg-[#D6DCD9] text-[#5C6B66]';
+		case 'servicing': return 'bg-[#C2CCB8] text-[#5A6650]';
+		case 'completed': return 'bg-[#E5E2DD] text-[#9CA3AF]';
+		case 'cancelled': return 'bg-[#E8C2C2] text-[#8C5D5D]';
+		default: return '';
+	}
+}
+
+const pageHeader = computed(() => {
 	switch (activeNav.value) {
-		case 'dashboard':
-			return { title: '總覽', subtitle: '今日維修廠運營概況' };
-		case 'orders':
-			return { title: '工單管理', subtitle: '管理今日與未來的工單狀態' };
-		case 'schedule':
-			return { title: '行程安排', subtitle: '查看各工位與技師排程' };
-		case 'records':
-			return { title: '維修紀錄', subtitle: '查詢車主的過往維修紀錄' };
-		case 'shop':
-			return { title: '廠房資訊', subtitle: '查看營業資訊、工位與人員狀態' };
-		default:
-			return { title: '總覽', subtitle: '今日維修廠運營概況' };
+		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
+		case 'appointments': return { title: '預約排程', sub: '管理客戶預約、指派技師與工位' };
+		case 'records': return { title: '維修紀錄', sub: '查詢過往維修履歷與工單細節' };
+		case 'settings': return { title: '店鋪設定', sub: '設定營業時間、管理技師名單' };
+		default: return { title: '', sub: '' };
 	}
 });
+
 </script>
 
 <template>
-	<div class="min-h-screen bg-white">
-		<div class="flex">
-			<aside class="w-[320px] shrink-0 bg-[#f5f3ee]">
-				<div class="px-10 py-10">
-					<h1 class="text-3xl font-semibold tracking-wide text-[#3f3f46]">維修廠後台</h1>
-				</div>
-				<nav class="px-6 pb-10">
-					<ul class="space-y-3">
-						<li>
-							<button
-								type="button"
-								class="flex w-full items-center gap-4 rounded-2xl px-5 py-5 text-left transition"
-								:class="
-									activeNav === 'dashboard'
-										? 'bg-[#7f93a4] text-white shadow-sm'
-										: 'text-[#5b5b5b] hover:bg-white/60'
-								"
-								@click="activeNav = 'dashboard'"
-							>
-								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="3" y="3" width="7" height="7" rx="1" />
-									<rect x="14" y="3" width="7" height="7" rx="1" />
-									<rect x="3" y="14" width="7" height="7" rx="1" />
-									<rect x="14" y="14" width="7" height="7" rx="1" />
-								</svg>
-								<span class="text-lg font-medium">總覽</span>
-							</button>
-						</li>
-						<li>
-							<button
-								type="button"
-								class="flex w-full items-center gap-4 rounded-2xl px-5 py-5 text-left text-[#5b5b5b] transition hover:bg-white/60"
-								:class="activeNav === 'orders' ? 'ring-1 ring-black/5' : ''"
-								@click="activeNav = 'orders'"
-							>
-								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M9 5H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-									<rect x="9" y="3" width="6" height="4" rx="1" />
-									<path d="M9 12h6" />
-									<path d="M9 16h6" />
-								</svg>
-								<span class="text-lg font-medium">工單管理</span>
-							</button>
-						</li>
-						<li>
-							<button
-								type="button"
-								class="flex w-full items-center gap-4 rounded-2xl px-5 py-5 text-left text-[#5b5b5b] transition hover:bg-white/60"
-								:class="activeNav === 'schedule' ? 'ring-1 ring-black/5' : ''"
-								@click="activeNav = 'schedule'"
-							>
-								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<rect x="3" y="4" width="18" height="18" rx="2" />
-									<path d="M16 2v4" />
-									<path d="M8 2v4" />
-									<path d="M3 10h18" />
-								</svg>
-								<span class="text-lg font-medium">行程安排</span>
-							</button>
-						</li>
-						<li>
-							<button
-								type="button"
-								class="flex w-full items-center gap-4 rounded-2xl px-5 py-5 text-left text-[#5b5b5b] transition hover:bg-white/60"
-								:class="activeNav === 'records' ? 'ring-1 ring-black/5' : ''"
-								@click="activeNav = 'records'"
-							>
-								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-									<path d="M14 2v6h6" />
-									<path d="M8 13h8" />
-									<path d="M8 17h8" />
-								</svg>
-								<span class="text-lg font-medium">維修紀錄</span>
-							</button>
-						</li>
-						<li>
-							<button
-								type="button"
-								class="flex w-full items-center gap-4 rounded-2xl px-5 py-5 text-left text-[#5b5b5b] transition hover:bg-white/60"
-								:class="activeNav === 'shop' ? 'ring-1 ring-black/5' : ''"
-								@click="activeNav = 'shop'"
-							>
-								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" />
-									<path
-										d="M19.4 15a7.97 7.97 0 0 0 .1-2l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1l-.3-2.4h-4l-.3 2.4c-.6.2-1.2.6-1.7 1l-2.3-.6-2 3.4 2 1.2a7.97 7.97 0 0 0 0 2l-2 1.2 2 3.4 2.3-.6c.5.4 1.1.8 1.7 1l.3 2.4h4l.3-2.4c.6-.2 1.2-.6 1.7-1l2.3.6 2-3.4-2-1.2z"
-									/>
-								</svg>
-								<span class="text-lg font-medium">廠房資訊</span>
-							</button>
-						</li>
-					</ul>
-				</nav>
-			</aside>
-			<main class="flex-1 bg-white px-12 py-10">
-				<header>
-					<h2 class="text-2xl font-semibold text-[#3f3f46]">{{ pageTitle.title }}</h2>
-					<p class="mt-2 text-sm text-[#a1a1aa]">{{ pageTitle.subtitle }}</p>
-				</header>
-				<section v-if="activeNav === 'dashboard'" class="mt-8">
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<div class="flex items-center justify-between">
-								<div>
-									<p class="text-sm text-[#a1a1aa]">今日預約</p>
-									<p class="mt-2 text-4xl font-semibold text-[#3f3f46]">
-										{{ stats.todayBookings }}
-									</p>
-								</div>
-								<div class="rounded-2xl bg-[#7f93a4] p-4 text-white">
-									<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<rect x="3" y="4" width="18" height="18" rx="2" />
-										<path d="M16 2v4" />
-										<path d="M8 2v4" />
-										<path d="M3 10h18" />
-									</svg>
-								</div>
-							</div>
-						</div>
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<div class="flex items-center justify-between">
-								<div>
-									<p class="text-sm text-[#a1a1aa]">待處理工單</p>
-									<p class="mt-2 text-4xl font-semibold text-[#3f3f46]">
-										{{ stats.pendingOrders }}
-									</p>
-								</div>
-								<div class="rounded-2xl bg-[#8fb6a1] p-4 text-[#2f3b35]">
-									<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M9 5H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-										<rect x="9" y="3" width="6" height="4" rx="1" />
-										<path d="M9 12h6" />
-										<path d="M9 16h6" />
-									</svg>
-								</div>
-							</div>
-						</div>
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<div class="flex items-center justify-between">
-								<div>
-									<p class="text-sm text-[#a1a1aa]">本月完成</p>
-									<p class="mt-2 text-4xl font-semibold text-[#3f3f46]">
-										{{ stats.monthCompleted }}
-									</p>
-								</div>
-								<div class="rounded-2xl bg-[#c7ab7a] p-4 text-[#3f3f46]">
-									<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M3 17l6-6 4 4 8-8" />
-										<path d="M14 7h7v7" />
-									</svg>
-								</div>
-							</div>
-						</div>
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<div class="flex items-center justify-between">
-								<div>
-									<p class="text-sm text-[#a1a1aa]">平均處理時間</p>
-									<p class="mt-2 text-4xl font-semibold text-[#3f3f46]">
-										{{ stats.avgHandlingTime }}
-									</p>
-								</div>
-								<div class="rounded-2xl bg-[#a9bac7] p-4 text-[#3f3f46]">
-									<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<circle cx="12" cy="12" r="9" />
-										<path d="M12 7v6l4 2" />
-									</svg>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="mt-8 rounded-2xl border border-zinc-100 bg-white p-8 shadow-sm">
-						<h3 class="text-lg font-semibold text-[#3f3f46]">近期工單</h3>
-						<div class="mt-6 space-y-4">
-							<div
-								v-for="o in recentOrders"
-								:key="o.id"
-								class="flex items-center justify-between rounded-2xl bg-[#f5f3ee] px-8 py-6"
-							>
-								<div class="min-w-0">
-									<div class="flex items-center gap-3 text-sm">
-										<span class="text-[#a1a1aa]">{{ o.id }}</span>
-										<span class="text-[#a1a1aa]">•</span>
-										<span class="font-medium text-[#3f3f46]">{{ o.customerName }}</span>
-									</div>
-									<p class="mt-2 text-sm text-[#a1a1aa]">{{ o.carModel }}</p>
-								</div>
-								<div class="flex items-center gap-6">
-									<span class="text-sm text-[#a1a1aa]">{{ o.time }}</span>
-									<span class="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium" :class="statusClass(o.status)">
-										{{ statusText(o.status) }}
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</section>
-				<section v-else-if="activeNav === 'orders'" class="mt-8 space-y-6">
-					<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-						<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-							<div class="relative w-full md:max-w-md">
-								<svg class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<circle cx="11" cy="11" r="8" />
-									<path d="M21 21l-4.3-4.3" />
-								</svg>
-								<input
-									v-model="orderQuery"
-									type="text"
-									placeholder="搜尋工單號、姓名、車型、車牌..."
-									class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 pl-10 text-sm outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
-								/>
-							</div>
-							<div class="flex items-center gap-3">
-								<select
-									v-model="orderStatusFilter"
-									class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
-								>
-									<option value="all">全部狀態</option>
-									<option value="in_progress">進行中</option>
-									<option value="pending_confirm">待確認</option>
-									<option value="completed">已完成</option>
-									<option value="cancelled">已取消</option>
-								</select>
-								<button
-									type="button"
-									class="rounded-xl bg-[#7f93a4] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-95 active:scale-[0.99]"
-									@click="orders = [...orders].reverse()"
-								>
-									假裝排序
-								</button>
-							</div>
-						</div>
-					</div>
-					<div class="rounded-2xl border border-zinc-100 bg-white shadow-sm">
-						<div class="overflow-x-auto">
-							<table class="w-full min-w-[920px] text-left text-sm">
-								<thead class="bg-[#f5f3ee] text-[#6b7280]">
-									<tr>
-										<th class="px-6 py-4 font-medium">工單</th>
-										<th class="px-6 py-4 font-medium">客戶 / 車輛</th>
-										<th class="px-6 py-4 font-medium">預約</th>
-										<th class="px-6 py-4 font-medium">服務項目</th>
-										<th class="px-6 py-4 font-medium">預估</th>
-										<th class="px-6 py-4 font-medium">金額</th>
-										<th class="px-6 py-4 font-medium">狀態</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-zinc-100">
-									<tr v-for="o in filteredOrders" :key="o.id" class="hover:bg-zinc-50/60">
-										<td class="px-6 py-4 font-medium text-[#3f3f46]">{{ o.id }}</td>
-										<td class="px-6 py-4">
-											<p class="font-medium text-[#3f3f46]">{{ o.customerName }} <span class="text-[#a1a1aa]">({{ o.phone }})</span></p>
-											<p class="mt-1 text-[#a1a1aa]">{{ o.carModel }} · {{ o.licensePlate }}</p>
-										</td>
-										<td class="px-6 py-4 text-[#6b7280]">{{ o.appointmentDate }} {{ o.appointmentTime }}</td>
-										<td class="px-6 py-4 text-[#6b7280]">{{ o.service }}</td>
-										<td class="px-6 py-4 text-[#6b7280]">{{ o.estimateMin }} 分</td>
-										<td class="px-6 py-4 font-medium text-[#3f3f46]">{{ formatCurrency(o.amount) }}</td>
-										<td class="px-6 py-4">
-											<span class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium" :class="statusClass(o.status)">
-												{{ statusText(o.status) }}
-											</span>
-										</td>
-									</tr>
-									<tr v-if="filteredOrders.length === 0">
-										<td colspan="7" class="px-6 py-10 text-center text-[#a1a1aa]">找不到符合的工單喔</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</section>
-				<section v-else-if="activeNav === 'schedule'" class="mt-8 space-y-6">
-					<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-						<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-							<div class="flex items-center gap-3">
-								<label class="text-sm text-[#6b7280]">日期</label>
-								<input
-									v-model="scheduleDate"
-									type="date"
-									class="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
-								/>
-							</div>
-							<button
-								type="button"
-								class="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-[#3f3f46] shadow-sm transition hover:bg-zinc-50 active:scale-[0.99]"
-								@click="scheduleDate = scheduleDate === '2024-12-01' ? '2024-12-02' : '2024-12-01'"
-							>
-								切換假日期
-							</button>
-						</div>
-					</div>
-					<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<h3 class="text-base font-semibold text-[#3f3f46]">當日排程</h3>
-							<div class="mt-4 space-y-3">
-								<div
-									v-for="s in schedulesOfDay"
-									:key="s.id"
-									class="flex items-center justify-between rounded-2xl bg-[#f5f3ee] px-6 py-5"
-								>
-									<div>
-										<p class="text-sm font-medium text-[#3f3f46]">
-											{{ s.time }} · 工位 {{ s.bay }} · {{ s.tech }}
-										</p>
-										<p class="mt-1 text-sm text-[#a1a1aa]">{{ s.customerName }} · {{ s.carModel }} · {{ s.title }}</p>
-									</div>
-									<span class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium" :class="scheduleBadgeClass(s.status)">
-										{{ s.status === 'doing' ? '進行中' : s.status === 'upcoming' ? '待開始' : '已完成' }}
-									</span>
-								</div>
-								<div v-if="schedulesOfDay.length === 0" class="rounded-2xl bg-zinc-50 px-6 py-10 text-center text-[#a1a1aa]">
-									當天沒有排程
-								</div>
-							</div>
-						</div>
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<h3 class="text-base font-semibold text-[#3f3f46]">工位概況</h3>
-							<div class="mt-4 grid grid-cols-2 gap-4">
-								<div
-									v-for="b in shopInfo.bays"
-									:key="b.bay"
-									class="rounded-2xl bg-zinc-50 p-5"
-								>
-									<p class="text-sm text-[#6b7280]">工位 {{ b.bay }}</p>
-									<p class="mt-2">
-										<span class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium" :class="bayStatusClass(b.status)">
-											{{ b.status === 'available' ? '可用' : b.status === 'busy' ? '忙碌中' : '維護中' }}
-										</span>
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</section>
-				<section v-else-if="activeNav === 'records'" class="mt-8 space-y-6">
-					<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-						<div class="relative w-full md:max-w-md">
-							<svg class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<circle cx="11" cy="11" r="8" />
-								<path d="M21 21l-4.3-4.3" />
+	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
+		<div class="flex h-screen overflow-hidden">
+			<aside class="w-[280px] shrink-0 flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3]">
+				<div class="p-8">
+					<div class="flex items-center gap-3">
+						<div class="flex h-10 w-10 items-center justify-center rounded bg-[#6B6B5C] text-[#EBE8E3] shadow-sm">
+							<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
 							</svg>
-							<input
-								v-model="recordQuery"
-								type="text"
-								placeholder="搜尋紀錄編號、姓名、車型、車牌..."
-								class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 pl-10 text-sm outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
-							/>
 						</div>
+						<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
 					</div>
-					<div class="space-y-4">
-						<div
-							v-for="r in filteredRecords"
-							:key="r.id"
-							class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm"
-						>
-							<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-								<div>
-									<p class="text-sm text-[#a1a1aa]">{{ r.id }} · {{ r.date }}</p>
-									<p class="mt-2 text-lg font-semibold text-[#3f3f46]">{{ r.customerName }}</p>
-									<p class="mt-1 text-sm text-[#a1a1aa]">
-										{{ r.phone }} · {{ r.carModel }} · {{ r.licensePlate }}
-									</p>
-								</div>
-								<div class="text-right">
-									<p class="text-sm text-[#a1a1aa]">合計</p>
-									<p class="mt-1 text-xl font-semibold text-[#3f3f46]">
-										{{ formatCurrency(sumRecord(r.items)) }}
-									</p>
-								</div>
-							</div>
-							<div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-								<div
-									v-for="(it, idx) in r.items"
-									:key="idx"
-									class="flex items-center justify-between rounded-2xl bg-[#f5f3ee] px-5 py-4"
-								>
-									<div class="flex items-center gap-3">
-										<span
-											class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-											:class="it.type === 'base' ? 'bg-[#7f93a4] text-white' : 'bg-[#c7ab7a] text-[#3f3f46]'"
-										>
-											{{ it.type === 'base' ? '基本維修' : '加購' }}
-										</span>
-										<span class="text-sm font-medium text-[#3f3f46]">{{ it.name }}</span>
-									</div>
-									<span class="text-sm font-semibold text-[#3f3f46]">{{ formatCurrency(it.price) }}</span>
-								</div>
-							</div>
-							<p class="mt-4 text-sm text-[#6b7280]">{{ r.notes }}</p>
-						</div>
-						<div
-							v-if="filteredRecords.length === 0"
-							class="rounded-2xl border border-zinc-100 bg-white p-12 text-center text-[#a1a1aa] shadow-sm"
-						>
-							找不到符合的維修紀錄
-						</div>
+				</div>
+				<nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+					<button
+						v-for="key in (['dashboard', 'appointments', 'records', 'settings'] as NavKey[])"
+						:key="key"
+						@click="activeNav = key"
+						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
+						:class="activeNav === key 
+							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20' 
+							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
+					>
+						<svg v-if="key === 'dashboard'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+						<svg v-if="key === 'appointments'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M10 14h4"/></svg>
+						<svg v-if="key === 'records'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+						<svg v-if="key === 'settings'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+						<span class="font-medium tracking-wide">
+							{{ key === 'dashboard' ? '總覽' : key === 'appointments' ? '預約排程' : key === 'records' ? '維修紀錄' : '店鋪設定' }}
+						</span>
+					</button>
+				</nav>
+				<div class="p-6">
+					<div class="rounded-lg bg-[#DEDbd6]/50 p-4 border border-[#DCD9D3]">
+						<div class="text-xs text-stone-500">目前登入</div>
+						<div class="font-bold text-[#4A4A45] tracking-wide">店長 Admin</div>
 					</div>
-				</section>
-				<section v-else class="mt-8 space-y-6">
-					<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-						<p class="text-sm text-[#a1a1aa]">廠名</p>
-						<p class="mt-1 text-xl font-semibold text-[#3f3f46]">{{ shopInfo.name }}</p>
-						<div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-							<div class="rounded-2xl bg-zinc-50 p-5">
-								<p class="text-sm text-[#6b7280]">地址</p>
-								<p class="mt-1 text-sm font-medium text-[#3f3f46]">{{ shopInfo.address }}</p>
-							</div>
-							<div class="rounded-2xl bg-zinc-50 p-5">
-								<p class="text-sm text-[#6b7280]">電話</p>
-								<p class="mt-1 text-sm font-medium text-[#3f3f46]">{{ shopInfo.phone }}</p>
-							</div>
-						</div>
-					</div>
-					<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<h3 class="text-base font-semibold text-[#3f3f46]">營業時間</h3>
-							<div class="mt-4 space-y-3">
-								<div
-									v-for="(h, idx) in shopInfo.businessHours"
-									:key="idx"
-									class="flex items-center justify-between rounded-2xl bg-[#f5f3ee] px-6 py-4"
-								>
-									<span class="text-sm font-medium text-[#3f3f46]">{{ h.day }}</span>
-									<span class="text-sm text-[#6b7280]">{{ h.open }} - {{ h.close }}</span>
-								</div>
-							</div>
-						</div>
-						<div class="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-							<h3 class="text-base font-semibold text-[#3f3f46]">技師狀態</h3>
-							<div class="mt-4 space-y-3">
-								<div
-									v-for="t in shopInfo.techs"
-									:key="t.name"
-									class="flex items-center justify-between rounded-2xl bg-zinc-50 px-6 py-4"
-								>
+				</div>
+			</aside>
+			<main class="flex-1 overflow-y-auto">
+				<div class="mx-auto max-w-6xl px-8 py-10">
+					<header class="mb-10">
+						<h2 class="text-3xl font-bold text-[#4A4A45] tracking-wide">{{ pageHeader.title }}</h2>
+						<p class="mt-2 text-stone-500 font-medium">{{ pageHeader.sub }}</p>
+					</header>
+					<div v-if="activeNav === 'dashboard'" class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+						<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+							<div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
+								<div class="flex items-start justify-between">
 									<div>
-										<p class="text-sm font-medium text-[#3f3f46]">{{ t.name }}</p>
-										<p class="mt-1 text-xs text-[#a1a1aa]">{{ t.level }}</p>
+										<p class="text-sm font-medium text-stone-400">今日預約數</p>
+										<p class="mt-2 text-3xl font-bold text-[#4A4A45]">{{ dashboardStats.todayCount }}</p>
+									</div>
+									<div class="rounded-full bg-[#D6DCD9] p-2 text-[#5C6B66]">
+										<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+									</div>
+								</div>
+							</div>
+							<div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
+								<div class="flex items-start justify-between">
+									<div>
+										<p class="text-sm font-medium text-stone-400">待確認訂單</p>
+										<p class="mt-2 text-3xl font-bold text-[#4A4A45]">{{ dashboardStats.pendingCount }}</p>
+									</div>
+									<div class="rounded-full bg-[#E8DCC2] p-2 text-[#8C7B5D]">
+										<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+									</div>
+								</div>
+							</div>
+							<div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
+								<div class="flex items-start justify-between">
+									<div>
+										<p class="text-sm font-medium text-stone-400">正在作業中</p>
+										<p class="mt-2 text-3xl font-bold text-[#4A4A45]">{{ dashboardStats.servicingCount }}</p>
+									</div>
+									<div class="rounded-full bg-[#C2CCB8] p-2 text-[#5A6650]">
+										<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+									</div>
+								</div>
+							</div>
+							<div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
+								<div class="flex items-start justify-between">
+									<div>
+										<p class="text-sm font-medium text-stone-400">執勤技師</p>
+										<p class="mt-2 text-3xl font-bold text-[#4A4A45]">{{ dashboardStats.techActiveCount }}</p>
+									</div>
+									<div class="rounded-full bg-stone-100 p-2 text-stone-500">
+										<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<div class="flex items-center justify-between mb-6">
+								<h3 class="text-lg font-bold text-[#4A4A45]">今日需關注</h3>
+								<button @click="activeNav = 'appointments'" class="text-sm font-medium text-[#6B6B5C] hover:text-[#5a5a4d] hover:underline">查看全部 &rarr;</button>
+							</div>
+							<div class="space-y-4">
+								<div v-for="apt in appointments.slice(0, 3)" :key="apt.id" class="flex items-center gap-4 rounded-lg bg-[#F8F7F5] p-4 border border-[#F0EEE9]">
+									<div class="w-16 text-center">
+										<div class="text-xs font-bold text-stone-400">{{ apt.time }}</div>
+									</div>
+									<div class="flex-1">
+										<div class="flex items-center gap-2">
+											<span class="font-bold text-[#4A4A45]">{{ apt.customerName }}</span>
+											<span class="text-xs text-stone-400">{{ apt.carModel }}</span>
+										</div>
+										<div class="text-sm text-stone-500">{{ apt.serviceType }}</div>
+									</div>
+									<div>
+										<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium" :class="getStatusClass(apt.status)">
+											{{ getStatusLabel(apt.status) }}
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div v-else-if="activeNav === 'appointments'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+						<div class="flex flex-col gap-4 rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+							<div class="flex flex-1 gap-3">
+								<div class="relative w-full max-w-sm">
+									<svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+									<input 
+										v-model="apptSearch"
+										type="text" 
+										placeholder="搜尋姓名、車牌..." 
+										class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] py-2.5 pl-10 pr-4 text-sm text-[#4A4A45] outline-none transition focus:border-[#6B6B5C] focus:bg-white focus:ring-1 focus:ring-[#6B6B5C]"
+									>
+								</div>
+								<select v-model="apptFilterStatus" class="rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+									<option value="all">顯示全部</option>
+									<option value="pending">待確認</option>
+									<option value="confirmed">已排程</option>
+									<option value="servicing">作業中</option>
+								</select>
+							</div>
+							<button class="flex items-center gap-2 rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#5a5a4d] active:scale-95">
+								<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+								新增預約
+							</button>
+						</div>
+						<div class="space-y-4">
+							<div 
+								v-for="apt in filteredAppointments" 
+								:key="apt.id"
+								class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
+							>
+								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusClass(apt.status).split(' ')[0].replace('bg-', 'bg-')"></div>
+								<div class="flex-1 pl-4">
+									<div class="flex flex-wrap items-center gap-3">
+										<span class="font-mono text-xs text-stone-400">{{ apt.id }}</span>
+										<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" :class="getStatusClass(apt.status)">
+											{{ getStatusLabel(apt.status) }}
+										</span>
+									</div>
+									<div class="mt-2 flex items-baseline gap-3">
+										<h3 class="text-lg font-bold text-[#4A4A45]">{{ apt.customerName }}</h3>
+										<span class="text-sm text-stone-500">{{ apt.carModel }} <span class="text-stone-300">|</span> {{ apt.licensePlate }}</span>
+									</div>
+									<div class="mt-1 text-sm text-stone-500">{{ apt.serviceType }} <span v-if="apt.notes" class="ml-2 text-[#8C7B5D]">★ {{ apt.notes }}</span></div>
+								</div>
+								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
+									<div class="flex items-center gap-2 text-sm text-stone-600">
+										<svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+										{{ apt.date }}
+									</div>
+									<div class="flex items-center gap-2 text-sm text-stone-600">
+										<svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+										{{ apt.time }}
+									</div>
+								</div>
+								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
+									<div v-if="apt.tech" class="flex items-center gap-2 text-sm">
+										<span class="text-stone-400">技師:</span>
+										<span class="font-medium text-stone-600">{{ apt.tech }}</span>
+									</div>
+									<div v-if="apt.bay" class="flex items-center gap-2 text-sm">
+										<span class="text-stone-400">工位:</span>
+										<span class="font-medium text-stone-600">{{ apt.bay }}</span>
+									</div>
+									<div v-if="!apt.tech && !apt.bay" class="text-sm italic text-stone-400">尚未指派</div>
+								</div>
+								<div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
+									<div class="text-right">
+										<div class="text-xs text-stone-400">預估費用</div>
+										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimatedCost) }}</div>
+									</div>
+								</div>
+								<div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:flex-col lg:border-0 lg:pt-0">
+									<button class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-20">編輯</button>
+								</div>
+							</div>
+							<div v-if="filteredAppointments.length === 0" class="rounded-xl border border-dashed border-stone-300 p-12 text-center">
+								<p class="text-stone-400">沒有符合條件的預約</p>
+							</div>
+						</div>
+					</div>
+					<div v-else-if="activeNav === 'records'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm">
+							<div class="relative max-w-md">
+								<svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+								<input 
+									v-model="recordSearch"
+									type="text" 
+									placeholder="輸入車主姓名或車牌查詢歷史紀錄..." 
+									class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] py-2.5 pl-10 pr-4 text-sm text-[#4A4A45] outline-none transition focus:border-[#6B6B5C] focus:bg-white focus:ring-1 focus:ring-[#6B6B5C]"
+								>
+							</div>
+						</div>
+						<div class="grid grid-cols-1 gap-6">
+							<div v-for="rec in filteredRecords" :key="rec.id" class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm">
+								<div class="flex flex-col justify-between gap-4 border-b border-[#F0EEE9] pb-4 md:flex-row md:items-center">
+									<div>
+										<div class="flex items-center gap-3">
+											<h3 class="text-lg font-bold text-[#4A4A45]">{{ rec.customerName }}</h3>
+											<span class="rounded bg-[#F0EEE9] px-2 py-0.5 text-xs text-stone-500">{{ rec.licensePlate }}</span>
+										</div>
+										<p class="text-sm text-stone-400">{{ rec.carModel }}</p>
 									</div>
 									<div class="text-right">
-										<p class="text-xs text-[#a1a1aa]">今日工單</p>
-										<p class="mt-1 text-sm font-semibold text-[#3f3f46]">{{ t.todayJobs }}</p>
+										<p class="text-sm text-stone-400">{{ rec.date }}</p>
+										<p class="text-xs text-stone-400">技師: {{ rec.tech }}</p>
 									</div>
+								</div>
+								<div class="mt-4 space-y-2">
+									<div v-for="(item, idx) in rec.items" :key="idx" class="flex justify-between text-sm">
+										<span class="text-stone-600">{{ item.name }} <span v-if="item.type === 'addon'" class="ml-1 text-[10px] text-[#8C7B5D] border border-[#8C7B5D] px-1 rounded">加購</span></span>
+										<span class="font-medium text-[#4A4A45]">{{ formatCurrency(item.price) }}</span>
+									</div>
+								</div>
+								<div class="mt-4 flex items-center justify-between border-t border-[#F0EEE9] pt-4">
+									<p class="text-sm text-stone-400 italic">{{ rec.notes || '無備註' }}</p>
+									<p class="text-lg font-bold text-[#4A4A45]">總計: {{ formatCurrency(rec.total) }}</p>
 								</div>
 							</div>
 						</div>
 					</div>
-				</section>
+					<div v-else-if="activeNav === 'settings'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">基本資訊</h3>
+							<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">店舖名稱</label>
+									<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+								</div>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">聯絡電話</label>
+									<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+								</div>
+								<div class="space-y-2 md:col-span-2">
+									<label class="text-sm font-medium text-stone-500">地址</label>
+									<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+								</div>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">工位數量 (Bays)</label>
+									<input v-model="shopSettings.bays" type="number" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+								</div>
+							</div>
+						</div>
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">營業時間設定</h3>
+							<div class="space-y-4">
+								<div v-for="(bh, idx) in shopSettings.businessHours" :key="idx" class="flex items-center gap-4 border-b border-[#F0EEE9] pb-3 last:border-0">
+									<div class="w-16 font-medium text-[#4A4A45]">{{ bh.day }}</div>
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input type="checkbox" v-model="bh.isClosed" class="rounded border-stone-300 text-[#6B6B5C] focus:ring-[#6B6B5C]">
+										<span class="text-sm text-stone-500">休息</span>
+									</label>
+									<div class="flex items-center gap-2" :class="{ 'opacity-30 pointer-events-none': bh.isClosed }">
+										<input v-model="bh.open" type="time" class="rounded border border-[#DCD9D3] px-2 py-1 text-sm text-[#4A4A45]">
+										<span class="text-stone-400">-</span>
+										<input v-model="bh.close" type="time" class="rounded border border-[#DCD9D3] px-2 py-1 text-sm text-[#4A4A45]">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<div class="mb-6 flex items-center justify-between">
+								<h3 class="text-lg font-bold text-[#4A4A45]">技師名單管理</h3>
+								<button class="text-sm font-medium text-[#6B6B5C] hover:underline">+ 新增技師</button>
+							</div>
+							<div class="space-y-3">
+								<div v-for="tech in shopSettings.techs" :key="tech.id" class="flex items-center justify-between rounded-lg bg-[#F8F7F5] px-4 py-3 border border-[#F0EEE9]">
+									<div class="flex items-center gap-3">
+										<div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#E5E2DD] text-xs font-bold text-stone-500">
+											{{ tech.name[0] }}
+										</div>
+										<div>
+											<input v-model="tech.name" class="bg-transparent font-medium text-[#4A4A45] focus:outline-none focus:underline" />
+										</div>
+									</div>
+									<div class="flex items-center gap-3">
+										<select v-model="tech.level" class="rounded border-0 bg-transparent text-sm text-stone-500 focus:ring-0">
+											<option>資深</option>
+											<option>中階</option>
+											<option>新手</option>
+										</select>
+										<select v-model="tech.status" class="rounded border-0 bg-transparent text-sm focus:ring-0" :class="tech.status === 'active' ? 'text-[#5A6650]' : 'text-stone-300'">
+											<option value="active">在職</option>
+											<option value="leave">離職</option>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="flex justify-end pt-4">
+							<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
+								儲存變更
+							</button>
+						</div>
+					</div>
+				</div>
 			</main>
 		</div>
 	</div>
