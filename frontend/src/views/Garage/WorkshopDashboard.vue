@@ -14,8 +14,6 @@ type Appointment = {
 	serviceType: string;
 	date: string;
 	time: string;
-	tech?: string;
-	bay?: string;
 	status: ApptStatus;
 	notes?: string;
 	estimatedCost: number;
@@ -99,8 +97,6 @@ const appointments = ref<Appointment[]>([
 		serviceType: '定期保養',
 		date: '2026-01-18',
 		time: '09:30',
-		tech: '阿哲',
-		bay: 'A1',
 		status: 'servicing',
 		estimatedCost: 3500,
 		notes: '自備機油',
@@ -114,8 +110,6 @@ const appointments = ref<Appointment[]>([
 		serviceType: '煞車異音檢查',
 		date: '2026-01-18',
 		time: '10:30',
-		tech: '小安',
-		bay: 'A2',
 		status: 'confirmed',
 		estimatedCost: 1200,
 		notes: '右前輪有異音',
@@ -256,7 +250,7 @@ function submitIdentity() {
 const pageHeader = computed(() => {
 	switch (activeNav.value) {
 		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
-		case 'appointments': return { title: '預約排程', sub: '管理客戶預約、指派技師與工位' };
+		case 'appointments': return { title: '預約排程', sub: '管理客戶預約與維修進度' };
 		case 'records': return { title: '維修紀錄', sub: '查詢過往維修履歷與工單細節' };
 		case 'settings': return { title: '編輯維修廠', sub: '維護維修廠的基本資料與簡介' };
 		case 'identity': return { title: '登記身份', sub: '管理維修廠的登記與認證資訊' };
@@ -289,7 +283,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 						@click="activeNav = key"
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
 						:class="activeNav === key 
-							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20' 
+							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20'
 							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
 					>
 						<svg v-if="key === 'dashboard'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -307,7 +301,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 						@click="activeNav = key"
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
 						:class="activeNav === key 
-							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20' 
+							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20'
 							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
 					>
 						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -443,18 +437,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 										{{ apt.time }}
 									</div>
 								</div>
-								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
-									<div v-if="apt.tech" class="flex items-center gap-2 text-sm">
-										<span class="text-stone-400">技師:</span>
-										<span class="font-medium text-stone-600">{{ apt.tech }}</span>
-									</div>
-									<div v-if="apt.bay" class="flex items-center gap-2 text-sm">
-										<span class="text-stone-400">工位:</span>
-										<span class="font-medium text-stone-600">{{ apt.bay }}</span>
-									</div>
-									<div v-if="!apt.tech && !apt.bay" class="text-sm italic text-stone-400">尚未指派</div>
-								</div>
-								<div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
+								<div class="flex items-center justify-end pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
 									<div class="text-right">
 										<div class="text-xs text-stone-400">預估費用</div>
 										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimatedCost) }}</div>
@@ -509,128 +492,109 @@ const navGroupBottom: NavKey[] = ['identity'];
 							</div>
 						</div>
 					</div>
-															<div v-else-if="activeNav === 'settings'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-																
-																<!-- 維修廠照片區塊 -->
-																<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-																	<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
-																		<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
-																			<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-																				<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-																				<circle cx="8.5" cy="8.5" r="1.5"/>
-																				<polyline points="21 15 16 10 5 21"/>
-																			</svg>
-																		</div>
-																		<div>
-																			<h3 class="text-lg font-bold text-[#4A4A45]">維修廠照片</h3>
-																			<p class="text-sm text-stone-500">上傳封面與環境照片，展現專業形象。</p>
-																		</div>
-																	</div>
-										
-																	<div class="space-y-8">
-																		<!-- 封面照片 -->
-																		<div>
-																			<label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
-																			<div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
-																				<input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onCoverFileChange">
-																				
-																				<div v-if="!shopSettings.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
-																					<svg class="mb-3 h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-																					<span class="font-medium">點擊上傳封面照片</span>
-																					<span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
-																				</div>
-																				
-																				<div v-else class="relative h-full w-full">
-																					<img :src="shopSettings.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
-																					<div class="absolute bottom-4 right-4 z-20">
-																						<span class="rounded-lg bg-white/90 px-3 py-2 text-xs font-bold text-stone-600 shadow-sm backdrop-blur transition hover:bg-white">更換照片</span>
-																					</div>
-																				</div>
-																			</div>
-																		</div>
-										
-																		<!-- 環境照片 -->
-																		<div>
-																			<label class="mb-3 block text-sm font-medium text-stone-500">環境照片 <span class="text-xs text-stone-400 font-normal">(展示工位、休息區等)</span></label>
-																			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-																				<div v-for="(img, idx) in shopSettings.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
-																					<img :src="img" class="h-full w-full object-cover" alt="Environment" />
-																					<button 
-																						@click="removeEnvImage(idx)" 
-																						class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-stone-500 shadow-sm opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-																					>
-																						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-																					</button>
-																				</div>
-																				
-																				<div class="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] text-stone-400 transition-colors hover:border-[#6B6B5C] hover:text-[#6B6B5C]">
-																					<input type="file" accept="image/*" multiple class="absolute inset-0 cursor-pointer opacity-0" @change="onEnvFileChange">
-																					<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-																					<span class="mt-2 text-xs font-medium">新增照片</span>
-																				</div>
-																			</div>
-																		</div>
-																	</div>
-																</div>
-										
-																<!-- 基本資料區塊 -->
-																<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-										
-												<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
-													<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
-														<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-															<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-															<polyline points="9 22 9 12 15 12 15 22"/>
-														</svg>
-													</div>
-													<div>
-														<h3 class="text-lg font-bold text-[#4A4A45]">基本資料</h3>
-														<p class="text-sm text-stone-500">這些資訊將顯示給您的客戶，請確保內容正確。</p>
-													</div>
-												</div>
-					
-												<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-													<div class="space-y-2">
-														<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
-														<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
-													</div>
-													
-													<div class="space-y-2">
-														<label class="text-sm font-medium text-stone-500">統一編號</label>
-														<input v-model="shopSettings.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
-													</div>
-					
-													<div class="space-y-2">
-														<label class="text-sm font-medium text-stone-500">聯絡電話</label>
-														<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
-													</div>
-					
-													<div class="space-y-2">
-														<label class="text-sm font-medium text-stone-500">維修廠地址</label>
-														<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
-													</div>
-					
-													<div class="col-span-1 space-y-2 md:col-span-2">
-														<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
-														<textarea 
-															v-model="shopSettings.description" 
-															rows="4" 
-															class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-															placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
-														></textarea>
-														<p class="text-right text-xs text-stone-400">{{ shopSettings.description.length }} / 200</p>
-													</div>
-												</div>
-					
-												<div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
-													<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
-														儲存變更
-													</button>
-												</div>
-											</div>
-					
+					<div v-else-if="activeNav === 'settings'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
+								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
+									<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+										<circle cx="8.5" cy="8.5" r="1.5"/>
+										<polyline points="21 15 16 10 5 21"/>
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-lg font-bold text-[#4A4A45]">維修廠照片</h3>
+									<p class="text-sm text-stone-500">上傳封面與環境照片，展現專業形象。</p>
+								</div>
+							</div>
+							<div class="space-y-8">
+								<div>
+									<label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
+									<div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
+										<input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onCoverFileChange">
+										<div v-if="!shopSettings.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
+											<svg class="mb-3 h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+											<span class="font-medium">點擊上傳封面照片</span>
+											<span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
 										</div>
-					
+										<div v-else class="relative h-full w-full">
+											<img :src="shopSettings.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
+											<div class="absolute bottom-4 right-4 z-20">
+												<span class="rounded-lg bg-white/90 px-3 py-2 text-xs font-bold text-stone-600 shadow-sm backdrop-blur transition hover:bg-white">更換照片</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div>
+									<label class="mb-3 block text-sm font-medium text-stone-500">環境照片 <span class="text-xs text-stone-400 font-normal">(展示工位、休息區等)</span></label>
+									<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+										<div v-for="(img, idx) in shopSettings.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
+											<img :src="img" class="h-full w-full object-cover" alt="Environment" />
+											<button 
+												@click="removeEnvImage(idx)" 
+												class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-stone-500 shadow-sm opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+											>
+												<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+											</button>
+										</div>
+										<div class="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] text-stone-400 transition-colors hover:border-[#6B6B5C] hover:text-[#6B6B5C]">
+											<input type="file" accept="image/*" multiple class="absolute inset-0 cursor-pointer opacity-0" @change="onEnvFileChange">
+											<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+											<span class="mt-2 text-xs font-medium">新增照片</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+							<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
+								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
+									<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+										<polyline points="9 22 9 12 15 12 15 22"/>
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-lg font-bold text-[#4A4A45]">基本資料</h3>
+									<p class="text-sm text-stone-500">這些資訊將顯示給您的客戶，請確保內容正確。</p>
+								</div>
+							</div>
+							<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
+									<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+								</div>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">統一編號</label>
+									<input v-model="shopSettings.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
+								</div>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">聯絡電話</label>
+									<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
+								</div>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">維修廠地址</label>
+									<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
+								</div>
+								<div class="col-span-1 space-y-2 md:col-span-2">
+									<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
+									<textarea 
+										v-model="shopSettings.description" 
+										rows="4" 
+										class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
+										placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
+									>
+									</textarea>
+									<p class="text-right text-xs text-stone-400">{{ shopSettings.description.length }} / 200</p>
+								</div>
+							</div>
+							<div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
+								<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
+									儲存變更
+								</button>
+							</div>
+						</div>
+					</div>
 					<div v-else-if="activeNav === 'identity'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
 							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">登記身份資訊</h3>
