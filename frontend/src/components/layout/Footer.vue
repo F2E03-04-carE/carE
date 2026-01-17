@@ -5,12 +5,11 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-5xl mx-auto text-center">
         <div class="text-center">
           <div class="flex items-center gap-2 mb-4 justify-center">
-            <img
+            <a href="/"><img
             src="@/assets/icons/carE_logo_white.png"
             alt="carE logo"
-            href="/"
-            class="h-15 sm:h-18 w-auto object-contain cursor-pointer"
-             />
+            class="h-16 sm:h-20 w-auto object-contain cursor-pointer"
+            /></a>
           </div>
         </div>
         <div class="text-center">
