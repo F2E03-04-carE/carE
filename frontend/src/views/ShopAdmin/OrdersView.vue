@@ -2,7 +2,8 @@
 import { ref } from 'vue';
 import OrderCard from './components/OrderCard.vue';
 import OrderDetailModal from './components/OrderDetailModal.vue';
-import HeaderSearch from './components/HeaderSearch.vue';
+import PageHead from './components/PageHead.vue';
+import SearchBar from './components/SearchBar.vue';
 import type { Order } from './types';
 
 // 假資料
@@ -85,10 +86,9 @@ const save = () => {
 
 <template>
   <div class="space-y-6">
-    <HeaderSearch
-      title="工單管理"
-      subtitle="系統工單配對、查詢"
-      placeholder="搜尋工單號、客戶姓名、電話或車輛..."
+    <PageHead title="工單管理" subtitle="系統工單配對、查詢" />
+    <SearchBar
+      placeholder="搜尋工單號、客戶姓名、電話或車牌..."
       v-model:keyword="keyword"
     />
 
