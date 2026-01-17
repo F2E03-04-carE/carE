@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, reactive } from 'vue';
 
-type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings' | 'identity';
+type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings';
 
 type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
 
@@ -41,11 +41,6 @@ type ShopSettings = {
 	environmentImages: string[];
 };
 
-type IdentityForm = {
-	name: string;
-	taxId: string;
-};
-
 // --- State ---
 
 const activeNav = ref<NavKey>('dashboard');
@@ -58,11 +53,6 @@ const shopSettings = reactive<ShopSettings>({
 	description: '我們專注於提供最優質的日系車維修服務，擁有超過 10 年的專業經驗。',
 	coverImage: '',
 	environmentImages: [],
-});
-
-const identityForm = reactive<IdentityForm>({
-	name: shopSettings.name,
-	taxId: '',
 });
 
 function onCoverFileChange(event: Event) {
@@ -78,7 +68,9 @@ function onEnvFileChange(event: Event) {
 	if (input.files) {
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files[i];
-			shopSettings.environmentImages.push(URL.createObjectURL(file));
+			if (file) {
+				shopSettings.environmentImages.push(URL.createObjectURL(file));
+			}
 		}
 	}
 }
@@ -243,23 +235,65 @@ function getStatusClass(s: ApptStatus) {
 	}
 }
 
-function submitIdentity() {
-	alert(`身份資訊已送出：\n店家名稱：${identityForm.name}\n店家統編：${identityForm.taxId}`);
-}
-
 const pageHeader = computed(() => {
 	switch (activeNav.value) {
 		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
 		case 'appointments': return { title: '預約排程', sub: '管理客戶預約與維修進度' };
 		case 'records': return { title: '維修紀錄', sub: '查詢過往維修履歷與工單細節' };
 		case 'settings': return { title: '編輯維修廠', sub: '維護維修廠的基本資料與簡介' };
-		case 'identity': return { title: '登記身份', sub: '管理維修廠的登記與認證資訊' };
 		default: return { title: '', sub: '' };
 	}
 });
 
+// --- Edit Modal State ---
+const showEditModal = ref(false);
+const editingForm = reactive<{
+	id: string;
+	customerName: string;
+	carModel: string;
+	serviceType: string;
+	status: ApptStatus;
+	notes: string;
+	estimatedCost: number;
+}>({
+	id: '',
+	customerName: '',
+	carModel: '',
+	serviceType: '',
+	status: 'pending',
+	notes: '',
+	estimatedCost: 0,
+});
+
+function openEditModal(apt: Appointment) {
+	editingForm.id = apt.id;
+	editingForm.customerName = apt.customerName;
+	editingForm.carModel = apt.carModel;
+	editingForm.serviceType = apt.serviceType;
+	editingForm.status = apt.status;
+	editingForm.notes = apt.notes || '';
+	editingForm.estimatedCost = apt.estimatedCost;
+	showEditModal.value = true;
+}
+
+function closeEditModal() {
+	showEditModal.value = false;
+}
+
+function saveEdit() {
+	const index = appointments.value.findIndex(a => a.id === editingForm.id);
+	if (index !== -1) {
+		const apt = appointments.value[index];
+		if (apt) {
+			apt.status = editingForm.status;
+			apt.notes = editingForm.notes;
+			apt.estimatedCost = editingForm.estimatedCost;
+		}
+	}
+	closeEditModal();
+}
+
 const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'settings'];
-const navGroupBottom: NavKey[] = ['identity'];
 </script>
 
 <template>
@@ -283,7 +317,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 						@click="activeNav = key"
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
 						:class="activeNav === key 
-							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20'
+							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20' 
 							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
 					>
 						<svg v-if="key === 'dashboard'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -293,19 +327,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 						<span class="font-medium tracking-wide">
 							{{ key === 'dashboard' ? '總覽' : key === 'appointments' ? '預約排程' : key === 'records' ? '維修紀錄' : '編輯維修廠' }}
 						</span>
-					</button>
-					<div class="my-2 border-t border-[#DCD9D3]"></div>
-					<button
-						v-for="key in navGroupBottom"
-						:key="key"
-						@click="activeNav = key"
-						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
-						:class="activeNav === key 
-							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20'
-							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
-					>
-						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-						<span class="font-medium tracking-wide">登記身份</span>
 					</button>
 				</nav>
 				<div class="p-6">
@@ -413,7 +434,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 								:key="apt.id"
 								class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
 							>
-								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusClass(apt.status).split(' ')[0].replace('bg-', 'bg-')"></div>
+								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="(getStatusClass(apt.status).split(' ')[0] || '').replace('bg-', 'bg-')"></div>
 								<div class="flex-1 pl-4">
 									<div class="flex flex-wrap items-center gap-3">
 										<span class="font-mono text-xs text-stone-400">{{ apt.id }}</span>
@@ -437,14 +458,14 @@ const navGroupBottom: NavKey[] = ['identity'];
 										{{ apt.time }}
 									</div>
 								</div>
-								<div class="flex items-center justify-end pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
+								<div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
 									<div class="text-right">
 										<div class="text-xs text-stone-400">預估費用</div>
 										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimatedCost) }}</div>
 									</div>
 								</div>
 								<div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:flex-col lg:border-0 lg:pt-0">
-									<button class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-20">編輯</button>
+									<button @click="openEditModal(apt)" class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-20">編輯</button>
 								</div>
 							</div>
 							<div v-if="filteredAppointments.length === 0" class="rounded-xl border border-dashed border-stone-300 p-12 text-center">
@@ -595,50 +616,80 @@ const navGroupBottom: NavKey[] = ['identity'];
 							</div>
 						</div>
 					</div>
-					<div v-else-if="activeNav === 'identity'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">登記身份資訊</h3>
-							<div class="space-y-6">
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">店家名稱</label>
-									<input 
-										v-model="identityForm.name" 
-										type="text" 
-										placeholder="請輸入店家完整名稱"
-										class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-									>
-								</div>
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">店家統編</label>
-									<input 
-										v-model="identityForm.taxId" 
-										type="text" 
-										placeholder="請輸入 8 位數統一編號"
-										maxlength="8"
-										class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-									>
-								</div>
-								<div class="pt-4">
-									<button 
-										@click="submitIdentity"
-										class="w-full rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95 md:w-auto"
-									>
-										確認資訊
-									</button>
-								</div>
+				</div>
+			</main>
+		</div>
+
+		<!-- Edit Modal -->
+		<div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+			<div class="w-full max-w-lg overflow-hidden rounded-2xl bg-[#FBFAF7] shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
+				<div class="flex items-center justify-between border-b border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+					<h3 class="text-lg font-bold text-[#4A4A45]">編輯預約單</h3>
+					<button @click="closeEditModal" class="rounded-full p-1 text-stone-400 hover:bg-black/5 hover:text-stone-600">
+						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+					</button>
+				</div>
+				
+				<div class="space-y-6 p-6">
+					<!-- Info Block -->
+					<div class="rounded-xl bg-[#F8F7F5] p-4 text-sm border border-[#E6E6DF]">
+						<div class="grid grid-cols-2 gap-y-3">
+							<div>
+								<span class="block text-xs text-stone-400">預約編號</span>
+								<span class="font-mono font-medium text-[#4A4A45]">{{ editingForm.id }}</span>
 							</div>
-							<div class="mt-8 border-t border-[#F0EEE9] pt-6">
-								<div class="flex items-start gap-3 text-sm text-stone-400">
-									<svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-									</svg>
-									<p>提交後將進入人工審核階段，審核期間部分功能可能會受到限制。如有疑問請聯繫系統管理員。</p>
-								</div>
+							<div>
+								<span class="block text-xs text-stone-400">客戶姓名</span>
+								<span class="font-bold text-[#4A4A45]">{{ editingForm.customerName }}</span>
+							</div>
+							<div>
+								<span class="block text-xs text-stone-400">車型</span>
+								<span class="text-stone-600">{{ editingForm.carModel }}</span>
+							</div>
+							<div>
+								<span class="block text-xs text-stone-400">維修項目</span>
+								<span class="text-stone-600">{{ editingForm.serviceType }}</span>
 							</div>
 						</div>
 					</div>
+
+					<!-- Form Fields -->
+					<div class="space-y-4">
+						<div class="space-y-2">
+							<label class="text-sm font-bold text-[#4A4A45]">訂單狀態</label>
+							<select v-model="editingForm.status" class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+								<option value="pending">待確認 (Pending)</option>
+								<option value="confirmed">已排程 (Confirmed)</option>
+								<option value="servicing">作業中 (Servicing)</option>
+								<option value="completed">已完工 (Completed)</option>
+								<option value="cancelled">已取消 (Cancelled)</option>
+							</select>
+						</div>
+
+						<div class="space-y-2">
+							<label class="text-sm font-bold text-[#4A4A45]">預估費用</label>
+							<div class="relative">
+								<span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500">NT$</span>
+								<input v-model.number="editingForm.estimatedCost" type="number" class="w-full rounded-lg border border-[#DCD9D3] bg-white py-2.5 pl-12 pr-4 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
+							</div>
+						</div>
+
+						<div class="space-y-2">
+							<label class="text-sm font-bold text-[#4A4A45]">備註事項</label>
+							<textarea v-model="editingForm.notes" rows="3" class="w-full resize-none rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="輸入備註..."></textarea>
+						</div>
+					</div>
 				</div>
-			</main>
+
+				<div class="flex items-center justify-end gap-3 border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+					<button @click="closeEditModal" class="rounded-lg border border-[#DCD9D3] bg-white px-5 py-2.5 text-sm font-medium text-stone-600 shadow-sm transition hover:bg-[#F8F7F5]">
+						取消
+					</button>
+					<button @click="saveEdit" class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95">
+						儲存變更
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
