@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, reactive } from 'vue';
 
-// --- Types ---
-
 type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings' | 'identity';
 
 type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
@@ -42,7 +40,10 @@ type ShopSettings = {
 	bays: number;
 };
 
-// --- State ---
+type IdentityForm = {
+	name: string;
+	taxId: string;
+};
 
 const activeNav = ref<NavKey>('dashboard');
 
@@ -51,6 +52,11 @@ const shopSettings = reactive<ShopSettings>({
 	address: '台北市中山區職人路 100 號',
 	phone: '02-1234-5678',
 	bays: 4,
+});
+
+const identityForm = reactive<IdentityForm>({
+	name: shopSettings.name,
+	taxId: '',
 });
 
 const appointments = ref<Appointment[]>([
@@ -140,8 +146,6 @@ const records = ref<RecordItem[]>([
 	},
 ]);
 
-// --- Logic & Computeds ---
-
 const dashboardStats = computed(() => {
 	const today = '2026-01-18'; 
 	const todayAppts = appointments.value.filter(a => a.date === today);
@@ -215,6 +219,10 @@ function getStatusClass(s: ApptStatus) {
 	}
 }
 
+function submitIdentity() {
+	alert(`身份資訊已送出：\n店家名稱：${identityForm.name}\n店家統編：${identityForm.taxId}`);
+}
+
 const pageHeader = computed(() => {
 	switch (activeNav.value) {
 		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
@@ -226,16 +234,13 @@ const pageHeader = computed(() => {
 	}
 });
 
-// 左側選單群組設定：已將設定移至 Main，身份移至 Bottom
 const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'settings'];
 const navGroupBottom: NavKey[] = ['identity'];
-
 </script>
 
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
 		<div class="flex h-screen overflow-hidden">
-			
 			<aside class="w-[280px] shrink-0 flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3]">
 				<div class="p-8">
 					<div class="flex items-center gap-3">
@@ -247,7 +252,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 						<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
 					</div>
 				</div>
-				
 				<nav class="flex-1 px-4 space-y-2 overflow-y-auto">
 					<button
 						v-for="key in navGroupMain"
@@ -262,14 +266,11 @@ const navGroupBottom: NavKey[] = ['identity'];
 						<svg v-if="key === 'appointments'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M10 14h4"/></svg>
 						<svg v-if="key === 'records'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
 						<svg v-if="key === 'settings'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-						
 						<span class="font-medium tracking-wide">
 							{{ key === 'dashboard' ? '總覽' : key === 'appointments' ? '預約排程' : key === 'records' ? '維修紀錄' : '店鋪設定' }}
 						</span>
 					</button>
-
 					<div class="my-2 border-t border-[#DCD9D3]"></div>
-
 					<button
 						v-for="key in navGroupBottom"
 						:key="key"
@@ -283,7 +284,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 						<span class="font-medium tracking-wide">登記身份</span>
 					</button>
 				</nav>
-
 				<div class="p-6">
 					<div class="rounded-lg bg-[#DEDbd6]/50 p-4 border border-[#DCD9D3]">
 						<div class="text-xs text-stone-500">目前登入</div>
@@ -291,15 +291,12 @@ const navGroupBottom: NavKey[] = ['identity'];
 					</div>
 				</div>
 			</aside>
-
 			<main class="flex-1 overflow-y-auto">
 				<div class="mx-auto max-w-6xl px-8 py-10">
-					
 					<header class="mb-10">
 						<h2 class="text-3xl font-bold text-[#4A4A45] tracking-wide">{{ pageHeader.title }}</h2>
 						<p class="mt-2 text-stone-500 font-medium">{{ pageHeader.sub }}</p>
 					</header>
-
 					<div v-if="activeNav === 'dashboard'" class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
 							<div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
@@ -336,7 +333,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 								</div>
 							</div>
 						</div>
-
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
 							<div class="flex items-center justify-between mb-6">
 								<h3 class="text-lg font-bold text-[#4A4A45]">今日需關注</h3>
@@ -363,7 +359,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 							</div>
 						</div>
 					</div>
-
 					<div v-else-if="activeNav === 'appointments'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="flex flex-col gap-4 rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
 							<div class="flex flex-1 gap-3">
@@ -388,7 +383,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 								新增預約
 							</button>
 						</div>
-
 						<div class="space-y-4">
 							<div 
 								v-for="apt in filteredAppointments" 
@@ -396,7 +390,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 								class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
 							>
 								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusClass(apt.status).split(' ')[0].replace('bg-', 'bg-')"></div>
-
 								<div class="flex-1 pl-4">
 									<div class="flex flex-wrap items-center gap-3">
 										<span class="font-mono text-xs text-stone-400">{{ apt.id }}</span>
@@ -410,7 +403,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 									</div>
 									<div class="mt-1 text-sm text-stone-500">{{ apt.serviceType }} <span v-if="apt.notes" class="ml-2 text-[#8C7B5D]">★ {{ apt.notes }}</span></div>
 								</div>
-
 								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
 									<div class="flex items-center gap-2 text-sm text-stone-600">
 										<svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
@@ -421,7 +413,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 										{{ apt.time }}
 									</div>
 								</div>
-
 								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
 									<div v-if="apt.tech" class="flex items-center gap-2 text-sm">
 										<span class="text-stone-400">技師:</span>
@@ -433,25 +424,21 @@ const navGroupBottom: NavKey[] = ['identity'];
 									</div>
 									<div v-if="!apt.tech && !apt.bay" class="text-sm italic text-stone-400">尚未指派</div>
 								</div>
-
 								<div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
 									<div class="text-right">
 										<div class="text-xs text-stone-400">預估費用</div>
 										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimatedCost) }}</div>
 									</div>
 								</div>
-								
 								<div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:flex-col lg:border-0 lg:pt-0">
 									<button class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-20">編輯</button>
 								</div>
 							</div>
-							
 							<div v-if="filteredAppointments.length === 0" class="rounded-xl border border-dashed border-stone-300 p-12 text-center">
 								<p class="text-stone-400">沒有符合條件的預約</p>
 							</div>
 						</div>
 					</div>
-
 					<div v-else-if="activeNav === 'records'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm">
 							<div class="relative max-w-md">
@@ -464,7 +451,6 @@ const navGroupBottom: NavKey[] = ['identity'];
 								>
 							</div>
 						</div>
-
 						<div class="grid grid-cols-1 gap-6">
 							<div v-for="rec in filteredRecords" :key="rec.id" class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm">
 								<div class="flex flex-col justify-between gap-4 border-b border-[#F0EEE9] pb-4 md:flex-row md:items-center">
@@ -493,9 +479,7 @@ const navGroupBottom: NavKey[] = ['identity'];
 							</div>
 						</div>
 					</div>
-
 					<div v-else-if="activeNav === 'settings'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-						
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
 							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">基本資訊</h3>
 							<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -517,28 +501,54 @@ const navGroupBottom: NavKey[] = ['identity'];
 								</div>
 							</div>
 						</div>
-
 						<div class="flex justify-end pt-4">
 							<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
 								儲存變更
 							</button>
 						</div>
-
 					</div>
-
 					<div v-else-if="activeNav === 'identity'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">登記身份狀態</h3>
-							<div class="flex flex-col items-center justify-center rounded-lg border border-dashed border-stone-300 py-16">
-								<div class="mb-4 rounded-full bg-stone-100 p-4 text-stone-400">
-									<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+							<h3 class="mb-6 text-lg font-bold text-[#4A4A45]">登記身份資訊</h3>
+							<div class="space-y-6">
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">店家名稱</label>
+									<input 
+										v-model="identityForm.name" 
+										type="text" 
+										placeholder="請輸入店家完整名稱"
+										class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
+									>
 								</div>
-								<h4 class="mb-2 font-medium text-[#4A4A45]">功能開發中</h4>
-								<p class="text-sm text-stone-500">此區塊將用於管理維修廠的營業登記證與認證資料。</p>
+								<div class="space-y-2">
+									<label class="text-sm font-medium text-stone-500">店家統編</label>
+									<input 
+										v-model="identityForm.taxId" 
+										type="text" 
+										placeholder="請輸入 8 位數統一編號"
+										maxlength="8"
+										class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
+									>
+								</div>
+								<div class="pt-4">
+									<button 
+										@click="submitIdentity"
+										class="w-full rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95 md:w-auto"
+									>
+										確認資訊
+									</button>
+								</div>
+							</div>
+							<div class="mt-8 border-t border-[#F0EEE9] pt-6">
+								<div class="flex items-start gap-3 text-sm text-stone-400">
+									<svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+									</svg>
+									<p>提交後將進入人工審核階段，審核期間部分功能可能會受到限制。如有疑問請聯繫系統管理員。</p>
+								</div>
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</main>
 		</div>
