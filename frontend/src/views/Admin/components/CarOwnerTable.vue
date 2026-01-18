@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '@/views/Admin/composables/useMemberData';
+import { getStatusLabel, getStatusClass } from '../utils/statusHelpers';
 
 defineProps<{
   members: Member[];
@@ -34,9 +35,9 @@ const emit = defineEmits<{
           <td class="px-6 py-4 whitespace-nowrap">
             <span 
               class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-              :class="user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+              :class="getStatusClass(user.status)"
             >
-              {{ user.status === 'Active' ? '正常' : '停權' }}
+              {{ getStatusLabel(user.status) }}
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

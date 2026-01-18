@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '@/views/Admin/composables/useMemberData';
+import { getStatusLabel, getStatusClass } from '../utils/statusHelpers';
 
 defineProps<{
   members: Member[];
@@ -8,28 +9,6 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'view-detail', member: Member): void;
 }>();
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'VerifiedFree': return '已驗證 (免費)';
-    case 'VerifiedPaid': return '已驗證 (付費)';
-    case 'Pending': return '審核中';
-    case 'Suspended': return '停權';
-    case 'Expired': return '已過期';
-    default: return status;
-  }
-};
-
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case 'VerifiedFree': return 'bg-blue-100 text-blue-800';
-    case 'VerifiedPaid': return 'bg-yellow-100 text-yellow-800';
-    case 'Pending': return 'bg-gray-100 text-gray-800';
-    case 'Suspended': return 'bg-red-100 text-red-800';
-    case 'Expired': return 'bg-orange-100 text-orange-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
 </script>
 
 <template>
