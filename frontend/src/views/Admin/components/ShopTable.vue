@@ -41,6 +41,7 @@ const getStatusClass = (status: string) => {
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">維修廠名稱</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">負責人</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">電話</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">接單數量</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">評分</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
           <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
@@ -52,6 +53,7 @@ const getStatusClass = (status: string) => {
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ shop.name }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ shop.shopOwner }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ shop.phone }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{ shop.orderCount }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
             <div class="flex items-center">
               <span class="text-yellow-400 mr-1">★</span>
