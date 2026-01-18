@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import FormInput from '@/components/ui/FormInput.vue';
 
+const router = useRouter();
 const currentStep = ref(1);
 
 
 const verificationResult = ref<'success' | 'failure' | null>(null);
 
-
 const countdown = ref(3);
+let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
 
 type FieldKey = 'garageName' | 'phone' | 'address' | 'ownerName' | 'taxId';
@@ -111,12 +113,13 @@ const handleSubmit = () => {
 			if (isValid) {
 				verificationResult.value = 'success';
 				console.log('統編驗證成功！');
+				currentStep.value = 3;
+				startCountdown();
 			} else {
 				verificationResult.value = 'failure';
 				console.log('統編驗證失敗！');
+				currentStep.value = 3;
 			}
-
-			currentStep.value = 3;
 		})
 		.catch((error) => {
 			console.error('驗證過程發生錯誤', error);
@@ -126,10 +129,40 @@ const handleSubmit = () => {
 };
 
 const backToForm = () => {
+	if (countdownTimer) {
+		clearInterval(countdownTimer);
+		countdownTimer = null;
+	}
 	currentStep.value = 1;
 	verificationResult.value = null;
 	didSubmitAttempt.value = false;
 };
+
+const startCountdown = () => {
+	countdown.value = 3;
+
+	countdownTimer = setInterval(() => {
+		countdown.value--;
+
+		if (countdown.value <= 0) {
+			if (countdownTimer) {
+				clearInterval(countdownTimer);
+				countdownTimer = null;
+			}
+
+			// TODO: 跳轉到商家編輯頁面（目前路由尚未建立）
+			// router.push('/garage/profile');
+			console.log('倒數結束，準備跳轉到商家編輯頁面');
+		}
+	}, 1000); //
+};
+
+onUnmounted(() => {
+	if (countdownTimer) {
+		clearInterval(countdownTimer);
+		countdownTimer = null;
+	}
+});
 </script>
 
 <template>
