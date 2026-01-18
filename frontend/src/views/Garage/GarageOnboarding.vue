@@ -5,7 +5,7 @@ import FormInput from '@/components/ui/FormInput.vue';
 
 const router = useRouter();
 const currentStep = ref(1);
-
+const isSubmitting = ref(false);
 
 const verificationResult = ref<'success' | 'failure' | null>(null);
 
@@ -89,9 +89,13 @@ const markAllTouched = () => {
 
 
 const handleSubmit = () => {
+	if (isSubmitting.value) {
+		console.log('驗證進行中，請勿重複提交');
+		return;
+	}
+
 	didSubmitAttempt.value = true;
 	markAllTouched();
-
 
 	const hasError = Object.values(errors.value).some((msg) => msg.length > 0);
 	if (hasError) {
@@ -101,7 +105,7 @@ const handleSubmit = () => {
 
 	console.log('前端驗證通過，開始統編驗證！', formData);
 
-
+	isSubmitting.value = true;
 	currentStep.value = 2;
 
 	// 模擬呼叫商業登記 API
@@ -113,53 +117,56 @@ const handleSubmit = () => {
 			if (isValid) {
 				verificationResult.value = 'success';
 				console.log('統編驗證成功！');
-				currentStep.value = 3;
 				startCountdown();
 			} else {
 				verificationResult.value = 'failure';
 				console.log('統編驗證失敗！');
-				currentStep.value = 3;
 			}
+      currentStep.value = 3;
 		})
 		.catch((error) => {
 			console.error('驗證過程發生錯誤', error);
 			verificationResult.value = 'failure';
 			currentStep.value = 3;
+		})
+		.finally(() => {
+			isSubmitting.value = false;
 		});
 };
 
-const backToForm = () => {
+
+const clearCountdownTimer = () => {
 	if (countdownTimer) {
 		clearInterval(countdownTimer);
 		countdownTimer = null;
 	}
+};
+
+const backToForm = () => {
+	clearCountdownTimer();
+	isSubmitting.value = false;
 	currentStep.value = 1;
 	verificationResult.value = null;
 	didSubmitAttempt.value = false;
 };
 
+// 啟動倒數計時
 const startCountdown = () => {
+	clearCountdownTimer();
+
 	countdown.value = 3;
 
 	countdownTimer = setInterval(() => {
 		countdown.value--;
 
 		if (countdown.value <= 0) {
-			if (countdownTimer) {
-				clearInterval(countdownTimer);
-				countdownTimer = null;
-			}
-
+			clearCountdownTimer();
 			router.push('/garage/profile');
 		}
-	}, 1000); //
+	}, 1000);
 };
-
 onUnmounted(() => {
-	if (countdownTimer) {
-		clearInterval(countdownTimer);
-		countdownTimer = null;
-	}
+	clearCountdownTimer();
 });
 </script>
 
@@ -227,9 +234,15 @@ onUnmounted(() => {
 					/>
 					<button
 						type="submit"
-						class="w-full px-6 py-3 mt-2 text-[18px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2"
+						:disabled="isSubmitting"
+						class="w-full px-6 py-3 mt-2 text-[18px] font-bold text-white transition-colors rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+						:class="
+							isSubmitting
+								? 'bg-[#8a8a7d] cursor-not-allowed'
+								: 'bg-[#6B6B5C] hover:bg-[#5a5a4a] focus:ring-[#6B6B5C]'
+						"
 					>
-						送出驗證
+						{{ isSubmitting ? '驗證中...' : '送出驗證' }}
 					</button>
 				</form>
 			</div>
