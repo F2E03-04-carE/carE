@@ -26,6 +26,48 @@ export interface Member {
   bookings?: { date: string; shop: string; service: string; status: string }[];
 }
 
+// 定義操作按鈕介面
+export interface ActionButton {
+  label: string;
+  class: string;
+  onClick?: () => void;
+}
+
+// 產生操作按鈕邏輯
+export function useMemberActions(member: Member, closeFn: () => void): ActionButton[] {
+  const btns: ActionButton[] = [
+    { label: '關閉', class: 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50', onClick: closeFn }
+  ];
+
+  if (member.status === 'Pending') {
+    btns.push({
+      label: `通過審核 (${member.appliedPlan === 'Paid' ? '付費' : '免費'})`,
+      class: 'bg-green-600 text-white hover:bg-green-700 border-transparent'
+    });
+  } else if (['Active', 'VerifiedFree', 'VerifiedPaid', 'Expired'].includes(member.status)) {
+    btns.push({
+      label: '停權會員',
+      class: 'bg-red-600 text-white hover:bg-red-700 border-transparent'
+    });
+  }
+
+  if (member.status === 'Expired') {
+    btns.push({
+      label: '開通付費',
+      class: 'bg-yellow-500 text-white hover:bg-yellow-600 border-transparent'
+    });
+  }
+
+  if (member.status === 'Suspended') {
+    btns.push({
+      label: '恢復權限',
+      class: 'bg-green-600 text-white hover:bg-green-700 border-transparent'
+    });
+  }
+
+  return btns.reverse();
+}
+
 // 取得狀態顯示文字
 export const getStatusLabel = (status: string) => {
   switch (status) {
