@@ -81,11 +81,8 @@ function onCoverFileChange(event: Event) {
 function onEnvFileChange(event: Event) {
 	const input = event.target as HTMLInputElement;
 	if (input.files) {
-		for (let i = 0; i < input.files.length; i++) {
-			const file = input.files[i];
-			if (file) {
-				shopSettings.environmentImages.push(URL.createObjectURL(file));
-			}
+		for (const file of input.files) {
+			shopSettings.environmentImages.push(URL.createObjectURL(file));
 		}
 	}
 }
@@ -314,13 +311,11 @@ function closeEditModal() {
 function saveEdit() {
 	const index = appointments.value.findIndex(a => a.id === editingForm.id);
 	if (index !== -1) {
-		const apt = appointments.value[index];
-		if (apt) {
-			apt.status = editingForm.status;
-			apt.notes = editingForm.notes;
-			apt.estimatedCost = editingForm.estimatedCost;
-			apt.quotationImage = editingForm.quotationImage;
-		}
+		const apt = appointments.value[index]!;
+		apt.status = editingForm.status;
+		apt.notes = editingForm.notes;
+		apt.estimatedCost = editingForm.estimatedCost;
+		apt.quotationImage = editingForm.quotationImage;
 	}
 	closeEditModal();
 }
@@ -533,16 +528,17 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 					<div v-else-if="activeNav === 'appointments'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm">
 							<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-								                                <div class="relative w-full max-w-sm">
-								                                    <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-								                                    <input
-								                                        v-model="apptSearch"
-								                                        type="text"
-								                                        placeholder="搜尋姓名、車牌、手機號碼..."
-								                                        class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] py-2.5 pl-10 pr-4 text-sm text-[#4A4A45] outline-none transition focus:border-[#6B6B5C] focus:bg-white focus:ring-1 focus:ring-[#6B6B5C]"
-								                                    >
-								                                </div>
-								                            </div>							<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-[#F0EEE9] pt-4">
+								<div class="relative w-full max-w-sm">
+									<svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+									<input
+										v-model="apptSearch"
+										type="text"
+										placeholder="搜尋姓名、車牌、手機號碼..."
+										class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] py-2.5 pl-10 pr-4 text-sm text-[#4A4A45] outline-none transition focus:border-[#6B6B5C] focus:bg-white focus:ring-1 focus:ring-[#6B6B5C]"
+									>
+								</div>
+							</div>
+							<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-[#F0EEE9] pt-4">
 								<span class="mr-2 text-sm font-medium text-stone-500">篩選狀態：</span>
 								<label
 									v-for="opt in statusOptions"
