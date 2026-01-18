@@ -54,6 +54,18 @@ const handleLogout = () => {
         >
           會員管理
         </router-link>
+        <router-link
+          to="/admin/reviews"
+          class="block px-4 py-2 rounded transition-colors"
+          :class="
+            route.path.includes('/reviews')
+              ? 'bg-[#5a5a4a] text-white'
+              : 'text-gray-100 hover:bg-[#5a5a4a] hover:text-white'
+          "
+          @click="isSidebarOpen = false"
+        >
+          評論列表
+        </router-link>
       </nav>
 
       <div class="p-4 border-t border-[#5a5a4a]">
