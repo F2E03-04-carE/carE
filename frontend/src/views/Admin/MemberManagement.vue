@@ -33,6 +33,7 @@ const closeModal = () => {
     <!-- Tabs -->
     <div class="border-b border-gray-200">
       <nav class="-mb-px flex" aria-label="Tabs">
+        <!-- 使用靜態定義的唯一 id 作為 key，確保頁籤切換時的效能與正確性 -->
         <button
           v-for="tab in tabs"
           :key="tab.id"
