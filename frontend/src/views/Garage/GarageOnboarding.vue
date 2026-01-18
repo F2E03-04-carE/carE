@@ -4,6 +4,10 @@ import FormInput from '@/components/ui/FormInput.vue';
 
 const currentStep = ref(1);
 
+
+const verificationResult = ref<'success' | 'failure' | null>(null);
+
+
 const countdown = ref(3);
 
 
@@ -81,9 +85,11 @@ const markAllTouched = () => {
 	});
 };
 
+
 const handleSubmit = () => {
 	didSubmitAttempt.value = true;
 	markAllTouched();
+
 
 	const hasError = Object.values(errors.value).some((msg) => msg.length > 0);
 	if (hasError) {
@@ -91,8 +97,38 @@ const handleSubmit = () => {
 		return;
 	}
 
-	console.log('前端驗證通過，準備送到後端！', formData);
-	// TODO: 之後會切換到步驟2（驗證中），並呼叫後端 API
+	console.log('前端驗證通過，開始統編驗證！', formData);
+
+
+	currentStep.value = 2;
+
+	// 模擬呼叫商業登記 API（實際應該是 30 秒，這裡縮短為 3 秒方便測試）
+	// TODO: 實際應該呼叫後端 API 來驗證統編
+	new Promise((resolve) => setTimeout(resolve, 3000))
+		.then(() => {
+			const isValid = Math.random() > 0.3;
+
+			if (isValid) {
+				verificationResult.value = 'success';
+				console.log('統編驗證成功！');
+			} else {
+				verificationResult.value = 'failure';
+				console.log('統編驗證失敗！');
+			}
+
+			currentStep.value = 3;
+		})
+		.catch((error) => {
+			console.error('驗證過程發生錯誤', error);
+			verificationResult.value = 'failure';
+			currentStep.value = 3;
+		});
+};
+
+const backToForm = () => {
+	currentStep.value = 1;
+	verificationResult.value = null;
+	didSubmitAttempt.value = false;
 };
 </script>
 
@@ -184,7 +220,7 @@ const handleSubmit = () => {
 			</div>
 
 			<div v-if="currentStep === 3" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-				<div class="text-center">
+				<div v-if="verificationResult === 'success'" class="text-center">
 					<div
 						class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-[#70c287]/20"
 					>
@@ -204,9 +240,7 @@ const handleSubmit = () => {
 					</div>
 				</div>
 
-				<!-- 驗證失敗（暫時隱藏，切換時會用 v-if 控制顯示成功或失敗） -->
-				<!--
-				<div class="text-center">
+				<div v-else class="text-center">
 					<div
 						class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-[#c97d7d]/20"
 					>
@@ -219,12 +253,12 @@ const handleSubmit = () => {
 						無法驗證公司統編，請確認資料是否正確
 					</p>
 					<button
+						@click="backToForm"
 						class="w-full px-6 py-3 text-[18px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md"
 					>
 						返回修改資料
 					</button>
 				</div>
-				-->
 			</div>
 		</div>
 	</main>
