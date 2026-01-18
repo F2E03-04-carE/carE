@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Member } from '@/views/Admin/composables/useMemberData';
-import { getStatusLabel, getStatusClass } from '../utils/statusHelpers';
+import { getStatusLabel, getStatusClass } from '../composables/memberCore';
 
 defineProps<{
   member: Member;

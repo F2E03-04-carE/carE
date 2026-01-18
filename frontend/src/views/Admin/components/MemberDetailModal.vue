@@ -2,7 +2,7 @@
 import type { Member } from '@/views/Admin/composables/useMemberData';
 import MemberDetailCarOwner from './MemberDetailCarOwner.vue';
 import MemberDetailShop from './MemberDetailShop.vue';
-import { getStatusLabel, getStatusClass } from '../utils/statusHelpers';
+import { getStatusLabel, getStatusClass } from '../composables/memberCore';
 
 defineProps<{
   member: Member;
