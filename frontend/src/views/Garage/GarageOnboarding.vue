@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import FormInput from '@/components/ui/FormInput.vue';
 
 // 倒數計時器（用於驗證成功後自動跳轉）
 const countdown = ref(3);
+
+// 表單資料（暫時用於 v-model 綁定）
+const garageName = ref('');
+const phone = ref('');
+const address = ref('');
+const ownerName = ref('');
+const taxId = ref('');
 
 // TODO(human): 之後會在這裡加上狀態管理和表單驗證邏輯
 </script>
@@ -21,70 +29,41 @@ const countdown = ref(3);
 
 				<form class="space-y-4">
 					<!-- 店名 -->
-					<div>
-						<label for="garageName" class="block mb-1 text-[16px] font-medium text-gray-700">
-							店名 <span class="text-[#c97d7d]">*</span>
-						</label>
-						<input
-							id="garageName"
-							type="text"
-							placeholder="例如：阿明汽車保養廠"
-							class="w-full px-4 py-2 text-[16px] transition-colors bg-white border border-[#e0ddd5] rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-						/>
-					</div>
+					<FormInput
+						v-model="garageName"
+						label="店名"
+						placeholder="例如：阿明汽車保養廠"
+						required
+					/>
 
 					<!-- 電話 -->
-					<div>
-						<label for="phone" class="block mb-1 text-[16px] font-medium text-gray-700">
-							電話號碼 <span class="text-[#c97d7d]">*</span>
-						</label>
-						<input
-							id="phone"
-							type="tel"
-							placeholder="0912345678 或 02-12345678"
-							class="w-full px-4 py-2 text-[16px] transition-colors bg-white border border-[#e0ddd5] rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-						/>
-					</div>
+					<FormInput
+						v-model="phone"
+						label="電話號碼"
+						type="tel"
+						placeholder="0912345678 或 02-12345678"
+						required
+					/>
 
 					<!-- 地址 -->
-					<div>
-						<label for="address" class="block mb-1 text-[16px] font-medium text-gray-700">
-							地址 <span class="text-[#c97d7d]">*</span>
-						</label>
-						<input
-							id="address"
-							type="text"
-							placeholder="請輸入完整地址"
-							class="w-full px-4 py-2 text-[16px] transition-colors bg-white border border-[#e0ddd5] rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-						/>
-					</div>
+					<FormInput v-model="address" label="地址" placeholder="請輸入完整地址" required />
 
 					<!-- 負責人姓名 -->
-					<div>
-						<label for="ownerName" class="block mb-1 text-[16px] font-medium text-gray-700">
-							負責人姓名 <span class="text-[#c97d7d]">*</span>
-						</label>
-						<input
-							id="ownerName"
-							type="text"
-							placeholder="請輸入負責人全名"
-							class="w-full px-4 py-2 text-[16px] transition-colors bg-white border border-[#e0ddd5] rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-						/>
-					</div>
+					<FormInput
+						v-model="ownerName"
+						label="負責人姓名"
+						placeholder="請輸入負責人全名"
+						required
+					/>
 
 					<!-- 公司統編 -->
-					<div>
-						<label for="taxId" class="block mb-1 text-[16px] font-medium text-gray-700">
-							公司統編 <span class="text-[#c97d7d]">*</span>
-						</label>
-						<input
-							id="taxId"
-							type="text"
-							maxlength="8"
-							placeholder="請輸入8碼統一編號"
-							class="w-full px-4 py-2 text-[16px] transition-colors bg-white border border-[#e0ddd5] rounded-lg outline-none placeholder:text-gray-400 focus:border-[#6B6B5C] focus:ring-2 focus:ring-[#6B6B5C]/30"
-						/>
-					</div>
+					<FormInput
+						v-model="taxId"
+						label="公司統編"
+						placeholder="請輸入8碼統一編號"
+						:maxlength="8"
+						required
+					/>
 
 					<!-- 送出按鈕 -->
 					<button
