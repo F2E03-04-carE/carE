@@ -10,6 +10,8 @@ export interface FormInputProps {
 	error?: string;
 	maxlength?: number;
 	id?: string;
+	inputmode?: 'text' | 'numeric' | 'tel' | 'email' | 'url';
+	pattern?: string;
 }
 
 const props = withDefaults(defineProps<FormInputProps>(), {
@@ -19,6 +21,8 @@ const props = withDefaults(defineProps<FormInputProps>(), {
 	error: '',
 	maxlength: undefined,
 	id: undefined,
+	inputmode: 'text',
+	pattern: undefined,
 });
 
 const emit = defineEmits<{
@@ -58,6 +62,8 @@ const inputId = computed(() => {
 			:value="modelValue"
 			:placeholder="placeholder"
 			:maxlength="maxlength"
+			:inputmode="inputmode"
+			:pattern="pattern"
 			class="w-full px-4 py-2 text-[16px] transition-colors bg-white border rounded-lg outline-none placeholder:text-gray-400 focus:ring-2"
 			:class="inputBorderClass"
 			@input="handleInput"
