@@ -58,8 +58,8 @@ const displayFields = computed(() => [
       <span class="material-symbols-outlined text-lg mr-1">history</span> 近期預約
     </h4>
     <ul v-if="member.bookings && member.bookings.length" class="space-y-2">
-      <!-- 迴圈渲染每一筆歷史預約紀錄 -->
-      <li v-for="booking in member.bookings" :key="`${booking.date}-${booking.shop}-${booking.service}`" class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
+      <!-- 迴圈渲染每一筆歷史預約紀錄，使用唯一 ID 作為 key 以確保穩定性 -->
+      <li v-for="booking in member.bookings" :key="booking.id" class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
         <span class="material-symbols-outlined text-gray-400 text-sm mr-2">event</span>
         {{ booking.date }} - {{ booking.shop }} 
         <span class="ml-auto text-xs px-2 py-0.5 rounded" :class="booking.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'">
