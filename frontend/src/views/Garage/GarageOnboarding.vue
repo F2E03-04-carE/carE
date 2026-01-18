@@ -167,7 +167,7 @@ const backToForm = () => {
 
 					<FormInput
 						v-model="formData.address"
-						label="地址"
+						label="商家地址"
 						placeholder="請輸入完整地址"
 						required
 						:error="showError('address') ? errors.address : ''"
@@ -216,7 +216,6 @@ const backToForm = () => {
 					正在驗證統編...
 				</h2>
 				<p class="text-[16px] text-[#8a8a7d] mb-4">請稍候，我們正在查詢</p>
-				<p class="text-[14px] text-[#8a8a7d]">此過程約需 30 秒</p>
 			</div>
 
 			<div v-if="currentStep === 3" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
