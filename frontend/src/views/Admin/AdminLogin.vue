@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import Toast from './components/Toast.vue';
 
 const router = useRouter();
 
@@ -9,18 +10,39 @@ const form = reactive({
   password: '',
 });
 
+// 浮窗提示狀態
+const toast = reactive({
+  show: false,
+  message: '',
+});
+
+// 顯示錯誤提示 (不自動關閉)
+const showToast = (message: string) => {
+  toast.message = message;
+  toast.show = true;
+};
+
+// 關閉浮窗
+const closeToast = () => {
+  toast.show = false;
+};
+
 const handleLogin = () => {
-  // 模擬登入驗證，實際專案應連接後端 API
+  // 純靜態切版模式：只要有輸入帳號密碼即可登入
   if (form.username && form.password) {
-    // 登入成功，跳轉至儀表板
+    // 登入成功，直接跳轉，不顯示提示
     router.push('/admin/members');
   } else {
-    alert('請輸入帳號密碼');
+    // 未輸入帳號或密碼，顯示錯誤提示
+    showToast('請輸入帳號密碼');
   }
 };
 </script>
 
 <template>
+  <!-- 浮窗提示組件 -->
+  <Toast :show="toast.show" :message="toast.message" type="error" @close="closeToast" />
+
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <div class="text-center mb-8">
