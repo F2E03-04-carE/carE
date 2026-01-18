@@ -9,6 +9,12 @@ const isSidebarOpen = ref(false);
 // 控制登出確認視窗的顯示
 const showLogoutModal = ref(false);
 
+// 導覽項目定義
+const navItems = [
+  { name: '會員管理', path: '/admin/members' },
+  { name: '評論列表', path: '/admin/reviews' },
+];
+
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
@@ -36,9 +42,7 @@ const cancelLogout = () => {
       v-if="showLogoutModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
     >
-      <div
-        class="bg-white rounded-lg shadow-xl w-[90%] max-w-sm p-6 transform transition-all scale-100"
-      >
+      <div class="bg-white rounded-lg shadow-xl w-[90%] max-w-sm p-6 transform transition-all scale-100">
         <h3 class="text-lg font-bold text-gray-800 mb-2">確認登出</h3>
         <p class="text-gray-600 mb-6">您確定要登出管理後台嗎？</p>
         <div class="flex justify-end gap-3">
@@ -82,28 +86,18 @@ const cancelLogout = () => {
 
       <nav class="flex-1 px-4 py-6 space-y-2">
         <router-link
-          to="/admin/members"
+          v-for="item in navItems"
+          :key="item.path"
+          :to="item.path"
           class="block px-4 py-2 rounded transition-colors"
           :class="
-            route.path.includes('/members')
+            route.path.includes(item.path)
               ? 'bg-[#5a5a4a] text-white'
               : 'text-gray-100 hover:bg-[#5a5a4a] hover:text-white'
           "
           @click="isSidebarOpen = false"
         >
-          會員管理
-        </router-link>
-        <router-link
-          to="/admin/reviews"
-          class="block px-4 py-2 rounded transition-colors"
-          :class="
-            route.path.includes('/reviews')
-              ? 'bg-[#5a5a4a] text-white'
-              : 'text-gray-100 hover:bg-[#5a5a4a] hover:text-white'
-          "
-          @click="isSidebarOpen = false"
-        >
-          評論列表
+          {{ item.name }}
         </router-link>
       </nav>
 
