@@ -27,6 +27,7 @@ const emit = defineEmits<{
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
+        <!-- 迴圈渲染每一筆維修廠資料 -->
         <tr v-for="shop in members" :key="shop.id" class="hover:bg-gray-50">
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ shop.id }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ shop.name }}</td>
