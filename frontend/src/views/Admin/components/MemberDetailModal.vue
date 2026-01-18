@@ -16,7 +16,7 @@ const shopHeaderInfo = computed(() => {
   if (props.type === 'carOwner') return [];
   const items = [
     { label: 'ID', value: `#${props.member.id}`, class: 'text-gray-900 font-medium' },
-    { label: '註冊日期', value: props.member.joinDate || '2026-01-01', class: 'text-gray-700' },
+    { label: '註冊日期', value: props.member.joinDate || '無資料', class: 'text-gray-700' },
     { label: '目前狀態', value: getStatusLabel(props.member.status), isTag: true, tagClass: getStatusClass(props.member.status) }
   ];
   if (props.member.appliedPlan) {
