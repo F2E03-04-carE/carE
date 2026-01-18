@@ -26,6 +26,7 @@ const emit = defineEmits<{
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
+        <!-- 迴圈渲染每一筆車主會員資料 -->
         <tr v-for="user in members" :key="user.id" class="hover:bg-gray-50">
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ user.id }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
