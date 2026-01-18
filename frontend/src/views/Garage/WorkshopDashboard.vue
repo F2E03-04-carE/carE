@@ -17,6 +17,7 @@ type Appointment = {
 	status: ApptStatus;
 	notes?: string;
 	estimatedCost: number;
+	quotationImage?: string;
 };
 
 type RecordItem = {
@@ -175,19 +176,37 @@ const dashboardStats = computed(() => {
 	};
 });
 
-const apptFilterStatus = ref<ApptStatus | 'all'>('all');
+const apptFilterStatuses = ref<Set<ApptStatus>>(new Set(['pending', 'confirmed', 'servicing']));
 const apptSearch = ref('');
+
+const statusOptions: { value: ApptStatus; label: string }[] = [
+	{ value: 'pending', label: '待確認' },
+	{ value: 'confirmed', label: '已排程' },
+	{ value: 'servicing', label: '作業中' },
+	{ value: 'completed', label: '已完工' },
+	{ value: 'cancelled', label: '已取消' },
+];
+
+function toggleStatusFilter(status: ApptStatus) {
+	if (apptFilterStatuses.value.has(status)) {
+		apptFilterStatuses.value.delete(status);
+	} else {
+		apptFilterStatuses.value.add(status);
+	}
+	// 觸發響應式更新
+	apptFilterStatuses.value = new Set(apptFilterStatuses.value);
+}
 
 const filteredAppointments = computed(() => {
 	let list = appointments.value;
-	
-	if (apptFilterStatus.value !== 'all') {
-		list = list.filter(a => a.status === apptFilterStatus.value);
+
+	if (apptFilterStatuses.value.size > 0) {
+		list = list.filter(a => apptFilterStatuses.value.has(a.status));
 	}
-	
+
 	const q = apptSearch.value.trim().toLowerCase();
 	if (q) {
-		list = list.filter(a => 
+		list = list.filter(a =>
 			a.customerName.toLowerCase().includes(q) ||
 			a.licensePlate.toLowerCase().includes(q) ||
 			a.phone.includes(q)
@@ -255,6 +274,7 @@ const editingForm = reactive<{
 	status: ApptStatus;
 	notes: string;
 	estimatedCost: number;
+	quotationImage: string;
 }>({
 	id: '',
 	customerName: '',
@@ -263,6 +283,7 @@ const editingForm = reactive<{
 	status: 'pending',
 	notes: '',
 	estimatedCost: 0,
+	quotationImage: '',
 });
 
 function openEditModal(apt: Appointment) {
@@ -273,6 +294,7 @@ function openEditModal(apt: Appointment) {
 	editingForm.status = apt.status;
 	editingForm.notes = apt.notes || '';
 	editingForm.estimatedCost = apt.estimatedCost;
+	editingForm.quotationImage = apt.quotationImage || '';
 	showEditModal.value = true;
 }
 
@@ -288,9 +310,43 @@ function saveEdit() {
 			apt.status = editingForm.status;
 			apt.notes = editingForm.notes;
 			apt.estimatedCost = editingForm.estimatedCost;
+			apt.quotationImage = editingForm.quotationImage;
 		}
 	}
 	closeEditModal();
+}
+
+// --- Remove Appointment ---
+const showRemoveConfirm = ref(false);
+
+function confirmRemove() {
+	showRemoveConfirm.value = true;
+}
+
+function cancelRemove() {
+	showRemoveConfirm.value = false;
+}
+
+function removeAppointment() {
+	const index = appointments.value.findIndex(a => a.id === editingForm.id);
+	if (index !== -1) {
+		appointments.value.splice(index, 1);
+	}
+	showRemoveConfirm.value = false;
+	closeEditModal();
+}
+
+// --- Quotation Image Upload ---
+function onQuotationImageChange(event: Event) {
+	const input = event.target as HTMLInputElement;
+	if (input.files && input.files[0]) {
+		const file = input.files[0];
+		editingForm.quotationImage = URL.createObjectURL(file);
+	}
+}
+
+function removeQuotationImage() {
+	editingForm.quotationImage = '';
 }
 
 const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'settings'];
@@ -405,28 +461,43 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						</div>
 					</div>
 					<div v-else-if="activeNav === 'appointments'" class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-						<div class="flex flex-col gap-4 rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-							<div class="flex flex-1 gap-3">
+						<div class="rounded-xl border border-[#DCD9D3] bg-white p-5 shadow-sm">
+							<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 								<div class="relative w-full max-w-sm">
 									<svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-									<input 
+									<input
 										v-model="apptSearch"
-										type="text" 
-										placeholder="搜尋姓名、車牌..." 
+										type="text"
+										placeholder="搜尋姓名、車牌..."
 										class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] py-2.5 pl-10 pr-4 text-sm text-[#4A4A45] outline-none transition focus:border-[#6B6B5C] focus:bg-white focus:ring-1 focus:ring-[#6B6B5C]"
 									>
 								</div>
-								<select v-model="apptFilterStatus" class="rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
-									<option value="all">顯示全部</option>
-									<option value="pending">待確認</option>
-									<option value="confirmed">已排程</option>
-									<option value="servicing">作業中</option>
-								</select>
+								<button class="flex items-center gap-2 rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#5a5a4d] active:scale-95">
+									<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+									新增預約
+								</button>
 							</div>
-							<button class="flex items-center gap-2 rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#5a5a4d] active:scale-95">
-								<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-								新增預約
-							</button>
+							<!-- Status Filter Checkboxes -->
+							<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-[#F0EEE9] pt-4">
+								<span class="mr-2 text-sm font-medium text-stone-500">篩選狀態：</span>
+								<label
+									v-for="opt in statusOptions"
+									:key="opt.value"
+									class="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-all"
+									:class="apptFilterStatuses.has(opt.value)
+										? 'border-[#6B6B5C] bg-[#6B6B5C] text-white'
+										: 'border-[#DCD9D3] bg-white text-stone-500 hover:border-[#6B6B5C] hover:text-[#4A4A45]'"
+								>
+									<input
+										type="checkbox"
+										:checked="apptFilterStatuses.has(opt.value)"
+										@change="toggleStatusFilter(opt.value)"
+										class="sr-only"
+									>
+									<svg v-if="apptFilterStatuses.has(opt.value)" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+									<span :class="apptFilterStatuses.has(opt.value) ? 'font-medium' : ''">{{ opt.label }}</span>
+								</label>
+							</div>
 						</div>
 						<div class="space-y-4">
 							<div 
@@ -678,16 +749,65 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							<label class="text-sm font-bold text-[#4A4A45]">備註事項</label>
 							<textarea v-model="editingForm.notes" rows="3" class="w-full resize-none rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="輸入備註..."></textarea>
 						</div>
+
+						<!-- Quotation Image Upload -->
+						<div class="space-y-2">
+							<label class="text-sm font-bold text-[#4A4A45]">報價單圖片</label>
+							<div v-if="!editingForm.quotationImage" class="relative h-40 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
+								<input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onQuotationImageChange">
+								<div class="flex h-full flex-col items-center justify-center text-stone-400">
+									<svg class="mb-2 h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+									<span class="text-sm font-medium">點擊上傳報價單圖片</span>
+									<span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
+								</div>
+							</div>
+							<div v-else class="group relative overflow-hidden rounded-xl border border-[#DCD9D3]">
+								<img :src="editingForm.quotationImage" class="w-full object-contain max-h-64" alt="報價單">
+								<div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition group-hover:opacity-100">
+									<label class="cursor-pointer rounded-lg bg-white px-3 py-2 text-xs font-medium text-stone-600 shadow-sm transition hover:bg-[#F8F7F5]">
+										<input type="file" accept="image/*" class="hidden" @change="onQuotationImageChange">
+										更換圖片
+									</label>
+									<button @click="removeQuotationImage" class="rounded-lg bg-red-500 px-3 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-red-600">
+										移除圖片
+									</button>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
-				<div class="flex items-center justify-end gap-3 border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
-					<button @click="closeEditModal" class="rounded-lg border border-[#DCD9D3] bg-white px-5 py-2.5 text-sm font-medium text-stone-600 shadow-sm transition hover:bg-[#F8F7F5]">
-						取消
+				<div class="flex items-center justify-between border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+					<button @click="confirmRemove" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
+						移除預約
 					</button>
-					<button @click="saveEdit" class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95">
-						儲存變更
-					</button>
+					<div class="flex items-center gap-3">
+						<button @click="closeEditModal" class="rounded-lg border border-[#DCD9D3] bg-white px-5 py-2.5 text-sm font-medium text-stone-600 shadow-sm transition hover:bg-[#F8F7F5]">
+							取消
+						</button>
+						<button @click="saveEdit" class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95">
+							儲存變更
+						</button>
+					</div>
+				</div>
+
+				<!-- Remove Confirmation Dialog -->
+				<div v-if="showRemoveConfirm" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
+					<div class="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+						<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-500">
+							<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+						</div>
+						<h4 class="text-lg font-bold text-[#4A4A45]">確定移除此預約？</h4>
+						<p class="mt-2 text-sm text-stone-500">此操作無法復原，預約資料將被永久刪除。</p>
+						<div class="mt-6 flex gap-3">
+							<button @click="cancelRemove" class="flex-1 rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-[#F8F7F5]">
+								取消
+							</button>
+							<button @click="removeAppointment" class="flex-1 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600">
+								確定移除
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
