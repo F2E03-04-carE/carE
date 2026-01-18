@@ -6,19 +6,58 @@ const router = useRouter();
 const route = useRoute();
 const isSidebarOpen = ref(false);
 
+// 控制登出確認視窗的顯示
+const showLogoutModal = ref(false);
+
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
+// 點擊登出按鈕，顯示確認視窗
 const handleLogout = () => {
-  const confirmLogout = confirm('確定要登出嗎？');
-  if (confirmLogout) {
-    router.push('/admin-login');
-  }
+  showLogoutModal.value = true;
+};
+
+// 確認登出：執行跳轉
+const confirmLogoutAction = () => {
+  showLogoutModal.value = false;
+  router.push('/admin-login');
+};
+
+// 取消登出：關閉視窗
+const cancelLogout = () => {
+  showLogoutModal.value = false;
 };
 </script>
 <template>
   <div class="min-h-screen bg-gray-100 flex">
+    <!-- 登出確認浮窗 -->
+    <div
+      v-if="showLogoutModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl w-[90%] max-w-sm p-6 transform transition-all scale-100"
+      >
+        <h3 class="text-lg font-bold text-gray-800 mb-2">確認登出</h3>
+        <p class="text-gray-600 mb-6">您確定要登出管理後台嗎？</p>
+        <div class="flex justify-end gap-3">
+          <button
+            @click="cancelLogout"
+            class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors text-sm font-medium"
+          >
+            取消
+          </button>
+          <button
+            @click="confirmLogoutAction"
+            class="px-4 py-2 text-white bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-md transition-colors text-sm font-medium"
+          >
+            確定登出
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 行動裝置遮罩 -->
     <div
       v-if="isSidebarOpen"
