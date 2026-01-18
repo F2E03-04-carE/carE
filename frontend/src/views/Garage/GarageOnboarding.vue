@@ -108,31 +108,34 @@ const handleSubmit = () => {
 	isSubmitting.value = true;
 	currentStep.value = 2;
 
-	// 模擬呼叫商業登記 API
-	// TODO: 實際應該呼叫後端 API 來驗證統編
-	new Promise((resolve) => setTimeout(resolve, 3000))
-		.then(() => {
-			const isValid = Math.random() > 0.3;
+fetch(`/api/verify-taxid?taxId=${formData.taxId}`)
+  .then((res) => {
+    if (!res.ok) throw new Error('API error');
+    return res.json();
+  })
+  .then((data) => {
+    const isValid = data.exists;
 
-			if (isValid) {
-				verificationResult.value = 'success';
-				console.log('統編驗證成功！');
-				startCountdown();
-			} else {
-				verificationResult.value = 'failure';
-				console.log('統編驗證失敗！');
-			}
-      currentStep.value = 3;
-		})
-		.catch((error) => {
-			console.error('驗證過程發生錯誤', error);
-			verificationResult.value = 'failure';
-			currentStep.value = 3;
-		})
-		.finally(() => {
-			isSubmitting.value = false;
-		});
-};
+    if (isValid) {
+      verificationResult.value = 'success';
+      console.log('統編驗證成功！');
+      startCountdown();
+    } else {
+      verificationResult.value = 'failure';
+      console.log('統編驗證失敗！');
+    }
+
+    currentStep.value = 3;
+  })
+  .catch((error) => {
+    console.error('驗證過程發生錯誤', error);
+    verificationResult.value = 'failure';
+    currentStep.value = 3;
+  })
+  .finally(() => {
+    isSubmitting.value = false;
+  });
+}
 
 
 const clearCountdownTimer = () => {
