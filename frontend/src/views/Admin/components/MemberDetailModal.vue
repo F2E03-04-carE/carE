@@ -61,7 +61,7 @@ const shopHeaderInfo = computed(() => {
 
       <!-- 底部按鈕區 -->
       <footer class="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row-reverse border-t border-gray-200 gap-2">
-        <button v-for="btn in actionButtons" :key="btn.label" type="button" @click="btn.onClick" class="w-full sm:w-auto px-4 py-2 rounded-md border shadow-sm text-sm font-medium transition-colors" :class="btn.class">{{ btn.label }}</button>
+        <button v-for="btn in actionButtons" :key="btn.key" type="button" @click="btn.onClick" class="w-full sm:w-auto px-4 py-2 rounded-md border shadow-sm text-sm font-medium transition-colors" :class="btn.class">{{ btn.label }}</button>
       </footer>
 
     </article>
