@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
-import taxIdRoutes from './routes/taxId.js';
-import debugRoutes from './routes/debug.js';
+import taxIdRoutes from './src/routes/taxId.js';
+import debugRoutes from './src/routes/debug.js';
 import 'dotenv/config'
 
 
