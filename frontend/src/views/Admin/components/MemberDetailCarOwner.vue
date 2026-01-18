@@ -40,7 +40,7 @@ const displayFields = computed(() => [
     </h4>
     <div v-if="member.vehicles && member.vehicles.length" class="space-y-2">
        <!-- 迴圈渲染每一輛登記的車輛 -->
-       <div v-for="(car, idx) in member.vehicles" :key="idx" class="flex items-center justify-between p-3 border border-gray-200 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
+       <div v-for="car in member.vehicles" :key="car.plate" class="flex items-center justify-between p-3 border border-gray-200 rounded-md bg-white shadow-sm hover:shadow-md transition-shadow">
          <div class="flex items-center space-x-3">
            <div class="bg-gray-100 p-2 rounded-full">
              <span class="material-symbols-outlined text-gray-500">directions_car</span>
@@ -59,7 +59,7 @@ const displayFields = computed(() => [
     </h4>
     <ul v-if="member.bookings && member.bookings.length" class="space-y-2">
       <!-- 迴圈渲染每一筆歷史預約紀錄 -->
-      <li v-for="(booking, idx) in member.bookings" :key="idx" class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
+      <li v-for="booking in member.bookings" :key="`${booking.date}-${booking.shop}-${booking.service}`" class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
         <span class="material-symbols-outlined text-gray-400 text-sm mr-2">event</span>
         {{ booking.date }} - {{ booking.shop }} 
         <span class="ml-auto text-xs px-2 py-0.5 rounded" :class="booking.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'">
