@@ -1,12 +1,15 @@
 import express from 'express'
 import cors from 'cors'
+import taxIdRoutes from './routes/taxId.js';
 import 'dotenv/config'
+
 
 const app = express()
 
 // ====== 中介軟體 (Middleware) ======
 app.use(cors())
 app.use(express.json())
+app.use('/api', taxIdRoutes);
 
 // ====== 路由 (Routes) ======
 // TODO: 之後引入路由
@@ -20,7 +23,6 @@ app.get('/', (req, res) => {
   res.json({ message: 'carE API 伺服器運作中' })
 })
 
-// ====== 啟動伺服器 ======
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
