@@ -1,25 +1,105 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import FormInput from '@/components/ui/FormInput.vue';
 
-// 倒數計時器（用於驗證成功後自動跳轉）
+const currentStep = ref(1);
+
 const countdown = ref(3);
 
-// 表單資料（暫時用於 v-model 綁定）
-const garageName = ref('');
-const phone = ref('');
-const address = ref('');
-const ownerName = ref('');
-const taxId = ref('');
 
-// TODO(human): 之後會在這裡加上狀態管理和表單驗證邏輯
+type FieldKey = 'garageName' | 'phone' | 'address' | 'ownerName' | 'taxId';
+
+const formData = reactive({
+	garageName: '',
+	phone: '',
+	address: '',
+	ownerName: '',
+	taxId: '',
+});
+
+const touched = reactive<Record<FieldKey, boolean>>({
+	garageName: false,
+	phone: false,
+	address: false,
+	ownerName: false,
+	taxId: false,
+});
+
+const didSubmitAttempt = ref(false);
+
+const errors = computed<Record<FieldKey, string>>(() => {
+	const result: Record<FieldKey, string> = {
+		garageName: '',
+		phone: '',
+		address: '',
+		ownerName: '',
+		taxId: '',
+	};
+
+	if (!formData.garageName.trim()) {
+		result.garageName = '店名為必填欄位';
+	}
+
+
+	if (!formData.phone.trim()) {
+		result.phone = '電話號碼為必填欄位';
+	} else if (!/^[0-9-]+$/.test(formData.phone.trim())) {
+		result.phone = '電話號碼只能包含數字和連字號';
+	}
+
+
+	if (!formData.address.trim()) {
+		result.address = '請輸入車廠地址';
+	}
+
+
+	if (!formData.ownerName.trim()) {
+		result.ownerName = '請輸入負責人姓名';
+	}
+
+
+	if (!formData.taxId.trim()) {
+		result.taxId = '請輸入公司統編';
+	} else if (!/^\d+$/.test(formData.taxId.trim())) {
+		result.taxId = '統一編號只能包含數字';
+	} else if (formData.taxId.trim().length !== 8) {
+		result.taxId = '統一編號須為8碼';
+	}
+	return result;
+});
+
+const showError = (key: FieldKey) => {
+	return (touched[key] || didSubmitAttempt.value) && !!errors.value[key];
+};
+
+const handleBlur = (key: FieldKey) => {
+	touched[key] = true;
+};
+const markAllTouched = () => {
+	Object.keys(touched).forEach((key) => {
+		touched[key as FieldKey] = true;
+	});
+};
+
+const handleSubmit = () => {
+	didSubmitAttempt.value = true;
+	markAllTouched();
+
+	const hasError = Object.values(errors.value).some((msg) => msg.length > 0);
+	if (hasError) {
+		console.log('表單有錯誤，無法送出');
+		return;
+	}
+
+	console.log('前端驗證通過，準備送到後端！', formData);
+	// TODO: 之後會切換到步驟2（驗證中），並呼叫後端 API
+};
 </script>
 
 <template>
 	<main class="relative min-h-screen bg-[#f5f4f0] pt-[60px] sm:pt-[70px]">
 		<div class="w-full max-w-[800px] mx-auto px-4 sm:px-6 py-12">
-			<!-- 步驟1: 填寫商家基本資料 -->
-			<div v-if="true" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+			<div v-if="currentStep === 1" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
 				<h1 class="text-[28px] sm:text-[32px] font-bold text-[#4a4a43] mb-2 text-center">
 					商家基本資料
 				</h1>
@@ -27,45 +107,57 @@ const taxId = ref('');
 					請填寫您的維修廠基本資訊，我們將驗證公司統編
 				</p>
 
-				<form class="space-y-4">
-					<!-- 店名 -->
+				<form @submit.prevent="handleSubmit" class="space-y-4">
 					<FormInput
-						v-model="garageName"
+						v-model="formData.garageName"
 						label="店名"
 						placeholder="例如：阿明汽車保養廠"
 						required
+						:error="showError('garageName') ? errors.garageName : ''"
+						@blur="handleBlur('garageName')"
 					/>
 
-					<!-- 電話 -->
 					<FormInput
-						v-model="phone"
+						v-model="formData.phone"
 						label="電話號碼"
 						type="tel"
 						placeholder="0912345678 或 02-12345678"
+						inputmode="numeric"
+						pattern="[0-9-]*"
 						required
+						:error="showError('phone') ? errors.phone : ''"
+						@blur="handleBlur('phone')"
 					/>
 
-					<!-- 地址 -->
-					<FormInput v-model="address" label="地址" placeholder="請輸入完整地址" required />
-
-					<!-- 負責人姓名 -->
 					<FormInput
-						v-model="ownerName"
+						v-model="formData.address"
+						label="地址"
+						placeholder="請輸入完整地址"
+						required
+						:error="showError('address') ? errors.address : ''"
+						@blur="handleBlur('address')"
+					/>
+
+					<FormInput
+						v-model="formData.ownerName"
 						label="負責人姓名"
 						placeholder="請輸入負責人全名"
 						required
+						:error="showError('ownerName') ? errors.ownerName : ''"
+						@blur="handleBlur('ownerName')"
 					/>
 
-					<!-- 公司統編 -->
 					<FormInput
-						v-model="taxId"
+						v-model="formData.taxId"
 						label="公司統編"
 						placeholder="請輸入8碼統一編號"
+						inputmode="numeric"
+						pattern="[0-9]*"
 						:maxlength="8"
 						required
+						:error="showError('taxId') ? errors.taxId : ''"
+						@blur="handleBlur('taxId')"
 					/>
-
-					<!-- 送出按鈕 -->
 					<button
 						type="submit"
 						class="w-full px-6 py-3 mt-2 text-[18px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2"
@@ -75,9 +167,8 @@ const taxId = ref('');
 				</form>
 			</div>
 
-			<!-- 步驟2: 驗證等待中 -->
 			<div
-				v-if="false"
+				v-if="currentStep === 2"
 				class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center"
 			>
 				<div class="flex justify-center mb-6">
@@ -92,9 +183,7 @@ const taxId = ref('');
 				<p class="text-[14px] text-[#8a8a7d]">此過程約需 30 秒</p>
 			</div>
 
-			<!-- 步驟3: 驗證結果 -->
-			<div v-if="false" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-				<!-- 驗證成功 -->
+			<div v-if="currentStep === 3" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
 				<div class="text-center">
 					<div
 						class="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-[#70c287]/20"

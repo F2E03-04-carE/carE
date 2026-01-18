@@ -28,7 +28,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 基本用法
 export const Default: Story = {
 	args: {
 		label: '店名',
@@ -38,7 +37,6 @@ export const Default: Story = {
 	},
 };
 
-// 必填欄位
 export const Required: Story = {
 	args: {
 		label: '電話號碼',
@@ -49,7 +47,6 @@ export const Required: Story = {
 	},
 };
 
-// 有錯誤訊息
 export const WithError: Story = {
 	args: {
 		label: '公司統編',
@@ -62,7 +59,6 @@ export const WithError: Story = {
 	},
 };
 
-// 已填寫內容
 export const Filled: Story = {
 	args: {
 		label: '負責人姓名',
@@ -71,8 +67,6 @@ export const Filled: Story = {
 		required: true,
 	},
 };
-
-// Email 類型
 export const EmailType: Story = {
 	args: {
 		label: '電子信箱',
@@ -83,7 +77,6 @@ export const EmailType: Story = {
 	},
 };
 
-// 密碼類型
 export const PasswordType: Story = {
 	args: {
 		label: '密碼',
