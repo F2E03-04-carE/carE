@@ -1,20 +1,25 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
+// 倒數計時器（用於驗證成功後自動跳轉）
+const countdown = ref(3);
+
 // TODO(human): 之後會在這裡加上狀態管理和表單驗證邏輯
 </script>
 
 <template>
 	<main class="relative min-h-screen bg-[#f5f4f0] pt-[60px] sm:pt-[70px]">
-		<div class="max-w-[800px] mx-auto px-4 sm:px-6 py-12">
+		<div class="w-full max-w-[800px] mx-auto px-4 sm:px-6 py-12">
 			<!-- 步驟1: 填寫商家基本資料 -->
 			<div v-if="true" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
 				<h1 class="text-[28px] sm:text-[32px] font-bold text-[#4a4a43] mb-2 text-center">
 					商家基本資料
 				</h1>
-				<p class="text-[16px] text-[#8a8a7d] mb-8 text-center">
+				<p class="text-[16px] text-[#8a8a7d] mb-6 text-center">
 					請填寫您的維修廠基本資訊，我們將驗證公司統編
 				</p>
 
-				<form class="space-y-5">
+				<form class="space-y-4">
 					<!-- 店名 -->
 					<div>
 						<label for="garageName" class="block mb-1 text-[16px] font-medium text-gray-700">
@@ -84,7 +89,7 @@
 					<!-- 送出按鈕 -->
 					<button
 						type="submit"
-						class="w-full px-6 py-3 mt-6 text-[18px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2"
+						class="w-full px-6 py-3 mt-2 text-[18px] font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md focus:outline-none focus:ring-2 focus:ring-[#6B6B5C] focus:ring-offset-2"
 					>
 						送出驗證
 					</button>
@@ -104,7 +109,7 @@
 				<h2 class="text-[24px] sm:text-[28px] font-bold text-[#4a4a43] mb-3">
 					正在驗證統編...
 				</h2>
-				<p class="text-[16px] text-[#8a8a7d] mb-4">請稍候，我們正在查詢商業登記資料</p>
+				<p class="text-[16px] text-[#8a8a7d] mb-4">請稍候，我們正在查詢</p>
 				<p class="text-[14px] text-[#8a8a7d]">此過程約需 30 秒</p>
 			</div>
 
@@ -121,13 +126,13 @@
 					</div>
 					<h2 class="text-[28px] sm:text-[32px] font-bold text-[#4a4a43] mb-3">驗證成功！</h2>
 					<p class="text-[16px] text-[#8a8a7d] mb-6">
-						公司統編驗證通過，即將跳轉到商家編輯頁面
+						驗證通過，即將跳轉到商家編輯頁面
 					</p>
-					<div class="flex items-center justify-center gap-2 text-[14px] text-[#8a8a7d]">
+					<div class="flex items-center justify-center gap-2 text-[16px] text-[#8a8a7d]">
 						<span class="material-symbols-outlined text-[20px] animate-spin">
 							autorenew
 						</span>
-						<span>自動跳轉中...</span>
+						<span>倒數 <span class="font-bold text-[#6B6B5C]">{{ countdown }}</span> 秒</span>
 					</div>
 				</div>
 
