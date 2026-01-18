@@ -104,7 +104,7 @@ const handleSubmit = () => {
 
 	currentStep.value = 2;
 
-	// 模擬呼叫商業登記 API（實際應該是 30 秒，這裡縮短為 3 秒方便測試）
+	// 模擬呼叫商業登記 API
 	// TODO: 實際應該呼叫後端 API 來驗證統編
 	new Promise((resolve) => setTimeout(resolve, 3000))
 		.then(() => {
@@ -150,9 +150,7 @@ const startCountdown = () => {
 				countdownTimer = null;
 			}
 
-			// TODO: 跳轉到商家編輯頁面（目前路由尚未建立）
-			// router.push('/garage/profile');
-			console.log('倒數結束，準備跳轉到商家編輯頁面');
+			router.push('/garage/profile');
 		}
 	}, 1000); //
 };
