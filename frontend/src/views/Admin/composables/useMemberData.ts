@@ -1,7 +1,8 @@
 import { ref } from 'vue';
-import type { Member, Vehicle } from '../types/member';
-import { mockCarOwners, mockShops } from '../data/mockMembers';
+import { mockCarOwners, mockShops } from './memberCore';
+import type { Member, Vehicle } from './memberCore';
 
+// Export types for consumers
 export type { Member, Vehicle };
 
 export function useMemberData() {
