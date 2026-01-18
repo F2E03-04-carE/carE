@@ -80,7 +80,8 @@ const toggleStatus = (review: Review) => {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="review in reviews" :key="review.id" class="hover:bg-gray-50">
+          <!-- 使用唯一的 review.id 作為 key；若 id 缺失則回退至索引，確保渲染穩定性 -->
+          <tr v-for="(review, index) in reviews" :key="review.id || index" class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ review.id }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               {{ review.author }}
