@@ -7,7 +7,6 @@ import DetailView from './views/Search/components/DetailView.vue';
 import ServiceSearchFlow from './components/service-search/ServiceSearchFlow.vue';
 import VehicleManagement from './views/User/VehicleManagement.vue';
 import JoinGarage from './views/Garage/JoinGarage.vue';
-import { Garage } from './components/layout/HeaderNavbar.stories';
 import GarageOnboarding from './views/Garage/GarageOnboarding.vue';
 
 </script>

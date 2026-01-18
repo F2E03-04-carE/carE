@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 
 export interface FormInputProps {
 	label: string;
@@ -29,7 +29,7 @@ const emit = defineEmits<{
 	(e: 'update:modelValue', value: string): void;
 	(e: 'blur'): void;
 }>();
-
+const inputId = props.id ?? useId();
 const handleInput = (event: Event) => {
 	const target = event.target as HTMLInputElement;
 	emit('update:modelValue', target.value);
@@ -43,10 +43,6 @@ const inputBorderClass = computed(() => {
 	return props.error
 		? 'border-[#c97d7d] focus:border-[#c97d7d] focus:ring-[#c97d7d]/30'
 		: 'border-[#e0ddd5] focus:border-[#6B6B5C] focus:ring-[#6B6B5C]/30';
-});
-
-const inputId = computed(() => {
-	return props.id || `input-${Math.random().toString(36).substring(2, 9)}`;
 });
 </script>
 
