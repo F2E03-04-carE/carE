@@ -3,7 +3,7 @@ import { computed, ref, reactive } from 'vue';
 
 type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings';
 
-type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
+type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'cancelled';
 
 type Appointment = {
 	id: string;
@@ -34,6 +34,7 @@ type RecordItem = {
 
 type ShopSettings = {
 	name: string;
+	ownerName: string;
 	address: string;
 	phone: string;
 	taxId: string;
@@ -41,8 +42,6 @@ type ShopSettings = {
 	coverImage: string;
 	environmentImages: string[];
 };
-
-// --- State ---
 
 const activeNav = ref<NavKey>('dashboard');
 const sidebarOpen = ref(false);
@@ -62,6 +61,7 @@ function handleNavClick(key: NavKey) {
 
 const shopSettings = reactive<ShopSettings>({
 	name: '晴天自動車',
+	ownerName: '店長 Admin',
 	address: '台北市中山區職人路 100 號',
 	phone: '02-1234-5678',
 	taxId: '12345678',
@@ -206,7 +206,6 @@ function toggleStatusFilter(status: ApptStatus) {
 	} else {
 		apptFilterStatuses.value.add(status);
 	}
-	// 觸發響應式更新
 	apptFilterStatuses.value = new Set(apptFilterStatuses.value);
 }
 
@@ -250,7 +249,6 @@ function getStatusLabel(s: ApptStatus) {
 		pending: '待確認',
 		confirmed: '已排程',
 		servicing: '作業中',
-		completed: '已完工',
 		cancelled: '已取消',
 	};
 	return map[s];
@@ -261,7 +259,6 @@ function getStatusClass(s: ApptStatus) {
 		case 'pending': return 'bg-[#E8DCC2] text-[#8C7B5D]';
 		case 'confirmed': return 'bg-[#D6DCD9] text-[#5C6B66]';
 		case 'servicing': return 'bg-[#C2CCB8] text-[#5A6650]';
-		case 'completed': return 'bg-[#E5E2DD] text-[#9CA3AF]';
 		case 'cancelled': return 'bg-[#E8C2C2] text-[#8C5D5D]';
 		default: return '';
 	}
@@ -277,7 +274,6 @@ const pageHeader = computed(() => {
 	}
 });
 
-// --- Edit Modal State ---
 const showEditModal = ref(false);
 const editingForm = reactive<{
 	id: string;
@@ -329,7 +325,6 @@ function saveEdit() {
 	closeEditModal();
 }
 
-// --- Remove Appointment ---
 const showRemoveConfirm = ref(false);
 
 function confirmRemove() {
@@ -349,7 +344,6 @@ function removeAppointment() {
 	closeEditModal();
 }
 
-// --- Quotation Image Upload ---
 function onQuotationImageChange(event: Event) {
 	const input = event.target as HTMLInputElement;
 	if (input.files && input.files[0]) {
@@ -362,7 +356,6 @@ function removeQuotationImage() {
 	editingForm.quotationImage = '';
 }
 
-// --- Complete Appointment ---
 const showCompleteConfirm = ref(false);
 const pendingCompleteApt = ref<Appointment | null>(null);
 
@@ -381,7 +374,6 @@ function confirmComplete() {
 
 	const apt = pendingCompleteApt.value;
 
-	// 建立完工維修記錄
 	const newRecord: RecordItem = {
 		id: `REC-${apt.id.replace('APT-', '')}`,
 		customerName: apt.customerName,
@@ -395,13 +387,11 @@ function confirmComplete() {
 	};
 	records.value.unshift(newRecord);
 
-	// 從預約列表移除
 	const index = appointments.value.findIndex(a => a.id === apt.id);
 	if (index !== -1) {
 		appointments.value.splice(index, 1);
 	}
 
-	// 關閉彈窗
 	showCompleteConfirm.value = false;
 	pendingCompleteApt.value = null;
 }
@@ -412,13 +402,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
 		<div class="flex h-screen overflow-hidden">
-			<!-- Mobile Overlay -->
-		<div
-			v-if="sidebarOpen"
-			class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
-			@click="closeSidebar"
-		></div>
-
+		<div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 		<aside
 			class="fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3] transition-transform duration-300 lg:static lg:translate-x-0"
 			:class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
@@ -433,11 +417,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							</div>
 							<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
 						</div>
-						<!-- Close Button (Mobile Only) -->
-						<button
-							@click="closeSidebar"
-							class="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition hover:bg-[#DEDbd6] hover:text-stone-600 lg:hidden"
-						>
+						<button @click="closeSidebar" class="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition hover:bg-[#DEDbd6] hover:text-stone-600 lg:hidden">
 							<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 								<line x1="18" y1="6" x2="6" y2="18"/>
 								<line x1="6" y1="6" x2="18" y2="18"/>
@@ -467,7 +447,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div class="p-6">
 					<div class="rounded-lg bg-[#DEDbd6]/50 p-4 border border-[#DCD9D3]">
 						<div class="text-xs text-stone-500">目前登入</div>
-						<div class="font-bold text-[#4A4A45] tracking-wide">店長 Admin</div>
+						<div class="font-bold text-[#4A4A45] tracking-wide">陳大貓</div>
 					</div>
 				</div>
 			</aside>
@@ -475,11 +455,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div class="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
 					<header class="mb-10">
 						<div class="flex items-center gap-4">
-							<!-- Hamburger Menu Button (Mobile Only) -->
-							<button
-								@click="toggleSidebar"
-								class="flex h-10 w-10 items-center justify-center rounded-lg border border-[#DCD9D3] bg-white text-stone-600 shadow-sm transition hover:bg-[#F8F7F5] lg:hidden"
-							>
+							<button @click="toggleSidebar" class="flex h-10 w-10 items-center justify-center rounded-lg border border-[#DCD9D3] bg-white text-stone-600 shadow-sm transition hover:bg-[#F8F7F5] lg:hidden">
 								<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 									<line x1="3" y1="6" x2="21" y2="6"/>
 									<line x1="3" y1="12" x2="21" y2="12"/>
@@ -571,7 +547,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									新增預約
 								</button>
 							</div>
-							<!-- Status Filter Checkboxes -->
 							<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-[#F0EEE9] pt-4">
 								<span class="mr-2 text-sm font-medium text-stone-500">篩選狀態：</span>
 								<label
@@ -599,7 +574,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								:key="apt.id"
 								class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
 							>
-								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="(getStatusClass(apt.status).split(' ')[0] || '').replace('bg-', 'bg-')"></div>
+								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="(getStatusClass(apt.status).split(' ')[0] || '')"></div>
 								<div class="flex-1 pl-4">
 									<div class="flex flex-wrap items-center gap-3">
 										<span class="font-mono text-xs text-stone-400">{{ apt.id }}</span>
@@ -681,7 +656,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 					</div>
 					<div v-else-if="activeNav === 'settings'" class="max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-							<!-- 照片區塊 -->
 							<div class="space-y-6">
 								<h3 class="text-base font-bold text-[#4A4A45]">維修廠照片</h3>
 								<div>
@@ -721,17 +695,17 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 								</div>
 							</div>
-
-							<!-- 分隔線 -->
 							<div class="my-8 border-t border-[#F0EEE9]"></div>
-
-							<!-- 基本資料區塊 -->
 							<div class="space-y-6">
 								<h3 class="text-base font-bold text-[#4A4A45]">基本資料</h3>
 								<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
 										<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+									</div>
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-stone-500">店長名稱</label>
+										<input v-model="shopSettings.ownerName" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">統一編號</label>
@@ -757,8 +731,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 								</div>
 							</div>
-
-							<!-- 儲存按鈕 -->
 							<div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
 								<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
 									儲存變更
@@ -769,21 +741,15 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				</div>
 			</main>
 		</div>
-
-		<!-- Edit Modal -->
 		<div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
 			<div class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#FBFAF7] shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
-				<!-- Modal Header (Fixed) -->
 				<div class="flex shrink-0 items-center justify-between border-b border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
 					<h3 class="text-lg font-bold text-[#4A4A45]">編輯預約單</h3>
 					<button @click="closeEditModal" class="rounded-full p-1 text-stone-400 hover:bg-black/5 hover:text-stone-600">
 						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 					</button>
 				</div>
-
-				<!-- Modal Body (Scrollable) -->
 				<div class="flex-1 space-y-6 overflow-y-auto p-6">
-					<!-- Info Block -->
 					<div class="rounded-xl bg-[#F8F7F5] p-4 text-sm border border-[#E6E6DF]">
 						<div class="grid grid-cols-2 gap-y-3">
 							<div>
@@ -804,8 +770,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							</div>
 						</div>
 					</div>
-
-					<!-- Form Fields -->
 					<div class="space-y-4">
 						<div class="space-y-2">
 							<label class="text-sm font-bold text-[#4A4A45]">訂單狀態</label>
@@ -813,11 +777,9 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<option value="pending">待確認 (Pending)</option>
 								<option value="confirmed">已排程 (Confirmed)</option>
 								<option value="servicing">作業中 (Servicing)</option>
-								<option value="completed">已完工 (Completed)</option>
 								<option value="cancelled">已取消 (Cancelled)</option>
 							</select>
 						</div>
-
 						<div class="space-y-2">
 							<label class="text-sm font-bold text-[#4A4A45]">預估費用</label>
 							<div class="relative">
@@ -825,13 +787,10 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<input v-model.number="editingForm.estimatedCost" type="number" class="w-full rounded-lg border border-[#DCD9D3] bg-white py-2.5 pl-12 pr-4 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]">
 							</div>
 						</div>
-
 						<div class="space-y-2">
 							<label class="text-sm font-bold text-[#4A4A45]">備註事項</label>
 							<textarea v-model="editingForm.notes" rows="3" class="w-full resize-none rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="輸入備註..."></textarea>
 						</div>
-
-						<!-- Quotation Image Upload -->
 						<div class="space-y-2">
 							<label class="text-sm font-bold text-[#4A4A45]">報價單圖片</label>
 							<div v-if="!editingForm.quotationImage" class="relative h-40 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
@@ -857,8 +816,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						</div>
 					</div>
 				</div>
-
-				<!-- Modal Footer (Fixed) -->
 				<div class="flex shrink-0 items-center justify-between border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
 					<button @click="confirmRemove" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
 						移除預約
@@ -872,8 +829,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						</button>
 					</div>
 				</div>
-
-				<!-- Remove Confirmation Dialog -->
 				<div v-if="showRemoveConfirm" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
 					<div class="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
 						<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-500">
@@ -893,8 +848,6 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				</div>
 			</div>
 		</div>
-
-		<!-- Complete Order Confirmation Modal -->
 		<div v-if="showCompleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
 			<div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
 				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C2CCB8] text-[#5A6650]">
