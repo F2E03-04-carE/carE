@@ -47,7 +47,7 @@ const errors = computed<Record<FieldKey, string>>(() => {
 
 	if (!formData.phone.trim()) {
 		result.phone = '電話號碼為必填欄位';
-	} else if (!/^[0-9-]+$/.test(formData.phone.trim())) {
+	} else if (!/^(?=.*\d)[\d-]+$/.test(formData.phone.trim())) {
 		result.phone = '電話號碼只能包含數字和連字號';
 	}
 
