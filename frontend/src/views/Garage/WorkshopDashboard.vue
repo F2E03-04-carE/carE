@@ -45,6 +45,20 @@ type ShopSettings = {
 // --- State ---
 
 const activeNav = ref<NavKey>('dashboard');
+const sidebarOpen = ref(false);
+
+function toggleSidebar() {
+	sidebarOpen.value = !sidebarOpen.value;
+}
+
+function closeSidebar() {
+	sidebarOpen.value = false;
+}
+
+function handleNavClick(key: NavKey) {
+	activeNav.value = key;
+	closeSidebar();
+}
 
 const shopSettings = reactive<ShopSettings>({
 	name: '晴天自動車',
@@ -83,7 +97,7 @@ function removeEnvImage(index: number) {
 const appointments = ref<Appointment[]>([
 	{
 		id: 'APT-2026-001',
-		customerName: '王小明',
+		customerName: '王貓貓',
 		phone: '0912-345-678',
 		carModel: 'Toyota Camry',
 		licensePlate: 'ABC-1234',
@@ -96,7 +110,7 @@ const appointments = ref<Appointment[]>([
 	},
 	{
 		id: 'APT-2026-002',
-		customerName: '李大華',
+		customerName: '李貓貓',
 		phone: '0923-456-789',
 		carModel: 'Honda CR-V',
 		licensePlate: 'KLM-7788',
@@ -109,7 +123,7 @@ const appointments = ref<Appointment[]>([
 	},
 	{
 		id: 'APT-2026-003',
-		customerName: '陳冠宇',
+		customerName: '陳貓貓',
 		phone: '0988-112-233',
 		carModel: 'Tesla Model 3',
 		licensePlate: 'EAA-9999',
@@ -121,7 +135,7 @@ const appointments = ref<Appointment[]>([
 	},
 	{
 		id: 'APT-2026-004',
-		customerName: '林雅婷',
+		customerName: '林貓貓',
 		phone: '0955-666-777',
 		carModel: 'Mini Cooper',
 		licensePlate: 'MIN-5678',
@@ -136,7 +150,7 @@ const appointments = ref<Appointment[]>([
 const records = ref<RecordItem[]>([
 	{
 		id: 'REC-2025-888',
-		customerName: '張美玲',
+		customerName: '張貓貓',
 		carModel: 'Mazda 3',
 		licensePlate: 'QWE-5566',
 		date: '2025-12-20',
@@ -150,7 +164,7 @@ const records = ref<RecordItem[]>([
 	},
 	{
 		id: 'REC-2025-887',
-		customerName: '王小明',
+		customerName: '王貓貓',
 		carModel: 'Toyota Camry',
 		licensePlate: 'ABC-1234',
 		date: '2025-11-15',
@@ -183,7 +197,6 @@ const statusOptions: { value: ApptStatus; label: string }[] = [
 	{ value: 'pending', label: '待確認' },
 	{ value: 'confirmed', label: '已排程' },
 	{ value: 'servicing', label: '作業中' },
-	{ value: 'completed', label: '已完工' },
 	{ value: 'cancelled', label: '已取消' },
 ];
 
@@ -258,7 +271,7 @@ const pageHeader = computed(() => {
 	switch (activeNav.value) {
 		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
 		case 'appointments': return { title: '預約排程', sub: '管理客戶預約與維修進度' };
-		case 'records': return { title: '維修紀錄', sub: '查詢過往維修履歷與工單細節' };
+		case 'records': return { title: '完工維修記錄', sub: '查詢過往維修履歷與工單細節' };
 		case 'settings': return { title: '編輯維修廠', sub: '維護維修廠的基本資料與簡介' };
 		default: return { title: '', sub: '' };
 	}
@@ -349,31 +362,97 @@ function removeQuotationImage() {
 	editingForm.quotationImage = '';
 }
 
+// --- Complete Appointment ---
+const showCompleteConfirm = ref(false);
+const pendingCompleteApt = ref<Appointment | null>(null);
+
+function openCompleteConfirm(apt: Appointment) {
+	pendingCompleteApt.value = apt;
+	showCompleteConfirm.value = true;
+}
+
+function cancelComplete() {
+	showCompleteConfirm.value = false;
+	pendingCompleteApt.value = null;
+}
+
+function confirmComplete() {
+	if (!pendingCompleteApt.value) return;
+
+	const apt = pendingCompleteApt.value;
+
+	// 建立完工維修記錄
+	const newRecord: RecordItem = {
+		id: `REC-${apt.id.replace('APT-', '')}`,
+		customerName: apt.customerName,
+		carModel: apt.carModel,
+		licensePlate: apt.licensePlate,
+		date: apt.date,
+		items: [{ name: apt.serviceType, price: apt.estimatedCost, type: 'base' }],
+		total: apt.estimatedCost,
+		tech: '技師',
+		notes: apt.notes || '',
+	};
+	records.value.unshift(newRecord);
+
+	// 從預約列表移除
+	const index = appointments.value.findIndex(a => a.id === apt.id);
+	if (index !== -1) {
+		appointments.value.splice(index, 1);
+	}
+
+	// 關閉彈窗
+	showCompleteConfirm.value = false;
+	pendingCompleteApt.value = null;
+}
+
 const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'settings'];
 </script>
 
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
 		<div class="flex h-screen overflow-hidden">
-			<aside class="w-[280px] shrink-0 flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3]">
+			<!-- Mobile Overlay -->
+		<div
+			v-if="sidebarOpen"
+			class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+			@click="closeSidebar"
+		></div>
+
+		<aside
+			class="fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3] transition-transform duration-300 lg:static lg:translate-x-0"
+			:class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+		>
 				<div class="p-8">
-					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded bg-[#6B6B5C] text-[#EBE8E3] shadow-sm">
-							<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-							</svg>
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<div class="flex h-10 w-10 items-center justify-center rounded bg-[#6B6B5C] text-[#EBE8E3] shadow-sm">
+								<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+								</svg>
+							</div>
+							<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
 						</div>
-						<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
+						<!-- Close Button (Mobile Only) -->
+						<button
+							@click="closeSidebar"
+							class="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition hover:bg-[#DEDbd6] hover:text-stone-600 lg:hidden"
+						>
+							<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="18" y1="6" x2="6" y2="18"/>
+								<line x1="6" y1="6" x2="18" y2="18"/>
+							</svg>
+						</button>
 					</div>
 				</div>
 				<nav class="flex-1 px-4 space-y-2 overflow-y-auto">
 					<button
 						v-for="key in navGroupMain"
 						:key="key"
-						@click="activeNav = key"
+						@click="handleNavClick(key)"
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left transition-all duration-300"
-						:class="activeNav === key 
-							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20' 
+						:class="activeNav === key
+							? 'bg-[#6B6B5C] text-[#EBE8E3] shadow-md shadow-[#6B6B5C]/20'
 							: 'text-stone-500 hover:bg-[#DEDbd6] hover:text-[#4A4A45]'"
 					>
 						<svg v-if="key === 'dashboard'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -381,7 +460,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						<svg v-if="key === 'records'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
 						<svg v-if="key === 'settings'" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
 						<span class="font-medium tracking-wide">
-							{{ key === 'dashboard' ? '總覽' : key === 'appointments' ? '預約排程' : key === 'records' ? '維修紀錄' : '編輯維修廠' }}
+							{{ key === 'dashboard' ? '總覽' : key === 'appointments' ? '預約排程' : key === 'records' ? '完工維修記錄' : '編輯維修廠' }}
 						</span>
 					</button>
 				</nav>
@@ -393,10 +472,25 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				</div>
 			</aside>
 			<main class="flex-1 overflow-y-auto">
-				<div class="mx-auto max-w-6xl px-8 py-10">
+				<div class="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
 					<header class="mb-10">
-						<h2 class="text-3xl font-bold text-[#4A4A45] tracking-wide">{{ pageHeader.title }}</h2>
-						<p class="mt-2 text-stone-500 font-medium">{{ pageHeader.sub }}</p>
+						<div class="flex items-center gap-4">
+							<!-- Hamburger Menu Button (Mobile Only) -->
+							<button
+								@click="toggleSidebar"
+								class="flex h-10 w-10 items-center justify-center rounded-lg border border-[#DCD9D3] bg-white text-stone-600 shadow-sm transition hover:bg-[#F8F7F5] lg:hidden"
+							>
+								<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="3" y1="6" x2="21" y2="6"/>
+									<line x1="3" y1="12" x2="21" y2="12"/>
+									<line x1="3" y1="18" x2="21" y2="18"/>
+								</svg>
+							</button>
+							<div>
+								<h2 class="text-2xl font-bold text-[#4A4A45] tracking-wide sm:text-3xl">{{ pageHeader.title }}</h2>
+								<p class="mt-1 text-sm text-stone-500 font-medium sm:mt-2 sm:text-base">{{ pageHeader.sub }}</p>
+							</div>
+						</div>
 					</header>
 					<div v-if="activeNav === 'dashboard'" class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -536,7 +630,8 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 								</div>
 								<div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:flex-col lg:border-0 lg:pt-0">
-									<button @click="openEditModal(apt)" class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-20">編輯</button>
+									<button @click="openCompleteConfirm(apt)" class="flex-1 rounded bg-[#6B6B5C] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#5a5a4d] lg:w-28">完成訂單</button>
+									<button @click="openEditModal(apt)" class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-28">編輯</button>
 								</div>
 							</div>
 							<div v-if="filteredAppointments.length === 0" class="rounded-xl border border-dashed border-stone-300 p-12 text-center">
@@ -584,22 +679,11 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							</div>
 						</div>
 					</div>
-					<div v-else-if="activeNav === 'settings'" class="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+					<div v-else-if="activeNav === 'settings'" class="max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
 						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-							<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
-								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
-									<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-										<circle cx="8.5" cy="8.5" r="1.5"/>
-										<polyline points="21 15 16 10 5 21"/>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-lg font-bold text-[#4A4A45]">維修廠照片</h3>
-									<p class="text-sm text-stone-500">上傳封面與環境照片，展現專業形象。</p>
-								</div>
-							</div>
-							<div class="space-y-8">
+							<!-- 照片區塊 -->
+							<div class="space-y-6">
+								<h3 class="text-base font-bold text-[#4A4A45]">維修廠照片</h3>
 								<div>
 									<label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
 									<div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
@@ -622,8 +706,8 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 										<div v-for="(img, idx) in shopSettings.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
 											<img :src="img" class="h-full w-full object-cover" alt="Environment" />
-											<button 
-												@click="removeEnvImage(idx)" 
+											<button
+												@click="removeEnvImage(idx)"
 												class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-stone-500 shadow-sm opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
 											>
 												<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -637,49 +721,44 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-							<div class="mb-8 flex items-center gap-4 border-b border-[#F0EEE9] pb-6">
-								<div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F4F1] text-stone-400">
-									<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-										<polyline points="9 22 9 12 15 12 15 22"/>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-lg font-bold text-[#4A4A45]">基本資料</h3>
-									<p class="text-sm text-stone-500">這些資訊將顯示給您的客戶，請確保內容正確。</p>
-								</div>
-							</div>
-							<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
-									<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
-								</div>
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">統一編號</label>
-									<input v-model="shopSettings.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
-								</div>
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">聯絡電話</label>
-									<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
-								</div>
-								<div class="space-y-2">
-									<label class="text-sm font-medium text-stone-500">維修廠地址</label>
-									<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
-								</div>
-								<div class="col-span-1 space-y-2 md:col-span-2">
-									<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
-									<textarea 
-										v-model="shopSettings.description" 
-										rows="4" 
-										class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-										placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
-									>
-									</textarea>
-									<p class="text-right text-xs text-stone-400">{{ shopSettings.description.length }} / 200</p>
+
+							<!-- 分隔線 -->
+							<div class="my-8 border-t border-[#F0EEE9]"></div>
+
+							<!-- 基本資料區塊 -->
+							<div class="space-y-6">
+								<h3 class="text-base font-bold text-[#4A4A45]">基本資料</h3>
+								<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
+										<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+									</div>
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-stone-500">統一編號</label>
+										<input v-model="shopSettings.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
+									</div>
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-stone-500">聯絡電話</label>
+										<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
+									</div>
+									<div class="space-y-2">
+										<label class="text-sm font-medium text-stone-500">維修廠地址</label>
+										<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
+									</div>
+									<div class="col-span-1 space-y-2 md:col-span-2">
+										<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
+										<textarea
+											v-model="shopSettings.description"
+											rows="4"
+											class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
+											placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
+										></textarea>
+										<p class="text-right text-xs text-stone-400">{{ shopSettings.description.length }} / 200</p>
+									</div>
 								</div>
 							</div>
+
+							<!-- 儲存按鈕 -->
 							<div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
 								<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
 									儲存變更
@@ -693,15 +772,17 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 
 		<!-- Edit Modal -->
 		<div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-			<div class="w-full max-w-lg overflow-hidden rounded-2xl bg-[#FBFAF7] shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
-				<div class="flex items-center justify-between border-b border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+			<div class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#FBFAF7] shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
+				<!-- Modal Header (Fixed) -->
+				<div class="flex shrink-0 items-center justify-between border-b border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
 					<h3 class="text-lg font-bold text-[#4A4A45]">編輯預約單</h3>
 					<button @click="closeEditModal" class="rounded-full p-1 text-stone-400 hover:bg-black/5 hover:text-stone-600">
 						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 					</button>
 				</div>
-				
-				<div class="space-y-6 p-6">
+
+				<!-- Modal Body (Scrollable) -->
+				<div class="flex-1 space-y-6 overflow-y-auto p-6">
 					<!-- Info Block -->
 					<div class="rounded-xl bg-[#F8F7F5] p-4 text-sm border border-[#E6E6DF]">
 						<div class="grid grid-cols-2 gap-y-3">
@@ -777,7 +858,8 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 					</div>
 				</div>
 
-				<div class="flex items-center justify-between border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+				<!-- Modal Footer (Fixed) -->
+				<div class="flex shrink-0 items-center justify-between border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
 					<button @click="confirmRemove" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
 						移除預約
 					</button>
@@ -808,6 +890,38 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							</button>
 						</div>
 					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Complete Order Confirmation Modal -->
+		<div v-if="showCompleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+			<div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C2CCB8] text-[#5A6650]">
+					<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+						<polyline points="22 4 12 14.01 9 11.01"/>
+					</svg>
+				</div>
+				<h4 class="text-lg font-bold text-[#4A4A45]">確定完成此訂單？</h4>
+				<p class="mt-2 text-sm text-stone-500">送出後將通知客戶可以取車，並將此訂單移至完工維修記錄。</p>
+				<div v-if="pendingCompleteApt" class="mt-4 rounded-lg bg-[#F8F7F5] p-3 text-sm">
+					<div class="flex justify-between">
+						<span class="text-stone-500">客戶</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.customerName }}</span>
+					</div>
+					<div class="mt-1 flex justify-between">
+						<span class="text-stone-500">車牌</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.licensePlate }}</span>
+					</div>
+				</div>
+				<div class="mt-6 flex gap-3">
+					<button @click="cancelComplete" class="flex-1 rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-[#F8F7F5]">
+						取消
+					</button>
+					<button @click="confirmComplete" class="flex-1 rounded-lg bg-[#6B6B5C] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#5a5a4d]">
+						確定送出
+					</button>
 				</div>
 			</div>
 		</div>
