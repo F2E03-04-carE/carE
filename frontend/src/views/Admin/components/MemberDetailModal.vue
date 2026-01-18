@@ -54,7 +54,7 @@ const getStatusClass = (status: string) => {
                   </button>
                 </div>
                 <div class="mt-2 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                  <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div v-if="type !== 'carOwner'" class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div>
                       <span class="text-xs text-gray-500 block uppercase tracking-wide">ID</span>
                       <span class="text-sm font-medium text-gray-900">#{{ member.id }}</span>
@@ -67,6 +67,12 @@ const getStatusClass = (status: string) => {
                       <span class="text-xs text-gray-500 block uppercase tracking-wide">目前狀態</span>
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1" :class="getStatusClass(member.status)">
                         {{ getStatusLabel(member.status) }}
+                      </span>
+                    </div>
+                    <div v-if="member.appliedPlan" class="col-span-2 sm:col-span-1">
+                      <span class="text-xs text-gray-500 block uppercase tracking-wide">申請方案</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold mt-1" :class="member.appliedPlan === 'Paid' ? 'text-yellow-700 bg-yellow-50' : 'text-blue-700 bg-blue-50'">
+                        {{ member.appliedPlan === 'Paid' ? '付費方案' : '免費方案' }}
                       </span>
                     </div>
                   </div>

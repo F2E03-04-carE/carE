@@ -4,10 +4,68 @@ import type { Member } from '@/views/Admin/composables/useMemberData';
 defineProps<{
   member: Member;
 }>();
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'VerifiedFree': return '已驗證 (免費)';
+    case 'VerifiedPaid': return '已驗證 (付費)';
+    case 'Pending': return '審核中';
+    case 'Suspended': return '已停權';
+    case 'Expired': return '已過期';
+    case 'Active': return '正常';
+    default: return status;
+  }
+};
+
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case 'VerifiedFree': return 'bg-blue-100 text-blue-800';
+    case 'VerifiedPaid': return 'bg-yellow-100 text-yellow-800';
+    case 'Pending': return 'bg-gray-100 text-gray-800';
+    case 'Suspended': return 'bg-red-100 text-red-800';
+    case 'Expired': return 'bg-orange-100 text-orange-800';
+    case 'Active': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
 </script>
 
 <template>
   <div>
+    <h4 class="font-medium text-gray-800 mb-2 border-l-4 border-[#6b6b5a] pl-2 flex items-center">
+      <span class="material-symbols-outlined text-lg mr-1">person</span> 基本資料
+    </h4>
+    <div class="bg-gray-50 rounded p-3 mb-5 border border-gray-100">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <span class="text-xs text-gray-500 block">ID</span>
+          <span class="text-sm font-medium text-gray-800">#{{ member.id }}</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 block">狀態</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getStatusClass(member.status)">
+            {{ getStatusLabel(member.status) }}
+          </span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 block">姓名</span>
+          <span class="text-sm font-medium text-gray-800">{{ member.name }}</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 block">電話</span>
+          <span class="text-sm font-medium text-gray-800">{{ member.phone }}</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 block">註冊日期</span>
+          <span class="text-sm font-medium text-gray-800">{{ member.joinDate }}</span>
+        </div>
+        <div class="md:col-span-2">
+          <span class="text-xs text-gray-500 block">信箱</span>
+          <span class="text-sm font-medium text-gray-800">{{ member.email }}</span>
+        </div>
+      </div>
+    </div>
+
     <h4 class="font-medium text-gray-800 mb-2 border-l-4 border-[#6b6b5a] pl-2 flex items-center">
       <span class="material-symbols-outlined text-lg mr-1">directions_car</span> 愛車列表
     </h4>
@@ -29,15 +87,15 @@ defineProps<{
     <h4 class="font-medium text-gray-800 mt-5 mb-2 border-l-4 border-[#6b6b5a] pl-2 flex items-center">
       <span class="material-symbols-outlined text-lg mr-1">history</span> 近期預約
     </h4>
-    <ul class="space-y-2">
-      <li class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
+    <ul v-if="member.bookings && member.bookings.length" class="space-y-2">
+      <li v-for="(booking, idx) in member.bookings" :key="idx" class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
         <span class="material-symbols-outlined text-gray-400 text-sm mr-2">event</span>
-        2026/01/20 - 大安修車廠 <span class="ml-auto text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded">定期保養</span>
-      </li>
-      <li class="flex items-center text-sm text-gray-600 bg-white p-2 rounded border border-gray-100">
-         <span class="material-symbols-outlined text-gray-400 text-sm mr-2">event</span>
-         2026/01/05 - 板橋輪胎行 <span class="ml-auto text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">更換輪胎</span>
+        {{ booking.date }} - {{ booking.shop }} 
+        <span class="ml-auto text-xs px-2 py-0.5 rounded" :class="booking.status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'">
+          {{ booking.service }}
+        </span>
       </li>
     </ul>
+    <p v-else class="text-sm text-gray-500 italic p-2 text-center bg-gray-50 rounded">尚無近期預約</p>
   </div>
 </template>
