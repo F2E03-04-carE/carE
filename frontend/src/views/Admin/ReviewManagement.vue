@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { mockReviews, type Review } from './composables/mockReviews';
+import { mockReviews } from './composables/mockData';
+import { type Review } from './composables/memberCore';
 
 // 使用匯入的假資料
 const reviews = ref<Review[]>(mockReviews);

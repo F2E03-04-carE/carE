@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Member } from '@/views/Admin/composables/useMemberData';
+import type { Member } from '@/views/Admin/composables/memberCore';
 import MemberDetailCarOwner from './MemberDetailCarOwner.vue';
 import MemberDetailShop from './MemberDetailShop.vue';
 import { getStatusLabel, getStatusClass, useMemberActions } from '../composables/memberCore';
