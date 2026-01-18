@@ -22,8 +22,8 @@ export const mockCarOwners: Member[] = [
       { brand: 'Honda', model: 'CR-V', year: 2021, plate: 'XYZ-5678' },
     ],
     bookings: [
-      { date: '2026/01/20', shop: '大安優質修車廠', service: '定期保養', status: 'completed' },
-      { date: '2026/01/05', shop: '板橋快速保養中心', service: '快速保養', status: 'completed' },
+      { id: 'B001', date: '2026/01/20', shop: '大安優質修車廠', service: '定期保養', status: 'completed' },
+      { id: 'B002', date: '2026/01/05', shop: '板橋快速保養中心', service: '快速保養', status: 'completed' },
     ],
   },
   {
@@ -34,7 +34,7 @@ export const mockCarOwners: Member[] = [
     joinDate: '2026-01-20',
     status: 'Active',
     vehicles: [{ brand: 'Benz', model: 'C300', year: 2019, plate: 'BEN-8888' }],
-    bookings: [{ date: '2026/01/18', shop: '中和輪胎行', service: '輪胎更換', status: 'pending' }],
+    bookings: [{ id: 'B003', date: '2026/01/18', shop: '中和輪胎行', service: '輪胎更換', status: 'pending' }],
   },
   {
     id: '1003',
@@ -55,7 +55,7 @@ export const mockCarOwners: Member[] = [
     status: 'Active',
     vehicles: [{ brand: 'Ford', model: 'Focus', year: 2020, plate: 'F-9999' }],
     bookings: [
-      { date: '2026/01/10', shop: '三重汽車電機', service: '冷氣維修', status: 'completed' },
+      { id: 'B004', date: '2026/01/10', shop: '三重汽車電機', service: '冷氣維修', status: 'completed' },
     ],
   },
   {
