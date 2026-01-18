@@ -32,10 +32,10 @@ const infoItems = computed(() => [
       <span class="material-symbols-outlined text-lg mr-1">handyman</span> 服務項目
     </h4>
     <div class="flex flex-wrap gap-2 mb-4 pl-1">
-      <!-- 迴圈渲染店家提供的服務項目標籤 -->
+      <!-- 使用服務名稱與索引組合作為 key，完全排除重複名稱導致的渲染風險 -->
       <span
-        v-for="service in member.services"
-        :key="service"
+        v-for="(service, index) in member.services"
+        :key="`${service}-${index}`"
         class="px-3 py-1 bg-[#6b6b5a]/10 text-[#5a5a4a] text-xs font-medium rounded-full border border-[#6b6b5a]/20"
       >
         {{ service }}
