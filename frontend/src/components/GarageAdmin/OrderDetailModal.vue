@@ -34,8 +34,10 @@ const save = () => emit('save', tempStatus.value);
   <div v-if="modelValue" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" @click="close" />
 
   <!-- 視窗 -->
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-[#f5f4f0] p-8 shadow-xl" @click.stop>
+  <!-- 浮窗主容器：在行動裝置上提供垂直邊距，讓浮窗不會貼齊螢幕頂部和底部 -->
+  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-4">
+    <!-- 浮窗內容區：限制最大高度並啟用垂直捲動，以適應行動裝置 -->
+    <div class="w-full max-w-2xl rounded-2xl bg-[#f5f4f0] p-8 shadow-xl max-h-[90vh] overflow-y-auto" @click.stop>
       <!-- 標題 -->
       <div class="mb-6 flex items-center justify-between">
         <div>
