@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import PageHead from './components/PageHead.vue';
-import EditSection from './components/EditSection.vue';
-import InfoSection from './components/InfoSection.vue';
-import HoursSection from './components/HoursSection.vue';
-import PhotosSection from './components/PhotosSection.vue';
-import SubscriptionSection from './components/SubscriptionSection.vue';
+import PageHead from './_components/PageHead.vue';
+import EditSection from './_components/EditSection.vue';
+import InfoSection from './_components/InfoSection.vue';
+import HoursSection from './_components/HoursSection.vue';
+import PhotosSection from './_components/PhotosSection.vue';
+import SubscriptionSection from './_components/SubscriptionSection.vue';
 </script>
 
 <template>
