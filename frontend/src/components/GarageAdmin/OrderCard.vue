@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { statusClass } from '../orderStatus';
-import type { Order } from '../types';
+import { statusClass } from './orderStatus';
+import type { Order } from './types';
 
 defineProps<{
   order: Order;
