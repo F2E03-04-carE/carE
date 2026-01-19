@@ -32,7 +32,7 @@ type RecordItem = {
 	notes: string;
 };
 
-type ShopSettings = {
+type GarageName = {
 	name: string;
 	ownerName: string;
 	address: string;
@@ -59,7 +59,7 @@ function handleNavClick(key: NavKey) {
 	closeSidebar();
 }
 
-const shopSettings = reactive<ShopSettings>({
+const garageName = reactive<GarageName>({
 	name: '晴天自動車',
 	ownerName: '店長 Admin',
 	address: '台北市中山區職人路 100 號',
@@ -74,7 +74,7 @@ function onCoverFileChange(event: Event) {
 	const input = event.target as HTMLInputElement;
 	if (input.files && input.files[0]) {
 		const file = input.files[0];
-		shopSettings.coverImage = URL.createObjectURL(file);
+		garageName.coverImage = URL.createObjectURL(file);
 	}
 }
 
@@ -82,13 +82,13 @@ function onEnvFileChange(event: Event) {
 	const input = event.target as HTMLInputElement;
 	if (input.files) {
 		for (const file of input.files) {
-			shopSettings.environmentImages.push(URL.createObjectURL(file));
+			garageName.environmentImages.push(URL.createObjectURL(file));
 		}
 	}
 }
 
 function removeEnvImage(index: number) {
-	shopSettings.environmentImages.splice(index, 1);
+	garageName.environmentImages.splice(index, 1);
 }
 
 const appointments = ref<Appointment[]>([
@@ -653,13 +653,13 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									<label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
 									<div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
 										<input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onCoverFileChange">
-										<div v-if="!shopSettings.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
+										<div v-if="!garageName.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
 											<svg class="mb-3 h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
 											<span class="font-medium">點擊上傳封面照片</span>
 											<span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
 										</div>
 										<div v-else class="relative h-full w-full">
-											<img :src="shopSettings.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
+											<img :src="garageName.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
 											<div class="absolute bottom-4 right-4 z-20">
 												<span class="rounded-lg bg-white/90 px-3 py-2 text-xs font-bold text-stone-600 shadow-sm backdrop-blur transition hover:bg-white">更換照片</span>
 											</div>
@@ -669,7 +669,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div>
 									<label class="mb-3 block text-sm font-medium text-stone-500">環境照片 <span class="text-xs text-stone-400 font-normal">(展示工位、休息區等)</span></label>
 									<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-										<div v-for="(img, idx) in shopSettings.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
+										<div v-for="(img, idx) in garageName.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
 											<img :src="img" class="h-full w-full object-cover" alt="Environment" />
 											<button
 												@click="removeEnvImage(idx)"
@@ -692,33 +692,33 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
-										<input v-model="shopSettings.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+										<input v-model="garageName.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">店長名稱</label>
-										<input v-model="shopSettings.ownerName" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
+										<input v-model="garageName.ownerName" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">統一編號</label>
-										<input v-model="shopSettings.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
+										<input v-model="garageName.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">聯絡電話</label>
-										<input v-model="shopSettings.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
+										<input v-model="garageName.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">維修廠地址</label>
-										<input v-model="shopSettings.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
+										<input v-model="garageName.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
 									</div>
 									<div class="col-span-1 space-y-2 md:col-span-2">
 										<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
 										<textarea
-											v-model="shopSettings.description"
+											v-model="garageName.description"
 											rows="4"
 											class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
 											placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
 										></textarea>
-										<p class="text-right text-xs text-stone-400">{{ shopSettings.description.length }} / 200</p>
+										<p class="text-right text-xs text-stone-400">{{ garageName.description.length }} / 200</p>
 									</div>
 								</div>
 							</div>
