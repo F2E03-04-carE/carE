@@ -4,26 +4,44 @@ export const verifyTaxId = (req, res) => {
     return res.status(400).json({ exists: false, error: '統編格式錯誤' });
   }
 
-  const filter = encodeURIComponent(`No eq ${taxId}`);
-  const url = `https://data.gcis.nat.gov.tw/od/data/api/673F0FC0-B3A7-429F-9041-E9866836B66D?$format=json&$filter=${filter}`;
+  const url = `https://opendata.vip/data/company?keyword=${taxId}`;
 
-  fetch(url)
+    fetch(url)
     .then(r => {
-      if (!r.ok) throw new Error('政府 API 回應錯誤');
+      if (!r.ok) throw new Error('API 回應錯誤');
       return r.json();
     })
     .then(data => {
-      // 政府 API 回傳陣列，檢查是否有資料且 exist === "Y"
-      // data 格式：[{ Year: "115", exist: "Y", TYPE: "公司" }]
-      const exists = Array.isArray(data) && data.length > 0 && data[0].exist === 'Y';
+      const hasData = data.output && Array.isArray(data.output) && data.output.length > 0;
+      
+      if (!hasData) {
+        return res.json({ 
+          exists: false,
+          companyName: null,
+          status: null
+        });
+      }
+
+      const company = data.output[0];
+      const taxIdFromAPI = company.Business_Accounting_NO;
+      const companyName = company.Company_Name;
+      const status = company.Company_Status_Desc;
+      
+      // 只有「核准設立」才算驗證通過
+      const isActive = status === '核准設立';
 
       res.json({
-        exists,
-        type: exists ? data[0].TYPE : null 
+        exists: isActive,
+        companyName: companyName,
+        status: status,
+        taxId: taxIdFromAPI  
       });
     })
     .catch(err => {
       console.error('驗證統編時發生錯誤:', err);
-      res.status(500).json({ exists: false, error: '伺服器錯誤' });
+      res.status(500).json({ 
+        exists: false, 
+        error: '伺服器錯誤' 
+      });
     });
 };
