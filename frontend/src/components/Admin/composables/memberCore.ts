@@ -115,7 +115,7 @@ export function useMemberActions(member: Member, closeFn: () => void): ActionBut
   return btns;
 }
 
-const STATUS_LABELS: Record<MemberStatus, string> = {
+const statusLabels: Record<MemberStatus, string> = {
   VerifiedFree: '已驗證 (免費)',
   VerifiedPaid: '已驗證 (付費)',
   Pending: '審核中',
@@ -124,7 +124,7 @@ const STATUS_LABELS: Record<MemberStatus, string> = {
   Active: '正常',
 };
 
-const STATUS_CLASSES: Record<MemberStatus, string> = {
+const statusClasses: Record<MemberStatus, string> = {
   VerifiedFree: 'bg-blue-100 text-blue-800',
   VerifiedPaid: 'bg-yellow-100 text-yellow-800',
   Pending: 'bg-gray-100 text-gray-800',
@@ -133,6 +133,6 @@ const STATUS_CLASSES: Record<MemberStatus, string> = {
   Active: 'bg-green-100 text-green-800',
 };
 
-export const getStatusLabel = (status: MemberStatus): string => STATUS_LABELS[status] || status;
+export const getStatusLabel = (status: MemberStatus): string => statusLabels[status] || status;
 export const getStatusClass = (status: MemberStatus): string =>
-  STATUS_CLASSES[status] || 'bg-gray-100 text-gray-800';
+  statusClasses[status] || 'bg-gray-100 text-gray-800';

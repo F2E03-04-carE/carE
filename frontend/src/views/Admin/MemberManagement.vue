@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useMemberData, type Member } from '@/views/Admin/composables/memberCore';
-import MemberDetailModal from './components/MemberDetailModal.vue';
-import CarOwnerTable from './components/CarOwnerTable.vue';
-import ShopTable from './components/ShopTable.vue';
+import { useMemberData, type Member } from '@/components/Admin/composables/memberCore';
+import MemberDetailModal from '@/components/Admin/MemberDetailModal.vue';
+import CarOwnerTable from '@/components/Admin/CarOwnerTable.vue';
+import ShopTable from '@/components/Admin/ShopTable.vue';
 
 const tabs = [
   { id: 'carOwner', name: '車主會員' },
