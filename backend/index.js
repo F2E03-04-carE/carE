@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import taxIdRoutes from './src/routes/taxId.js';
+import searchRoutes from './src/routes/search.js';
 import 'dotenv/config'
 
 
@@ -30,3 +31,4 @@ app.listen(PORT, () => {
 })
 
 app.use('/api', taxIdRoutes);
+app.use('/api', searchRoutes);
