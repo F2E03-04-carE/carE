@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { CustomerProfile } from '../types';
+import type { CustomerProfile } from './types';
 
 const props = defineProps<{
   carOwner: CustomerProfile;

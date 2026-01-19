@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import PageHead from './_components/PageHead.vue';
-import SearchBar from './_components/SearchBar.vue';
-import RecordCard from './_components/RecordCard.vue';
-import type { CustomerProfile } from './types';
+import PageHead from '@/components/GarageAdmin/PageHead.vue';
+import SearchBar from '@/components/GarageAdmin/SearchBar.vue';
+import RecordCard from '@/components/GarageAdmin/RecordCard.vue';
+import type { CustomerProfile } from '@/components/GarageAdmin/types';
 
 // 假資料
 const carOwners = ref<CustomerProfile[]>([

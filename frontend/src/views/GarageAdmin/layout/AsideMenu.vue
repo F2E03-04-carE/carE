@@ -4,11 +4,11 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const menuItems = [
-  { path: '/shop-admin/overview', label: '總覽', icon: 'search' },
-  { path: '/shop-admin/orders', label: '工單管理', icon: 'event_note' },
-  { path: '/shop-admin/schedule', label: '行程安排', icon: 'calendar_month' },
-  { path: '/shop-admin/records', label: '維修紀錄', icon: 'trending_up' },
-  { path: '/shop-admin/edit', label: '廠房資訊', icon: 'factory' },
+  { path: '/garage-admin/overview', label: '總覽', icon: 'search' },
+  { path: '/garage-admin/orders', label: '工單管理', icon: 'event_note' },
+  { path: '/garage-admin/schedule', label: '行程安排', icon: 'calendar_month' },
+  { path: '/garage-admin/records', label: '維修紀錄', icon: 'trending_up' },
+  { path: '/garage-admin/edit', label: '廠房資訊', icon: 'factory' },
 ];
 
 const isActive = (path: string) => route.path === path;

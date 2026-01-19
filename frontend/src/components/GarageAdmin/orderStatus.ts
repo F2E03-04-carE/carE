@@ -1,5 +1,6 @@
-// 根據工單狀態決定標籤顏色
 import type { OrderStatus } from './types';
+
+// 根據工單狀態決定標籤顏色
 
 export const statusColors: Record<OrderStatus, string> = {
   進行中: 'bg-green-400 text-white',
