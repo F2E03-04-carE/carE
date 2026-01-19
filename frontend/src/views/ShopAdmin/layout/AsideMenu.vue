@@ -2,6 +2,15 @@
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+
+const menuItems = [
+  { path: '/shop-admin/overview', label: '總覽', icon: 'search' },
+  { path: '/shop-admin/orders', label: '工單管理', icon: 'event_note' },
+  { path: '/shop-admin/schedule', label: '行程安排', icon: 'calendar_month' },
+  { path: '/shop-admin/records', label: '維修紀錄', icon: 'trending_up' },
+  { path: '/shop-admin/edit', label: '廠房資訊', icon: 'factory' },
+];
+
 const isActive = (path: string) => route.path === path;
 </script>
 
@@ -13,7 +22,9 @@ const isActive = (path: string) => route.path === path;
 
     <nav class="flex-1 overflow-y-auto px-3 gap-4 flex flex-col">
       <RouterLink
-        to="/shop-admin/overview"
+        v-for="item in menuItems"
+        :key="item.path"
+        :to="item.path"
         :class="[
           'py-3',
           'rounded',
@@ -22,84 +33,13 @@ const isActive = (path: string) => route.path === path;
           'justify-center',
           'gap-2',
           'transition-colors',
-          isActive('/shop-admin/overview')
+          isActive(item.path)
             ? 'font-bold bg-[#6b6b5a] text-white'
             : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
         ]"
       >
-        <span class="material-symbols-outlined">search</span> 總覽
-      </RouterLink>
-
-      <RouterLink
-        to="/shop-admin/orders"
-        :class="[
-          'py-3',
-          'rounded',
-          'flex',
-          'items-center',
-          'justify-center',
-          'gap-2',
-          'transition-colors',
-          isActive('/shop-admin/orders')
-            ? 'font-bold bg-[#6b6b5a] text-white'
-            : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
-        ]"
-      >
-        <span class="material-symbols-outlined">event_note</span> 工單管理
-      </RouterLink>
-
-      <RouterLink
-        to="/shop-admin/schedule"
-        :class="[
-          'py-3',
-          'rounded',
-          'flex',
-          'items-center',
-          'justify-center',
-          'gap-2',
-          'transition-colors',
-          isActive('/shop-admin/schedule')
-            ? 'font-bold bg-[#6b6b5a] text-white'
-            : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
-        ]"
-      >
-        <span class="material-symbols-outlined">calendar_month</span> 行程安排
-      </RouterLink>
-
-      <RouterLink
-        to="/shop-admin/records"
-        :class="[
-          'py-3',
-          'rounded',
-          'flex',
-          'items-center',
-          'justify-center',
-          'gap-2',
-          'transition-colors',
-          isActive('/shop-admin/records')
-            ? 'font-bold bg-[#6b6b5a] text-white'
-            : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
-        ]"
-      >
-        <span class="material-symbols-outlined">trending_up</span> 維修紀錄
-      </RouterLink>
-
-      <RouterLink
-        to="/shop-admin/edit"
-        :class="[
-          'py-3',
-          'rounded',
-          'flex',
-          'items-center',
-          'justify-center',
-          'gap-2',
-          'transition-colors',
-          isActive('/shop-admin/edit')
-            ? 'font-bold bg-[#6b6b5a] text-white'
-            : 'text-[#4a4a43] hover:bg-[#e5e3df] cursor-pointer',
-        ]"
-      >
-        <span class="material-symbols-outlined">factory</span> 廠房資訊
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        {{ item.label }}
       </RouterLink>
     </nav>
 
