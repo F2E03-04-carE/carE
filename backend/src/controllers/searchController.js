@@ -172,3 +172,27 @@ export const searchGarages = async (req, res) => {
 
 
 
+export const getFilterOptions = async (req, res) => {
+  try {
+
+    const { data: brandsData } = await supabase
+      .from('brands')
+      .select('id, name');
+      
+    const { data: servicesData } = await supabase
+      .from('services')
+      .select('id, name');
+
+    return res.json({
+      brands: brandsData || [],
+      services: servicesData || []
+    });
+
+  } catch (error) {
+    console.error('獲取篩選選項異常:', error);
+    return res.status(500).json({
+      error: '伺服器內部錯誤',
+      message: error.message
+    });
+  }
+};
