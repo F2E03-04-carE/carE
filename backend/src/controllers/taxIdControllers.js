@@ -29,14 +29,13 @@ export const verifyTaxId = (req, res) => {
       
       // 只有「核准設立」才算驗證通過
       const isActive = status === '核准設立';
-
+      const isTaxIdMatch = taxIdFromAPI === taxId;
       res.json({
-        exists: isActive,
+        exists: isActive && isTaxIdMatch,
         companyName: companyName,
         status: status,
         taxId: taxIdFromAPI  
       });
-    })
     .catch(err => {
       console.error('驗證統編時發生錯誤:', err);
       res.status(500).json({ 
