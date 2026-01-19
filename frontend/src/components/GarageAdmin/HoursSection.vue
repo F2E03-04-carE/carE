@@ -12,10 +12,12 @@ const businessHours = [
 </script>
 <template>
   <div class="space-y-4">
+    <!-- 營業時間項目 -->
+    <!-- 使用 flex-col 讓內容在行動裝置上預設為垂直堆疊，在 sm 尺寸以上變為水平排列 -->
     <div
       v-for="item in businessHours"
       :key="item.day"
-      class="flex items-center justify-between rounded-2xl px-6 py-4 bg-white border border-transparent min-h-[56px]"
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-4 bg-white border border-transparent"
     >
       <div class="flex items-center gap-4">
         <span class="font-medium w-8">{{ item.day }}</span>
@@ -34,8 +36,10 @@ const businessHours = [
           ></div>
         </div>
       </div>
+      <!-- 時間輸入區塊 -->
+      <!-- 加入 flex-wrap 允許內容換行，並在行動裝置上縮小間距 -->
       <div
-        class="flex items-center gap-3 px-4 py-2 rounded-2xl transition justify-center"
+        class="flex flex-wrap items-center justify-center gap-2 rounded-2xl px-2 py-2 transition sm:gap-3 sm:px-4"
         :class="
           item.enabled ? 'bg-white ring-1 ring-[#6b6b5a] shadow-sm' : 'bg-[#e0dfd6] text-[#8a8a7d]'
         "
