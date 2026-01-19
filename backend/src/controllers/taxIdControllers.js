@@ -34,8 +34,9 @@ export const verifyTaxId = (req, res) => {
         exists: isActive && isTaxIdMatch,
         companyName: companyName,
         status: status,
-        taxId: taxIdFromAPI  
+        taxId: taxIdFromAPI
       });
+    })
     .catch(err => {
       console.error('驗證統編時發生錯誤:', err);
       res.status(500).json({ 
