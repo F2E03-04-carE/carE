@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Member } from '@/views/Admin/composables/memberCore';
+import type { Member } from '@/components/Admin/composables/memberCore';
 const props = defineProps<{
   member: Member;
 }>();

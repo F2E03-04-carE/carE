@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Member } from '@/views/Admin/composables/memberCore';
-import { getStatusLabel, getStatusClass } from '../composables/memberCore';
+import type { Member } from '@/components/Admin/composables/memberCore';
+import { getStatusLabel, getStatusClass } from '@/components/Admin/composables/memberCore';
 
 defineProps<{
   members: Member[];
@@ -26,7 +26,13 @@ const emit = defineEmits<{
             scope="col"
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
           >
-            姓名
+            維修廠名稱
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            負責人
           </th>
           <th
             scope="col"
@@ -38,13 +44,13 @@ const emit = defineEmits<{
             scope="col"
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
           >
-            Email
+            接單數量
           </th>
           <th
             scope="col"
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
           >
-            註冊日期
+            評分
           </th>
           <th
             scope="col"
@@ -61,25 +67,33 @@ const emit = defineEmits<{
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <!-- 迴圈渲染每一筆車主會員資料 -->
-        <tr v-for="user in members" :key="user.id" class="hover:bg-gray-50">
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ user.id }}</td>
+        <!-- 迴圈渲染每一筆維修廠資料 -->
+        <tr v-for="shop in members" :key="shop.id" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ shop.id }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-            {{ user.name }}
+            {{ shop.name }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.phone }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.joinDate }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ shop.shopOwner }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ shop.phone }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+            {{ shop.orderCount }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <div class="flex items-center">
+              <span class="text-yellow-400 mr-1">★</span>
+              {{ shop.rating }}
+            </div>
+          </td>
           <td class="px-6 py-4 whitespace-nowrap">
             <span
               class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-              :class="getStatusClass(user.status)"
+              :class="getStatusClass(shop.status)"
             >
-              {{ getStatusLabel(user.status) }}
+              {{ getStatusLabel(shop.status) }}
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <button @click="emit('view-detail', user)" class="text-[#6b6b5a] hover:text-[#5a5a4a]">
+            <button @click="emit('view-detail', shop)" class="text-[#6b6b5a] hover:text-[#5a5a4a]">
               查看詳情
             </button>
           </td>

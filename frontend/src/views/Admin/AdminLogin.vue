@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import Toast from './components/Toast.vue';
+import Toast from '@/components/Admin/Toast.vue';
 
 const router = useRouter();
 
