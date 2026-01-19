@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import PageHead from './components/PageHead.vue';
-import SearchBar from './components/SearchBar.vue';
-import RecordCard from './components/RecordCard.vue';
+import PageHead from './_components/PageHead.vue';
+import SearchBar from './_components/SearchBar.vue';
+import RecordCard from './_components/RecordCard.vue';
 import type { CustomerProfile } from './types';
 
 // 假資料

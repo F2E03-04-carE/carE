@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import OrderCard from './components/OrderCard.vue';
-import OrderDetailModal from './components/OrderDetailModal.vue';
+import OrderCard from './_components/OrderCard.vue';
+import OrderDetailModal from './_components/OrderDetailModal.vue';
 import type { Order } from './types';
 
 // 假資料
