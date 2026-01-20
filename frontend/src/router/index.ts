@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,7 +11,12 @@ const router = createRouter({
         title: '刊登維修廠 - carE',
       },
     },
+    {
+      path: '/auth/callback',
+      name: 'auth-callback',
+      component: () => import('@/views/Auth/AuthCallback.vue'),
+    },
   ],
-})
+});
 
-export default router
+export default router;

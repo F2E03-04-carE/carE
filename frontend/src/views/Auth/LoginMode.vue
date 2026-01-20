@@ -1,37 +1,43 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'switch-to-signup'): void;
 }>();
 
-const loginForm = reactive({
-  account: '',
-  password: '',
-  rememberMe: false,
-});
+const authStore = useAuthStore();
 
-const formErrors = reactive({
-  account: '',
-  password: '',
-});
+const email = ref('');
+const formError = ref('');
+const isLoading = ref(false);
+const emailSent = ref(false);
 
-const handleLoginSubmit = () => {
-  formErrors.account = '';
-  formErrors.password = '';
-  let isValid = true;
-  if (!loginForm.account) {
-    formErrors.account = '請輸入帳號';
-    isValid = false;
+const handleLoginSubmit = async () => {
+  formError.value = '';
+
+  if (!email.value) {
+    formError.value = '請輸入電子信箱';
+    return;
   }
-  if (!loginForm.password) {
-    formErrors.password = '請輸入密碼';
-    isValid = false;
-  }
-  if (!isValid) return;
 
-  console.log('執行登入', loginForm);
+  const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  if (!emailPattern.test(email.value)) {
+    formError.value = '請輸入有效的電子信箱格式';
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    await authStore.signInWithMagicLink(email.value);
+    emailSent.value = true;
+  } catch (error: any) {
+    formError.value = error.message || '發送登入連結失敗，請稍後再試';
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
@@ -55,64 +61,57 @@ const handleLoginSubmit = () => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員登入</h2>
-      <form @submit.prevent="handleLoginSubmit" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <label for="account" class="text-[16px] text-gray-700 font-medium">帳號</label>
-          <input
-            id="account"
-            v-model="loginForm.account"
-            type="text"
-            placeholder="請輸入您的帳號"
-            :class="[
-              'w-full px-4 py-2 text-[16px] rounded-lg border outline-none transition-all',
-              formErrors.account
-                ? 'border-red-500 bg-red-50'
-                : 'border-gray-300 focus:border-[#6b6b5a]',
-            ]"
-          />
-          <span v-if="formErrors.account" class="text-[14px] text-red-500">
-            {{ formErrors.account }}
-          </span>
+      <div v-if="emailSent" class="text-center py-4">
+        <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#6B6B5C]/10">
+          <i class="text-2xl fa-solid fa-envelope text-[#6B6B5C]" aria-hidden="true"></i>
         </div>
-        <div class="flex flex-col gap-1">
-          <label for="password" class="text-[16px] text-gray-700 font-medium">密碼</label>
-          <input
-            id="password"
-            v-model="loginForm.password"
-            type="password"
-            placeholder="請輸入您的密碼"
-            :class="[
-              'w-full px-4 py-2 text-[16px] rounded-lg border outline-none transition-all',
-              formErrors.password
-                ? 'border-red-500 bg-red-50'
-                : 'border-gray-300 focus:border-[#6b6b5a]',
-            ]"
-          />
-          <span v-if="formErrors.password" class="text-[14px] text-red-500">
-            {{ formErrors.password}}
-          </span>
-        </div>
-        <div class="flex justify-between items-center mt-1">
-          <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              v-model="loginForm.rememberMe"
-              type="checkbox"
-              class="w-4 h-4 text-[#6b6b5a] rounded border-gray-300 focus:ring-[#6b6b5a]"
-            />
-            <span class="text-[14px] text-gray-600">記住帳號密碼</span>
-          </label>
-          <a href="#" class="text-[14px] text-[#6b6b5a] hover:underline hover:text-[#4a4a43]">
-            忘記密碼？
-          </a>
-        </div>
+        <h2 class="mb-2 text-2xl font-medium text-[#3d3d3d]">登入連結已發送</h2>
+        <p class="mb-4 text-[#8a8a7e]">我們已將登入連結發送至</p>
+        <p class="font-bold text-[#6B6B5C] mb-6">{{ email }}</p>
+        <p class="text-[14px] text-[#8a8a7e] mb-6">請檢查您的信箱並點擊連結完成登入</p>
         <button
-          type="submit"
-          class="mt-2 w-full py-2.5 text-[16px] font-bold text-white bg-[#6b6b5a] rounded-lg hover:bg-[#5a5a4a] transition-colors shadow-md cursor-pointer"
+          type="button"
+          @click="emit('close')"
+          class="w-full px-6 py-2.5 font-bold text-white transition-colors rounded-lg bg-[#6B6B5C] hover:bg-[#5a5a4a] shadow-md"
         >
-          登入
+          關閉
         </button>
-      </form>
+      </div>
+      <div v-else>
+        <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員登入</h2>
+        <p class="mb-6 text-center text-[14px] text-gray-600">輸入您的電子信箱，我們會發送登入連結給您</p>
+        <form @submit.prevent="handleLoginSubmit" class="flex flex-col gap-4">
+          <div class="flex flex-col gap-1">
+            <label for="email" class="text-[16px] text-gray-700 font-medium">電子信箱</label>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              placeholder="請輸入您的電子信箱"
+              :disabled="isLoading"
+              :class="[
+                'w-full px-4 py-2 text-[16px] rounded-lg border outline-none transition-all',
+                formError
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-300 focus:border-[#6b6b5a]',
+              ]"
+            />
+            <span v-if="formError" class="text-[14px] text-red-500">
+              {{ formError }}
+            </span>
+          </div>
+          <button
+            type="submit"
+            :disabled="isLoading"
+            class="mt-2 w-full py-2.5 text-[16px] font-bold text-white bg-[#6b6b5a] rounded-lg hover:bg-[#5a5a4a] transition-colors shadow-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <span v-if="isLoading">
+              <i class="mr-2 fa-solid fa-spinner fa-spin"></i>發送中...
+            </span>
+            <span v-else>發送登入連結</span>
+          </button>
+        </form>
+      </div>
       <div class="relative flex justify-center items-center my-6">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-gray-300"></div>
