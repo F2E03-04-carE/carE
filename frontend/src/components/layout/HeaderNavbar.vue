@@ -98,6 +98,13 @@ const handleGoToJoinGarage = () => {
   router.push('/join-garage');
 };
 
+// 導航到指定頁面
+const handleNavigate = (path: string) => {
+  closeDropdown();
+  closeMobileMenu();
+  router.push(path);
+};
+
 interface MenuItem {
   label: string;
   href: string;
@@ -187,18 +194,18 @@ const currentMenu = computed(() => {
                 v-if="isDropdownOpen"
                 class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
               >
-                <a
+                <button
                   v-for="item in currentMenu.items"
                   :key="item.href"
-                  :href="item.href"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                  @click="handleNavigate(item.href)"
+                  class="block w-full px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center cursor-pointer"
                 >
                   {{ item.label }}
-                </a>
+                </button>
                 <div class="border-t border-gray-200 my-2"></div>
                 <button
                   @click="handleLogout"
-                  class="w-full px-4 py-2 text-[14px] text-red-600 hover:bg-red-50 transition-colors text-center"
+                  class="w-full px-4 py-2 text-[14px] text-red-600 hover:bg-red-50 transition-colors text-center cursor-pointer"
                 >
                   登出
                 </button>
@@ -258,19 +265,18 @@ const currentMenu = computed(() => {
               v-if="isMobileAccordionOpen"
               class="flex flex-col gap-2 pl-4"
             >
-              <a
+              <button
                 v-for="item in currentMenu.items"
                 :key="item.href"
-                :href="item.href"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
+                @click="handleNavigate(item.href)"
+                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center cursor-pointer"
               >
                 {{ item.label }}
-              </a>
+              </button>
               <div class="border-t border-gray-200 my-1"></div>
               <button
                 @click="handleLogout"
-                class="w-full py-2 text-[14px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center"
+                class="w-full py-2 text-[14px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center cursor-pointer"
               >
                 登出
               </button>

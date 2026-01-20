@@ -53,7 +53,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#FAF8F5] px-4">
+  <div class="min-h-screen flex items-center justify-center bg-[#FAF8F5] px-4 pt-[60px] sm:pt-[70px]">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
       <div v-if="loading" class="py-8">
         <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-[#6B6B5C]/10">
