@@ -82,6 +82,16 @@ watch(
             v-model="item.end"
             class="bg-transparent rounded-lg px-2 outline-none"
           />
+          <!-- 時段餘額 (分隔線) -->
+          <div class="h-4 w-px bg-gray-300 mx-1"></div>
+          <span class="text-sm text-[#4a4a43]">接單量</span>
+          <input
+            type="number"
+            v-model="item.capacity"
+            min="0"
+            class="w-16 bg-transparent rounded-lg px-2 outline-none text-center"
+            placeholder="0"
+          />
         </template>
         <template v-else>
           <span>公休</span>
