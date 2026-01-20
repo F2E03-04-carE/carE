@@ -133,7 +133,7 @@ export const searchGarages = async (req, res) => {
     const enrichedGarages = garages.map(garage => {
       const garageRelatedBrands = brands
         .filter(b => b.garage_id === garage.id)
-        .slice(0, 8)
+        .slice(0, MAX_RELATED_ITEMS_PER_GARAGE)
         .map(b => b.brands);
 
       const garageRelatedServices = services
