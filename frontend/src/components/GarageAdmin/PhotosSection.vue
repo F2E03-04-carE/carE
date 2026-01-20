@@ -6,6 +6,8 @@ const images = defineModel<string[]>('images', {
   required: true,
 });
 
+const files = defineModel<File[]>('files', { default: () => [] });
+
 const fileInput = ref<HTMLInputElement | null>(null);
 const showToast = ref(false);
 const toastMessage = ref('');
@@ -34,11 +36,14 @@ const handleFileSelect = (event: Event) => {
     return;
   }
 
-  // 模擬上傳與處理
+  // 處理檔案
   newFiles.forEach((file) => {
-    // [接後端API] 這裡應該呼叫後端上傳 API 並取得 URL
+    // 1. 產生預覽網址 (僅供前端顯示用)
     const previewUrl = URL.createObjectURL(file);
     images.value.push(previewUrl);
+
+    // 2. 儲存原始檔案 (供後端上傳用)
+    files.value.push(file);
   });
 
   // 清空 input
@@ -46,7 +51,9 @@ const handleFileSelect = (event: Event) => {
 };
 
 const removePhoto = (index: number) => {
+  // 同步移除預覽圖與原始檔案
   images.value.splice(index, 1);
+  files.value.splice(index, 1);
 };
 </script>
 
@@ -69,7 +76,9 @@ const removePhoto = (index: number) => {
       <span class="material-symbols-outlined">add_a_photo</span>
     </div>
     <p class="font-medium text-[#4a4a43]">點擊上傳廠房照片</p>
-    <p class="text-sm mt-1 text-[#8a8a7d]">支援 JPG、PNG 格式，最多 3 張 (目前 {{ images.length }}/3)</p>
+    <p class="text-sm mt-1 text-[#8a8a7d]">
+      支援 JPG、PNG 格式，最多 3 張 (目前 {{ images.length }}/3)
+    </p>
   </div>
 
   <div class="flex-1 overflow-y-auto mt-6 mb-6" v-if="images.length > 0">
@@ -87,10 +96,10 @@ const removePhoto = (index: number) => {
           ✕
         </button>
       </div>
-      
+
       <!-- 補齊空格的佔位符 -->
       <div
-        v-for="n in (3 - images.length)"
+        v-for="n in 3 - images.length"
         :key="`empty-${n}`"
         class="aspect-square rounded-2xl flex items-center justify-center bg-white border border-[#e0dfd6]"
       >
@@ -100,10 +109,5 @@ const removePhoto = (index: number) => {
   </div>
 
   <!-- 錯誤提示 Toast -->
-  <Toast 
-    :show="showToast" 
-    :message="toastMessage" 
-    type="error" 
-    @close="showToast = false" 
-  />
+  <Toast :show="showToast" :message="toastMessage" type="error" @close="showToast = false" />
 </template>
