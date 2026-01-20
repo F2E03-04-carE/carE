@@ -44,7 +44,7 @@ const selectPlan = (id: string) => {
         <p class="text-[#4a4a43] font-medium mb-2">{{ plan.subtitle }}</p>
         <p class="text-2xl font-bold text-[#4a4a43] mb-4">{{ plan.price }}</p>
         <ul class="text-[#4a4a43] text-sm space-y-2 mb-6">
-          <li v-for="(feature, idx) in plan.features" :key="idx">{{ feature }}</li>
+          <li v-for="feature in plan.features" :key="feature">{{ feature }}</li>
         </ul>
         
         <button
