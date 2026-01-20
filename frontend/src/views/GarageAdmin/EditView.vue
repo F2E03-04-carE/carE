@@ -28,9 +28,10 @@ const isSaving = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');
 const hasTimeError = ref(false);
+const hasInfoError = ref(false);
 
 const handleSave = async () => {
-  if (isSaving.value || hasTimeError.value) return;
+  if (isSaving.value || hasTimeError.value || hasInfoError.value) return;
 
   isSaving.value = true;
 
@@ -68,7 +69,10 @@ const handleSave = async () => {
 
       <form class="space-y-6" @submit.prevent="handleSave">
         <EditSection title="基本資料" icon="description">
-          <InfoSection v-model:info="garageInfo.info" />
+          <InfoSection 
+            v-model:info="garageInfo.info" 
+            @validation-error="hasInfoError = $event"
+          />
         </EditSection>
 
         <EditSection title="營業時間設定" icon="alarm">
@@ -87,7 +91,7 @@ const handleSave = async () => {
         <div class="flex justify-end mt-8">
           <button
             type="submit"
-            :disabled="isSaving || hasTimeError"
+            :disabled="isSaving || hasTimeError || hasInfoError"
             class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold transition hover:bg-[#57574a] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span v-if="isSaving" class="material-symbols-outlined animate-spin text-sm">sync</span>
