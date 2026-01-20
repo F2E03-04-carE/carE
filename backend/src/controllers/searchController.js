@@ -222,14 +222,29 @@ export const searchGarages = async (req, res) => {
 export const getFilterOptions = async (req, res) => {
   try {
 
-    const { data: brandsData } = await supabase
+    const { data: brandsData, error: brandsError } = await supabase
       .from('brands')
       .select('id, name');
+
+    if (brandsError) {
+      console.error('獲取品牌篩選選項異常:', brandsError);
+      return res.status(500).json({
+        error: '伺服器內部錯誤',
+        message: brandsError.message || '獲取品牌篩選選項失敗'
+      });
+    }
       
-    const { data: servicesData } = await supabase
+    const { data: servicesData, error: servicesError } = await supabase
       .from('services')
       .select('id, name');
 
+    if (servicesError) {
+      console.error('獲取服務篩選選項異常:', servicesError);
+      return res.status(500).json({
+        error: '伺服器內部錯誤',
+        message: servicesError.message || '獲取服務篩選選項失敗'
+      });
+    }
     return res.json({
       brands: brandsData || [],
       services: servicesData || []
