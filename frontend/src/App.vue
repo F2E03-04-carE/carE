@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import HeaderNavbar from './components/Layout/HeaderNavbar.vue';
-import Home from './views/Home/Home.vue';
-import Footer from './components/Layout/Footer.vue';
-import SearchResults from './views/Search/SearchResults.vue';
+import HeaderNavbar from '@/components/Layout/HeaderNavbar.vue';
+import Home from '@/views/Home/Home.vue';
+import Footer from '@/components/Layout/Footer.vue';
+import SearchResults from '@/views/Search/SearchResults.vue';
 import DetailView from '@/components/Search/DetailView.vue';
-import ServiceSearchFlow from './components/service-search/ServiceSearchFlow.vue';
-import VehicleManagement from './views/User/VehicleManagement.vue';
-import JoinGarage from './views/Garage/JoinGarage.vue';
-import GarageOnboarding from './views/Garage/GarageOnboarding.vue';
+import ServiceSearchFlow from '@/components/service-search/ServiceSearchFlow.vue';
+import VehicleManagement from '@/views/User/VehicleManagement.vue';
+import JoinGarage from '@/views/Garage/JoinGarage.vue';
+import GarageOnboarding from '@/views/Garage/GarageOnboarding.vue';
 
 </script>
 
