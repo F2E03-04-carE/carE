@@ -3,18 +3,11 @@ import 'dotenv/config';
 
 // 讀取 Supabase URL（支援多種環境變數名稱）
 // 在 Zeabur 上，REST 服務的 domain 就是你的 SUPABASE_URL
-const supabaseUrl =
-  process.env.SUPABASE_URL ||      
-  process.env.REST_URL ||         
-  process.env.SUPABASE_API_URL;    
+// 讀取 Supabase URL
+const supabaseUrl = process.env.SUPABASE_URL;
 
-
-const supabaseKey =
-  process.env.SUPABASE_KEY ||             
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 
-  process.env.SERVICE_ROLE_KEY ||          
-  process.env.SUPABASE_ANON_KEY ||         
-  process.env.ANON_KEY;
+// 建議後端統一使用權限較高的 service_role key
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 
 if (!supabaseUrl) {
