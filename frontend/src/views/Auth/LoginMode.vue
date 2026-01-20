@@ -77,8 +77,12 @@ const handleLoginSubmit = async () => {
         </button>
       </div>
       <div v-else>
-        <h2 class="mb-6 text-center text-[24px] font-bold text-[#4a4a43]">會員登入</h2>
-        <p class="mb-6 text-center text-[14px] text-gray-600">輸入您的電子信箱，我們會發送登入連結給您</p>
+        <h2 class="mb-4 text-center text-[24px] font-bold text-[#4a4a43]">會員登入/註冊</h2>
+        <p class="mb-2 text-center text-[14px] text-gray-600">輸入您的電子信箱，我們會發送登入連結給您</p>
+        <p class="mb-6 text-center text-[13px] text-[#6B6B5C] bg-[#6B6B5C]/5 rounded-lg py-2 px-3">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          採用 Magic Link 無密碼登入，更安全便利
+        </p>
         <form @submit.prevent="handleLoginSubmit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-1">
             <label for="email" class="text-[16px] text-gray-700 font-medium">電子信箱</label>

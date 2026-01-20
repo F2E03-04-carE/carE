@@ -27,14 +27,22 @@ const currentUserRole = computed(() => {
   return props.userRole;
 });
 
-// 取得用戶顯示名稱（優先顯示 nickname，否則顯示 email）
+// 取得用戶顯示名稱（優先顯示 nickname，否則顯示 "用戶"）
 const userDisplayName = computed(() => {
   if (authStore.user) {
     const nickname = authStore.user.user_metadata?.nickname;
-    if (nickname) return nickname;
-    return authStore.user.email || '用戶';
+    // 檢查 nickname 是否存在且不是空字串
+    if (nickname && nickname.trim() !== '') {
+      return nickname;
+    }
+    return '用戶';
   }
-  return userStore.currentUser?.email || '用戶';
+  // 對於 userStore.currentUser 也使用相同邏輯
+  const currentNickname = userStore.currentUser?.nickname;
+  if (currentNickname && currentNickname.trim() !== '') {
+    return currentNickname;
+  }
+  return '用戶';
 });
 
 const baseButtonClass =
@@ -173,7 +181,7 @@ const currentMenu = computed(() => {
                 'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 border border-transparent',
               ]"
             >
-              登入
+              登入/註冊
             </button>
           </template>
 
@@ -249,7 +257,7 @@ const currentMenu = computed(() => {
             @click="openLoginModal"
             class="w-full py-3 text-[16px] bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] rounded-lg transition-colors text-center"
           >
-            登入
+            登入/註冊
           </button>
         </template>
 
