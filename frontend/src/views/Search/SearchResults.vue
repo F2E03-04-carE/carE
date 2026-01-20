@@ -55,14 +55,50 @@ const fetchShops = async () => {
   try {
     const searchParams = {
       city: route.query.city,
-      location: route.query.location,
+      district: route.query.district,
       brand: route.query.brand,
-      repair: route.query.repair
+      service: route.query.service
     }
 
     console.log('搜尋參數:', searchParams)
 
-    // 呼叫後端 API
+    // 暫時使用 Mock Data (資料庫尚未建立時測試用)
+    // TODO: 資料庫建立後改用真實 API
+    allShops.value = [
+      {
+        id: 1,
+        name: '匠心汽車維修中心',
+        score: 5,
+        distance: 1.2,
+        reviewCount: 120,
+        brands: ['Benz', 'BMW', '奧迪', '保時捷'],
+        services: ['保養維護', '故障維修', '年檢服務', '鈑金噴漆', '輪胎更換', '冷氣維修'],
+        image: 'https://picsum.photos/300/200?random=1',
+      },
+      {
+        id: 2,
+        name: '職人汽車保養廠',
+        score: 4,
+        distance: 2.5,
+        reviewCount: 85,
+        brands: ['豐田', '本田', 'Volvo', '馬自達'],
+        services: ['定期保養', '引擎維修', '變速箱維修', '煞車系統', '電路檢修', '冷氣維修'],
+        image: 'https://picsum.photos/300/200?random=2',
+      },
+      {
+        id: 3,
+        name: '專業汽車維修站',
+        score: 3,
+        distance: 3.8,
+        reviewCount: 50,
+        brands: ['福斯', '奧迪', '保時捷', 'BMW'],
+        services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
+        image: 'https://picsum.photos/300/200?random=3',
+      },
+    ]
+
+    // 真實 API 呼叫 (資料庫建立後使用)
+    /*
     const params = new URLSearchParams(searchParams as Record<string, string>)
     const response = await fetch(`/api/search?${params.toString()}`)
 
@@ -71,7 +107,8 @@ const fetchShops = async () => {
     }
 
     const data = await response.json()
-    allShops.value = data
+    allShops.value = data.data || []
+    */
 
   } catch (err) {
     console.log('沒有符合資料的結果:', err)
