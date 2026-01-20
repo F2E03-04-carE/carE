@@ -1,22 +1,45 @@
 <script setup lang="ts">
+import { watch } from 'vue';
 import type { BusinessHour } from '@/types/garage';
 
 const hours = defineModel<BusinessHour[]>('hours', {
   required: true,
 });
 
+const emit = defineEmits<{
+  (event: 'validation-error', hasError: boolean): void;
+}>();
+
+// 驗證單一項目是否無效
+const isInvalid = (item: BusinessHour) => {
+  if (!item.enabled) return false;
+  // 如果尚未填寫時間，暫不視為錯誤（或視需求而定，這裡假設必填則可加強判斷）
+  if (!item.start || !item.end) return false;
+  return item.start >= item.end;
+};
+
 const toggleDay = (item: BusinessHour) => {
   item.enabled = !item.enabled;
 };
+
+// 監聽營業時間變化，驗證是否有錯誤並通知父元件
+watch(
+  hours,
+  (newHours) => {
+    const hasError = newHours.some((item) => isInvalid(item));
+    emit('validation-error', hasError);
+  },
+  { deep: true, immediate: true },
+);
 </script>
 <template>
   <div class="space-y-4">
     <!-- 營業時間項目 -->
-    <!-- 使用 flex-col 讓內容在行動裝置上預設為垂直堆疊，在 sm 尺寸以上變為水平排列 -->
     <div
       v-for="item in hours"
       :key="item.day"
-      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-4 bg-white border border-transparent"
+      class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-4 bg-white border"
+      :class="isInvalid(item) ? 'border-red-500 bg-red-50' : 'border-transparent'"
     >
       <div class="flex items-center gap-4">
         <span class="font-medium w-8">{{ item.day }}</span>
@@ -36,8 +59,11 @@ const toggleDay = (item: BusinessHour) => {
           ></div>
         </div>
       </div>
+      <!-- 錯誤提示 -->
+      <div v-if="isInvalid(item)" class="absolute right-4 top-2 sm:static sm:block">
+        <span class="text-xs font-bold text-red-500 sm:text-sm">時間錯誤</span>
+      </div>
       <!-- 時間輸入區塊 -->
-      <!-- 加入 flex-wrap 允許內容換行，並在行動裝置上縮小間距 -->
       <div
         class="flex flex-wrap items-center justify-center gap-2 rounded-2xl px-2 py-2 transition sm:gap-3 sm:px-4"
         :class="
