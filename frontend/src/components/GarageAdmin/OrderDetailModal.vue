@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { statusClass } from './orderStatus';
+import { statusClass } from '@/utils/orderStatus';
 import type { Order, OrderStatus } from './types';
 
 const props = defineProps<{

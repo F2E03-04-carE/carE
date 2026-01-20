@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useMemberData, type Member } from '@/components/Admin/composables/memberCore';
+import { useMemberData, type Member } from '@/composables/admin/memberCore';
 import MemberDetailModal from '@/components/Admin/MemberDetailModal.vue';
 import CarOwnerTable from '@/components/Admin/CarOwnerTable.vue';
 import ShopTable from '@/components/Admin/ShopTable.vue';

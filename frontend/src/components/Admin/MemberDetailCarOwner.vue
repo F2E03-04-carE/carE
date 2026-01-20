@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Member, MemberStatus } from '@/components/Admin/composables/memberCore';
-import { getStatusLabel, getStatusClass } from '@/components/Admin/composables/memberCore';
+import type { Member, MemberStatus } from '@/composables/admin/memberCore';
+import { getStatusLabel, getStatusClass } from '@/composables/admin/memberCore';
 
 const props = defineProps<{
   member: Member;

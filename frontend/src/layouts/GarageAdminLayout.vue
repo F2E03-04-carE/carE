@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import AsideMenu from './AsideMenu.vue';
+import AsideMenu from '@/components/GarageAdmin/AsideMenu.vue';
 
 const isSidebarOpen = ref(false);
 </script>

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import PageHead from '@/components/GarageAdmin/PageHead.vue';
 import SearchBar from '@/components/GarageAdmin/SearchBar.vue';
 import RecordCard from '@/components/GarageAdmin/RecordCard.vue';
-import type { CustomerProfile } from '@/components/GarageAdmin/types';
+import type { CustomerProfile } from '@/types/garage';
 
 // 假資料
 const carOwners = ref<CustomerProfile[]>([

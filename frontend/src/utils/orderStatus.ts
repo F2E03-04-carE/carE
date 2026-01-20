@@ -1,4 +1,4 @@
-import type { OrderStatus } from './types';
+import type { OrderStatus } from '@/types/garage';
 
 // 根據工單狀態決定標籤顏色
 
