@@ -57,6 +57,7 @@ export interface BusinessHour {
   enabled: boolean;
   start: string;
   end: string;
+  capacity: number;
 }
 
 export interface SubscriptionPlan {

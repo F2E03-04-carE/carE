@@ -15,15 +15,15 @@ export const mockWorkshopInfo: WorkshopInfo = {
   ],
 };
 
-// 營業時間假資料
+// 營業時間與接單量名額假資料
 export const mockBusinessHours: BusinessHour[] = [
-  { day: '週一', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週二', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週三', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週四', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週五', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週六', enabled: false, start: '', end: '' },
-  { day: '週日', enabled: false, start: '', end: '' },
+  { day: '週一', enabled: true, start: '09:00', end: '18:00', capacity: 3 },
+  { day: '週二', enabled: true, start: '09:00', end: '18:00', capacity: 3 },
+  { day: '週三', enabled: true, start: '09:00', end: '18:00', capacity: 3 },
+  { day: '週四', enabled: true, start: '09:00', end: '18:00', capacity: 3 },
+  { day: '週五', enabled: true, start: '09:00', end: '18:00', capacity: 3 },
+  { day: '週六', enabled: false, start: '', end: '', capacity: 0 },
+  { day: '週日', enabled: false, start: '', end: '', capacity: 0 },
 ];
 
 // 選項假資料
