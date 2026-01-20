@@ -77,7 +77,7 @@ const handleSave = async () => {
         </EditSection>
 
         <EditSection title="廠房照片" icon="imagesmode">
-          <PhotosSection />
+          <PhotosSection v-model:images="garageInfo.info.images" />
         </EditSection>
 
         <SubscriptionSection />
