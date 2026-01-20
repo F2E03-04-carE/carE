@@ -95,6 +95,16 @@ const handleSave = async () => {
     return;
   }
 
+  if (Name.value.trim().length > 10) {
+    saveError.value = '姓名不得超過 10 個字';
+    return;
+  }
+
+  if (Nickname.value && Nickname.value.trim().length > 8) {
+    saveError.value = '暱稱不得超過 8 個字';
+    return;
+  }
+
   if (!Phone.value || Phone.value.trim() === '') {
     saveError.value = '請輸入電話號碼';
     return;
@@ -202,6 +212,7 @@ const handleSave = async () => {
 									v-if="IsEditing"
 									type="text"
 									v-model="Nickname"
+									maxlength="8"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
 									placeholder="請輸入暱稱"
 								/>
@@ -218,6 +229,7 @@ const handleSave = async () => {
 									v-if="IsEditing"
 									type="text"
 									v-model="Name"
+									maxlength="10"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
 									placeholder="請輸入姓名"
 								/>

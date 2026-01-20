@@ -27,14 +27,14 @@ const currentUserRole = computed(() => {
   return props.userRole;
 });
 
-// 取得用戶顯示名稱（優先顯示 name，否則顯示 email）
+// 取得用戶顯示名稱（優先顯示 nickname，否則顯示 email）
 const userDisplayName = computed(() => {
   if (authStore.user) {
-    const name = authStore.user.user_metadata?.name;
-    if (name) return name;
+    const nickname = authStore.user.user_metadata?.nickname;
+    if (nickname) return nickname;
     return authStore.user.email || '用戶';
   }
-  return userStore.currentUser?.name || userStore.currentUser?.email || '用戶';
+  return userStore.currentUser?.email || '用戶';
 });
 
 const baseButtonClass =
@@ -202,15 +202,14 @@ const currentMenu = computed(() => {
                 >
                   {{ item.label }}
                 </button>
-                <div class="border-t border-gray-200 my-2"></div>
-                <button
-                  @click="handleLogout"
-                  class="w-full px-4 py-2 text-[14px] text-red-600 hover:bg-red-50 transition-colors text-center cursor-pointer"
-                >
-                  登出
-                </button>
               </div>
             </div>
+            <button
+              @click="handleLogout"
+              :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+            >
+              登出
+            </button>
           </template>
         </div>
 
