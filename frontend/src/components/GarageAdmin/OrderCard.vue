@@ -5,10 +5,6 @@ import type { Order } from '@/types/garage';
 defineProps<{
   order: Order;
 }>();
-
-defineEmits<{
-  (event: 'open', order: Order): void;
-}>();
 </script>
 
 <template>
@@ -39,9 +35,14 @@ defineEmits<{
       <!-- 車輛 -->
       <div class="border-l border-[#6b6b5a]/20 pl-6">
         <p class="mb-2 text-[#8a8a7d] font-medium">車輛資訊</p>
-        <p class="text-lg font-medium text-[#4a4a43]">
-          {{ order.vehicle.model }}
-        </p>
+        <div class="flex items-center gap-2">
+          <p class="text-lg font-medium text-[#4a4a43]">
+            {{ order.vehicle.model }}
+          </p>
+          <span class="rounded bg-[#6b6b5a]/10 px-2 py-0.5 text-xs font-bold text-[#6b6b5a]">
+            {{ order.vehicle.licensePlate }}
+          </span>
+        </div>
         <p class="mt-4 mb-1 text-[#8a8a7d] font-medium">維修項目</p>
         <p class="text-[#4a4a43]">
           {{ order.serviceType }}
