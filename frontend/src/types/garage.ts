@@ -49,6 +49,7 @@ export interface WorkshopInfo {
   description: string;
   brands: string[];
   skills: string[];
+  images: string[];
 }
 
 export interface BusinessHour {
