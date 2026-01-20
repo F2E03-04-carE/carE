@@ -90,13 +90,13 @@ const handleSubmit = (e: Event) => {
   <form
     ref="formRef"
     @submit="handleSubmit"
-    class="city-selector-container flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px] font-bold"
+    class="city-selector-container flex flex-col xl:flex-row xl:items-end gap-4 xl:gap-3 w-full max-w-[1400px] mx-auto p-5 bg-[#fff] shadow-md rounded-[8px] font-bold"
   >
-
     <input type="hidden" name="cityValue" :value="selectedCity" />
     <input type="hidden" name="districtValue" :value="selectedDistrict" />
 
-    <div class="w-full lg:w-[25%]">
+    <!-- 縣市 -->
+    <div class="flex-1 min-w-0">
       <label
         for="city"
         class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
@@ -112,7 +112,8 @@ const handleSubmit = (e: Event) => {
       </select>
     </div>
 
-    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+    <!-- 行政區 -->
+    <div class="flex-1 min-w-0">
       <label
         for="location"
         class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
@@ -128,7 +129,8 @@ const handleSubmit = (e: Event) => {
       </select>
     </div>
 
-    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+    <!-- 品牌 -->
+    <div class="flex-1 min-w-0">
       <SelectField
         id="brand"
         name="brand"
@@ -139,7 +141,8 @@ const handleSubmit = (e: Event) => {
       />
     </div>
 
-    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+    <!-- 維修項目 -->
+    <div class="flex-1 min-w-0">
       <SelectField
         id="repair"
         name="repair"
@@ -150,9 +153,10 @@ const handleSubmit = (e: Event) => {
       />
     </div>
 
+    <!-- 搜尋按鈕 -->
     <button
       type="submit"
-      class="w-full lg:w-[20%] px-[20px] py-[10px] mt-[30px] lg:mt-0 flex flex-row justify-center items-center text-[#fff] bg-[#6b6b5a] rounded cursor-pointer hover:bg-[#5a5a4a] transition-colors"
+      class="w-full xl:w-auto xl:flex-shrink-0 px-8 py-[11px] xl:mt-[32px] flex flex-row justify-center items-center text-[#fff] bg-[#6b6b5a] rounded cursor-pointer hover:bg-[#5a5a4a] transition-colors whitespace-nowrap"
     >
       <span class="material-symbols-outlined mr-1">search</span>
       搜尋
