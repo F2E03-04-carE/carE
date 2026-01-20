@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import Toast from '@/components/Admin/Toast.vue';
 
 const images = defineModel<string[]>('images', {
   required: true,
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
+const showToast = ref(false);
+const toastMessage = ref('');
 
 const triggerFileInput = () => {
   if (images.value.length >= 3) {
-    alert('最多只能上傳 3 張照片');
+    toastMessage.value = '最多只能上傳 3 張照片';
+    showToast.value = true;
     return;
   }
   fileInput.value?.click();
@@ -23,7 +27,8 @@ const handleFileSelect = (event: Event) => {
   const remainingSlots = 3 - images.value.length;
 
   if (newFiles.length > remainingSlots) {
-    alert(`最多只能再上傳 ${remainingSlots} 張照片`);
+    toastMessage.value = `最多只能再上傳 ${remainingSlots} 張照片`;
+    showToast.value = true;
     // 清空 input 以便下次選擇
     input.value = '';
     return;
@@ -31,12 +36,7 @@ const handleFileSelect = (event: Event) => {
 
   // 模擬上傳與處理
   newFiles.forEach((file) => {
-    // [模擬 API] 這裡應該呼叫後端上傳 API
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // await api.upload(formData);
-
-    // 暫時使用 Object URL 作為預覽
+    // [接後端API] 這裡應該呼叫後端上傳 API 並取得 URL
     const previewUrl = URL.createObjectURL(file);
     images.value.push(previewUrl);
   });
@@ -88,7 +88,7 @@ const removePhoto = (index: number) => {
         </button>
       </div>
       
-      <!-- 補齊空格的佔位符 (可選，保持排版整齊) -->
+      <!-- 補齊空格的佔位符 -->
       <div
         v-for="n in (3 - images.length)"
         :key="`empty-${n}`"
@@ -98,4 +98,12 @@ const removePhoto = (index: number) => {
       </div>
     </div>
   </div>
+
+  <!-- 錯誤提示 Toast -->
+  <Toast 
+    :show="showToast" 
+    :message="toastMessage" 
+    type="error" 
+    @close="showToast = false" 
+  />
 </template>
