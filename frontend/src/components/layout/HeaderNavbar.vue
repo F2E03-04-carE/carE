@@ -162,6 +162,7 @@ const currentMenu = computed(() => {
 
         <div class="hidden md:flex items-center gap-2 lg:gap-3 font-extrabold">
           <button
+            @click="handleNavigate('/')"
             :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
           >
             尋找維修廠
@@ -240,7 +241,7 @@ const currentMenu = computed(() => {
         class="md:hidden pb-4 flex flex-col gap-3 font-extrabold border-t border-[#e0e0db] pt-4"
       >
         <button
-          @click="closeMobileMenu"
+          @click="handleNavigate('/')"
           class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
         >
           尋找維修廠
