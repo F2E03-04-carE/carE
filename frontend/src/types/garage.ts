@@ -59,5 +59,14 @@ export interface BusinessHour {
   end: string;
 }
 
+export interface SubscriptionPlan {
+  id: string;
+  title: string;
+  subtitle: string;
+  price: string;
+  features: string[];
+  tag: string | null;
+}
+
 // 維修廠申請狀態，正常開通 / 審核中 / 註冊中，或填寫資料中
 export type WorkshopStatus = 'active' | 'pending_review' | 'onboarding';

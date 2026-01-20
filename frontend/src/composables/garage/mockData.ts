@@ -100,3 +100,23 @@ export const mockOrders: Order[] = [
     },
   },
 ];
+
+// 訂閱方案假資料
+export const mockSubscriptionPlans = [
+  {
+    id: 'free',
+    title: '免費試用方案',
+    subtitle: '先試用，滿意再升級',
+    price: 'NT$ 0',
+    features: ['完整預約管理功能', '評價系統功能', '商家資料展示 （試用期滿僅剩此功能）'],
+    tag: null,
+  },
+  {
+    id: 'pro',
+    title: '永久會員方案',
+    subtitle: '一次付費，終身使用',
+    price: 'NT$ 5,555',
+    features: ['完整預約管理功能', '評價系統功能', '商家資料展示', '永久使用權限'],
+    tag: '一次性買斷',
+  },
+];
