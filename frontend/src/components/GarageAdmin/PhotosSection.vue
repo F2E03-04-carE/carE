@@ -1,46 +1,97 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const images = defineModel<string[]>('images', {
+  required: true,
+});
+
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const triggerFileInput = () => {
+  if (images.value.length >= 3) {
+    alert('最多只能上傳 3 張照片');
+    return;
+  }
+  fileInput.value?.click();
+};
+
+const handleFileSelect = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const newFiles = Array.from(input.files);
+  const remainingSlots = 3 - images.value.length;
+
+  if (newFiles.length > remainingSlots) {
+    alert(`最多只能再上傳 ${remainingSlots} 張照片`);
+    // 清空 input 以便下次選擇
+    input.value = '';
+    return;
+  }
+
+  // 模擬上傳與處理
+  newFiles.forEach((file) => {
+    // [模擬 API] 這裡應該呼叫後端上傳 API
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // await api.upload(formData);
+
+    // 暫時使用 Object URL 作為預覽
+    const previewUrl = URL.createObjectURL(file);
+    images.value.push(previewUrl);
+  });
+
+  // 清空 input
+  input.value = '';
+};
+
+const removePhoto = (index: number) => {
+  images.value.splice(index, 1);
+};
+</script>
 
 <template>
-  <input type="file" accept="image/png,image/jpeg" multiple class="hidden" />
+  <input
+    ref="fileInput"
+    type="file"
+    accept="image/png,image/jpeg"
+    multiple
+    class="hidden"
+    @change="handleFileSelect"
+  />
+
   <div
     class="group border-2 border-dashed border-[#e0dfd6] rounded-2xl h-48 flex flex-col items-center justify-center text-[#4a4a43] transition-all duration-200 shrink-0 cursor-pointer hover:bg-white"
+    @click="triggerFileInput"
+    :class="{ 'opacity-50 cursor-not-allowed': images.length >= 3 }"
   >
     <div class="text-4xl mb-2 text-[#b0afa4] group-hover:text-[#6b6b5a]">
       <span class="material-symbols-outlined">add_a_photo</span>
     </div>
     <p class="font-medium text-[#4a4a43]">點擊上傳廠房照片</p>
-    <p class="text-sm mt-1 text-[#8a8a7d]">支援 JPG、PNG 格式，最多 3 張</p>
+    <p class="text-sm mt-1 text-[#8a8a7d]">支援 JPG、PNG 格式，最多 3 張 (目前 {{ images.length }}/3)</p>
   </div>
-  <div class="flex-1 overflow-y-auto mt-6 mb-6">
+
+  <div class="flex-1 overflow-y-auto mt-6 mb-6" v-if="images.length > 0">
     <div class="grid grid-cols-3 gap-6">
-      <!-- 靜態範例圖片 1 -->
-      <div class="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group">
-        <img
-          src="https://placehold.co/400x400/e0dfd6/6b6b5a?text=Photo+1"
-          class="w-full h-full object-cover"
-          alt="preview"
-        />
-        <button
-          class="absolute top-2 right-2 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-        >
-          ✕
-        </button>
-      </div>
-      <!-- 靜態範例圖片 2 -->
-      <div class="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group">
-        <img
-          src="https://placehold.co/400x400/e0dfd6/6b6b5a?text=Photo+2"
-          class="w-full h-full object-cover"
-          alt="preview"
-        />
-        <button
-          class="absolute top-2 right-2 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
-        >
-          ✕
-        </button>
-      </div>
-      <!-- 空位 -->
       <div
+        v-for="(img, index) in images"
+        :key="index"
+        class="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group"
+      >
+        <img :src="img" class="w-full h-full object-cover" alt="preview" />
+        <button
+          @click.stop="removePhoto(index)"
+          class="absolute top-2 right-2 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500 cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+      
+      <!-- 補齊空格的佔位符 (可選，保持排版整齊) -->
+      <div
+        v-for="n in (3 - images.length)"
+        :key="`empty-${n}`"
         class="aspect-square rounded-2xl flex items-center justify-center bg-white border border-[#e0dfd6]"
       >
         <span class="material-symbols-outlined text-[#d1d1c1]">image</span>
