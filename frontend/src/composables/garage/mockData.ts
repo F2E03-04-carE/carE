@@ -9,6 +9,10 @@ export const mockWorkshopInfo: WorkshopInfo = {
   description: '我們提供專業的維修服務，擁有豐富的經驗和技術。',
   brands: ['Toyota', 'Honda'],
   skills: ['定期保養'],
+  images: [
+    'https://placehold.co/600x400/e0dfd6/6b6b5a?text=Garage+1',
+    'https://placehold.co/600x400/e0dfd6/6b6b5a?text=Garage+2',
+  ],
 };
 
 // 營業時間假資料
