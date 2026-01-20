@@ -206,7 +206,10 @@ const currentMenu = computed(() => {
             </div>
             <button
               @click="handleLogout"
-              :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+              :class="[
+                baseButtonClass,
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white px-4 py-1 sm:py-1.5 transition-all'
+              ]"
             >
               登出
             </button>
