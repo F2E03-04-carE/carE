@@ -8,6 +8,14 @@ const router = createRouter({
       name: 'Home',
       component: () => import('@/views/Home/Home.vue'),
     },
+  {
+    path: '/join-garage',
+    name: 'JoinGarage',
+    component: () => import('@/views/Garage/JoinGarage.vue'),
+    meta: {
+      title: '刊登維修廠 - carE',
+    },
+  },
     {
       path: '/join-garage',
       name: 'JoinGarage',
