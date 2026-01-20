@@ -1,3 +1,49 @@
+<script setup lang="ts">
+import SelectField from '@/components/Home/SelectField.vue'
+
+const repairOptions = [
+  { value: 'body_repair', label: '板金維修／鈑金烤漆' },
+  { value: 'engine_maintenance', label: '引擎保養與維修' },
+  { value: 'transmission_repair', label: '變速箱維修' },
+  { value: 'brake_system', label: '煞車系統維修' },
+  { value: 'air_conditioning', label: '冷氣系統維修' },
+  { value: 'suspension_system', label: '底盤／懸吊系統維修' }
+]
+
+const cityOptions = [
+  { value: 'TPE', label: '臺北市' },
+  { value: 'NTPC', label: '新北市' }
+]
+
+const locationOptions = [
+  { value: 'Zhongzheng', label: '中正區' },
+  { value: 'Datong', label: '大同區' },
+  { value: 'Zhongshan', label: '中山區' },
+  { value: 'Songshan', label: '松山區' },
+  { value: 'Daan', label: '大安區' },
+  { value: 'Wanhua', label: '萬華區' },
+  { value: 'Xinyi', label: '信義區' },
+  { value: 'Shilin', label: '士林區' },
+  { value: 'Beitou', label: '北投區' },
+  { value: 'Neihu', label: '內湖區' },
+  { value: 'Nangang', label: '南港區' },
+  { value: 'Wenshan', label: '文山區' }
+]
+
+const brandOptions = [
+  { value: 'Toyota', label: 'Toyota' },
+  { value: 'Honda', label: 'Honda' },
+  { value: 'Nissan', label: 'Nissan' },
+  { value: 'Mazda', label: 'Mazda' },
+  { value: 'Mitsubishi', label: 'Mitsubishi' },
+  { value: 'Lexus', label: 'Lexus' },
+  { value: 'BMW', label: 'BMW' },
+  { value: 'Mercedes-Benz', label: 'Mercedes-Benz' },
+  { value: 'Volkswagen', label: 'Volkswagen' },
+  { value: 'else', label: '其他品牌' }
+]
+</script>
+
 <template>
   <main class="relative mt-[60px] sm:mt-[70px]">
     <section
@@ -16,110 +62,47 @@
           class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px] font-bold"
         >
           <div class="w-full lg:w-[25%]">
-            <label
-              for="repair"
-              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
-            >
-              <span class="material-symbols-outlined mr-2"> build </span>
-              搜尋維修項目
-            </label>
-            <div>
-              <select
-                name="repair"
-                id="repair"
-                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
-              >
-                <option value="" selected disabled>選擇維修項目</option>
-                <option value="body_repair">板金維修／鈑金烤漆</option>
-                <option value="engine_maintenance">引擎保養與維修</option>
-                <option value="transmission_repair">變速箱維修</option>
-                <option value="brake_system">煞車系統維修</option>
-                <option value="air_conditioning">冷氣系統維修</option>
-                <option value="suspension_system">底盤／懸吊系統維修</option>
-              </select>
-            </div>
+            <SelectField
+              id="repair"
+              name="repair"
+              label="搜尋維修項目"
+              icon="build"
+              placeholder="選擇維修項目"
+              :options="repairOptions"
+            />
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label
-              for="city"
-              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
-            >
-              <span class="material-symbols-outlined mr-2"> location_city </span>
-
-              縣市
-            </label>
-            <div>
-              <select
-                name="city"
-                id="city"
-                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
-              >
-                <option value="" selected disabled>選擇縣市，抓郵局API</option>
-                <option value="TPE">臺北市</option>
-                <option value="NTPC">新北市</option>
-              </select>
-            </div>
+            <SelectField
+              id="city"
+              name="city"
+              label="縣市"
+              icon="location_city"
+              placeholder="選擇縣市，抓郵局API"
+              :options="cityOptions"
+            />
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label
-              for="location"
-              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
-            >
-              <span class="material-symbols-outlined mr-2"> location_on </span>
-              行政區
-            </label>
-            <div>
-              <select
-                name="location"
-                id="location"
-                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
-              >
-                <option value="" selected disabled>選擇行政區，抓郵局API</option>
-                <option value="Zhongzheng">中正區</option>
-                <option value="Datong">大同區</option>
-                <option value="Zhongshan">中山區</option>
-                <option value="Songshan">松山區</option>
-                <option value="Daan">大安區</option>
-                <option value="Wanhua">萬華區</option>
-                <option value="Xinyi">信義區</option>
-                <option value="Shilin">士林區</option>
-                <option value="Beitou">北投區</option>
-                <option value="Neihu">內湖區</option>
-                <option value="Nangang">南港區</option>
-                <option value="Wenshan">文山區</option>
-              </select>
-            </div>
+            <SelectField
+              id="location"
+              name="location"
+              label="行政區"
+              icon="location_on"
+              placeholder="選擇行政區，抓郵局API"
+              :options="locationOptions"
+            />
           </div>
 
           <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-            <label
-              for="brand"
-              class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
-            >
-              <span class="material-symbols-outlined mr-2"> directions_car </span>
-              車子品牌
-            </label>
-            <div>
-              <select
-                name="brand"
-                id="brand"
-                class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
-              >
-                <option value="" selected disabled>選擇品牌</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Honda">Honda</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Mazda">Mazda</option>
-                <option value="Mitsubishi">Mitsubishi</option>
-                <option value="Lexus">Lexus</option>
-                <option value="BMW">BMW</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="else">其他品牌</option>
-              </select>
-            </div>
+            <SelectField
+              id="brand"
+              name="brand"
+              label="車子品牌"
+              icon="directions_car"
+              placeholder="選擇品牌"
+              :options="brandOptions"
+            />
           </div>
 
           <button
