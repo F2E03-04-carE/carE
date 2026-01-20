@@ -9,7 +9,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const { error: authError } = await supabase.auth.getSession();
+    const { data: { session }, error: authError } = await supabase.auth.getSession();
 
     if (authError) {
       error.value = '登入驗證失敗，請重試';
@@ -20,7 +20,25 @@ onMounted(async () => {
       return;
     }
 
-    // 登入成功，重定向到首頁
+    if (!session?.user) {
+      error.value = '無法取得用戶資訊';
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
+      return;
+    }
+
+    // 檢查用戶資料完整度
+    const userMetadata = session.user.user_metadata || {};
+    const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
+
+    // 如果沒有手機號碼，導向個人資料頁面完善資料
+    if (!hasPhone) {
+      router.push('/member/profile?firstLogin=true');
+      return;
+    }
+
+    // 資料完整，導向首頁
     router.push('/');
   } catch (err) {
     error.value = '發生未預期的錯誤';

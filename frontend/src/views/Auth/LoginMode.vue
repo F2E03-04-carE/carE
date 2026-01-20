@@ -4,7 +4,6 @@ import { useAuthStore } from '@/stores/auth';
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'switch-to-signup'): void;
 }>();
 
 const authStore = useAuthStore();
@@ -111,22 +110,6 @@ const handleLoginSubmit = async () => {
             <span v-else>發送登入連結</span>
           </button>
         </form>
-      </div>
-      <div class="relative flex justify-center items-center my-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative px-4 text-[14px] text-gray-500 bg-white/0 backdrop-blur-md">
-          還沒有帳號嗎？
-        </div>
-      </div>
-      <div class="text-center">
-        <button
-          @click="$emit('switch-to-signup')"
-          class="text-[16px] font-bold text-[#6b6b5a] hover:underline cursor-pointer"
-        >
-          立即註冊
-        </button>
       </div>
     </div>
   </div>
