@@ -95,7 +95,6 @@ const handleSubmit = (e: Event) => {
     <input type="hidden" name="cityValue" :value="selectedCity" />
     <input type="hidden" name="districtValue" :value="selectedDistrict" />
 
-    <!-- 縣市 -->
     <div class="flex-1 min-w-0">
       <label
         for="city"
@@ -112,7 +111,6 @@ const handleSubmit = (e: Event) => {
       </select>
     </div>
 
-    <!-- 行政區 -->
     <div class="flex-1 min-w-0">
       <label
         for="location"
@@ -129,7 +127,6 @@ const handleSubmit = (e: Event) => {
       </select>
     </div>
 
-    <!-- 品牌 -->
     <div class="flex-1 min-w-0">
       <SelectField
         id="brand"
@@ -141,7 +138,6 @@ const handleSubmit = (e: Event) => {
       />
     </div>
 
-    <!-- 維修項目 -->
     <div class="flex-1 min-w-0">
       <SelectField
         id="repair"
@@ -153,7 +149,6 @@ const handleSubmit = (e: Event) => {
       />
     </div>
 
-    <!-- 搜尋按鈕 -->
     <button
       type="submit"
       class="w-full xl:w-auto xl:flex-shrink-0 px-8 py-[11px] xl:mt-[32px] flex flex-row justify-center items-center text-[#fff] bg-[#6b6b5a] rounded cursor-pointer hover:bg-[#5a5a4a] transition-colors whitespace-nowrap"
