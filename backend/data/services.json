@@ -1,0 +1,16 @@
+[
+  { "garageservice_id": 1, "name": "引擎維修", "category": "維修" },
+  { "garageservice_id": 2, "name": "變速箱維修", "category": "維修" },
+  { "garageservice_id": 3, "name": "底盤檢修", "category": "維修" },
+  { "garageservice_id": 4, "name": "煞車系統", "category": "維修" },
+  { "garageservice_id": 5, "name": "冷氣系統", "category": "維修" },
+  { "garageservice_id": 6, "name": "電機維修", "category": "維修" },
+  { "garageservice_id": 7, "name": "傳動系統", "category": "維修" },
+  { "garageservice_id": 8, "name": "定期保養", "category": "保養" },
+  { "garageservice_id": 9, "name": "電瓶更換", "category": "保養" },
+  { "garageservice_id": 10, "name": "配件改裝", "category": "改裝" },
+  { "garageservice_id": 11, "name": "鈑金烤漆", "category": "鈑金" },
+  { "garageservice_id": 12, "name": "四輪定位", "category": "輪胎" },
+  { "garageservice_id": 13, "name": "輪胎更換", "category": "輪胎" },
+  { "garageservice_id": 14, "name": "道路救援", "category": "救援" }
+]
