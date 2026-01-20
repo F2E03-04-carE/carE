@@ -5,11 +5,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/Home/Home.vue'),
-      meta: {
-        title: 'carE - 汽車維修平台',
-      },
+      name: 'Home',
+      component: () => import('@/views/Home/Home.vue'), 
     },
     {
       path: '/join-garage',
@@ -17,6 +14,14 @@ const router = createRouter({
       component: () => import('@/views/Garage/JoinGarage.vue'),
       meta: {
         title: '刊登維修廠 - carE',
+      },
+    },
+    {
+      path: '/search',
+      name: 'SearchResults',
+      component: () => import('@/views/Search/SearchResults.vue'),
+      meta: {
+        title: '搜尋結果 - carE',
       },
     },
     {
