@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import SelectField from '@/components/Home/SelectField.vue'
+import TwCitySelector from 'tw-city-selector'
 
 const repairOptions = [
   { value: 'body_repair', label: '板金維修／鈑金烤漆' },
@@ -8,26 +10,6 @@ const repairOptions = [
   { value: 'brake_system', label: '煞車系統維修' },
   { value: 'air_conditioning', label: '冷氣系統維修' },
   { value: 'suspension_system', label: '底盤／懸吊系統維修' }
-]
-
-const cityOptions = [
-  { value: 'TPE', label: '臺北市' },
-  { value: 'NTPC', label: '新北市' }
-]
-
-const locationOptions = [
-  { value: 'Zhongzheng', label: '中正區' },
-  { value: 'Datong', label: '大同區' },
-  { value: 'Zhongshan', label: '中山區' },
-  { value: 'Songshan', label: '松山區' },
-  { value: 'Daan', label: '大安區' },
-  { value: 'Wanhua', label: '萬華區' },
-  { value: 'Xinyi', label: '信義區' },
-  { value: 'Shilin', label: '士林區' },
-  { value: 'Beitou', label: '北投區' },
-  { value: 'Neihu', label: '內湖區' },
-  { value: 'Nangang', label: '南港區' },
-  { value: 'Wenshan', label: '文山區' }
 ]
 
 const brandOptions = [
@@ -42,45 +24,70 @@ const brandOptions = [
   { value: 'Volkswagen', label: 'Volkswagen' },
   { value: 'else', label: '其他品牌' }
 ]
+
+const citySelector = ref<HTMLDivElement>()
+
+onMounted(() => {
+  if (citySelector.value) {
+    new TwCitySelector({
+      el: citySelector.value,
+      elCounty: citySelector.value.querySelector('#city'),
+      elDistrict: citySelector.value.querySelector('#location'),
+      hasZipcode: false,
+      standardWords: true
+    })
+  }
+})
+
+const handleSubmit = (e: Event) => {
+  e.preventDefault()
+  const formData = new FormData(e.target as HTMLFormElement)
+  const searchParams = {
+    city: formData.get('city'),
+    location: formData.get('location'),
+    brand: formData.get('brand'),
+    repair: formData.get('repair')
+  }
+  console.log('搜尋參數:', searchParams)
+  // TODO: 導向搜尋結果頁或呼叫 API
+}
 </script>
 
 <template>
   <form
-    action=""
-    method="get"
+    @submit="handleSubmit"
     class="flex flex-col lg:flex-row justify-evenly items-end gap-x-[50px] w-[80%] p-[20px] bg-[#fff] shadow-md rounded-[8px] font-bold"
   >
-    <div class="w-full lg:w-[25%]">
-      <SelectField
-        id="repair"
-        name="repair"
-        label="搜尋維修項目"
-        icon="build"
-        placeholder="選擇維修項目"
-        :options="repairOptions"
-      />
-    </div>
+    <div ref="citySelector" class="contents">
+      <div class="w-full lg:w-[25%]">
+        <label
+          for="city"
+          class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+        >
+          <span class="material-symbols-outlined mr-2">location_city</span>
+          縣市
+        </label>
+        <select
+          id="city"
+          name="city"
+          class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+        ></select>
+      </div>
 
-    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-      <SelectField
-        id="city"
-        name="city"
-        label="縣市"
-        icon="location_city"
-        placeholder="選擇縣市，抓郵局API"
-        :options="cityOptions"
-      />
-    </div>
-
-    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
-      <SelectField
-        id="location"
-        name="location"
-        label="行政區"
-        icon="location_on"
-        placeholder="選擇行政區，抓郵局API"
-        :options="locationOptions"
-      />
+      <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+        <label
+          for="location"
+          class="flex flex-row justify-start items-center mb-2 text-[16px] text-left text-[#8a8a7d]"
+        >
+          <span class="material-symbols-outlined mr-2">location_on</span>
+          行政區
+        </label>
+        <select
+          id="location"
+          name="location"
+          class="block w-full px-[10px] py-[11px] text-[#4c4c46] bg-[#f5f4f0] outline-[1px] outline-[#e0e0db] rounded"
+        ></select>
+      </div>
     </div>
 
     <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
@@ -91,6 +98,17 @@ const brandOptions = [
         icon="directions_car"
         placeholder="選擇品牌"
         :options="brandOptions"
+      />
+    </div>
+
+    <div class="w-full lg:w-[25%] mt-[20px] lg:mt-0">
+      <SelectField
+        id="repair"
+        name="repair"
+        label="搜尋維修項目"
+        icon="build"
+        placeholder="選擇維修項目"
+        :options="repairOptions"
       />
     </div>
 
