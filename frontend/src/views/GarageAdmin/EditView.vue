@@ -1,10 +1,48 @@
 <script setup lang="ts">
+import { ref, reactive } from 'vue';
 import PageHead from '@/components/GarageAdmin/PageHead.vue';
 import EditSection from '@/components/GarageAdmin/EditSection.vue';
 import InfoSection from '@/components/GarageAdmin/InfoSection.vue';
 import HoursSection from '@/components/GarageAdmin/HoursSection.vue';
 import PhotosSection from '@/components/GarageAdmin/PhotosSection.vue';
 import SubscriptionSection from '@/components/GarageAdmin/SubscriptionSection.vue';
+import Toast from '@/components/Admin/Toast.vue';
+import type { WorkshopInfo, BusinessHour } from '@/types/garage';
+import { mockWorkshopInfo, mockBusinessHours } from '@/composables/garage/mockData';
+
+interface GarageFormData {
+  info: WorkshopInfo;
+  hours: BusinessHour[];
+}
+
+// 廠房假資料
+const garageInfo = reactive<GarageFormData>({
+  info: { ...mockWorkshopInfo },
+  hours: JSON.parse(JSON.stringify(mockBusinessHours)),
+});
+
+// UI 狀態
+const isSaving = ref(false);
+const showToast = ref(false);
+const toastMessage = ref('');
+
+const handleSave = async () => {
+  if (isSaving.value) return;
+
+  isSaving.value = true;
+
+  // 模擬 API 請求
+  setTimeout(() => {
+    isSaving.value = false;
+    toastMessage.value = '儲存成功，資料已送出審核';
+    showToast.value = true;
+
+    // 3秒後自動關閉 Toast
+    setTimeout(() => {
+      showToast.value = false;
+    }, 3000);
+  }, 1500);
+};
 </script>
 
 <template>
@@ -25,13 +63,13 @@ import SubscriptionSection from '@/components/GarageAdmin/SubscriptionSection.vu
         <PageHead title="廠房資訊" subtitle="管理與編輯您的廠房詳細資訊" />
       </div>
 
-      <form class="space-y-6" @submit.prevent>
+      <form class="space-y-6" @submit.prevent="handleSave">
         <EditSection title="基本資料" icon="description">
-          <InfoSection />
+          <InfoSection v-model:info="garageInfo.info" />
         </EditSection>
 
         <EditSection title="營業時間設定" icon="alarm">
-          <HoursSection />
+          <HoursSection v-model:hours="garageInfo.hours" />
         </EditSection>
 
         <EditSection title="廠房照片" icon="imagesmode">
@@ -43,12 +81,17 @@ import SubscriptionSection from '@/components/GarageAdmin/SubscriptionSection.vu
         <div class="flex justify-end mt-8">
           <button
             type="submit"
-            class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold transition hover:bg-[#57574a] cursor-pointer"
+            :disabled="isSaving"
+            class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold transition hover:bg-[#57574a] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            儲存並提交審核
+            <span v-if="isSaving" class="material-symbols-outlined animate-spin text-sm">sync</span>
+            {{ isSaving ? '儲存中...' : '儲存並提交審核' }}
           </button>
         </div>
       </form>
     </div>
+
+    <!-- Toast 通知 -->
+    <Toast :show="showToast" :message="toastMessage" type="success" @close="showToast = false" />
   </div>
 </template>

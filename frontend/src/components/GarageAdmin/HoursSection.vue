@@ -1,27 +1,27 @@
 <script setup lang="ts">
-// 假資料
-const businessHours = [
-  { day: '週一', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週二', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週三', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週四', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週五', enabled: true, start: '09:00', end: '18:00' },
-  { day: '週六', enabled: false, start: '', end: '' },
-  { day: '週日', enabled: false, start: '', end: '' },
-];
+import type { BusinessHour } from '@/types/garage';
+
+const hours = defineModel<BusinessHour[]>('hours', {
+  required: true,
+});
+
+const toggleDay = (item: BusinessHour) => {
+  item.enabled = !item.enabled;
+};
 </script>
 <template>
   <div class="space-y-4">
     <!-- 營業時間項目 -->
     <!-- 使用 flex-col 讓內容在行動裝置上預設為垂直堆疊，在 sm 尺寸以上變為水平排列 -->
     <div
-      v-for="item in businessHours"
+      v-for="item in hours"
       :key="item.day"
       class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-4 bg-white border border-transparent"
     >
       <div class="flex items-center gap-4">
         <span class="font-medium w-8">{{ item.day }}</span>
-        <div class="relative cursor-pointer">
+        <!-- Toggle Switch -->
+        <div class="relative cursor-pointer" @click="toggleDay(item)">
           <div
             :class="[
               'w-12 h-6 rounded-full transition-colors',
@@ -47,13 +47,13 @@ const businessHours = [
         <template v-if="item.enabled">
           <input
             type="time"
-            :value="item.start"
+            v-model="item.start"
             class="bg-transparent rounded-lg px-2 outline-none"
           />
           <span>至</span>
           <input
             type="time"
-            :value="item.end"
+            v-model="item.end"
             class="bg-transparent rounded-lg px-2 outline-none"
           />
         </template>

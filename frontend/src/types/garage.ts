@@ -41,5 +41,22 @@ export interface CustomerProfile {
   serviceHistory: ServiceRecord[];
 }
 
+export interface WorkshopInfo {
+  name: string;
+  phone: string;
+  address: string;
+  taxId: string;
+  description: string;
+  brands: string[];
+  skills: string[];
+}
+
+export interface BusinessHour {
+  day: string;
+  enabled: boolean;
+  start: string;
+  end: string;
+}
+
 // 維修廠申請狀態，正常開通 / 審核中 / 註冊中，或填寫資料中
 export type WorkshopStatus = 'active' | 'pending_review' | 'onboarding';
