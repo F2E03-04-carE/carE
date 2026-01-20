@@ -1,30 +1,24 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref , computed} from 'vue'
 import { useRouter } from 'vue-router'
 import SelectField from '@/components/Home/SelectField.vue'
 import TwCitySelector from 'tw-city-selector'
+import brandsData from '@/data/brands.json'
+import servicesData from '@/data/services.json'
 
-const repairOptions = [
-  { value: 'body_repair', label: '板金維修／鈑金烤漆' },
-  { value: 'engine_maintenance', label: '引擎保養與維修' },
-  { value: 'transmission_repair', label: '變速箱維修' },
-  { value: 'brake_system', label: '煞車系統維修' },
-  { value: 'air_conditioning', label: '冷氣系統維修' },
-  { value: 'suspension_system', label: '底盤／懸吊系統維修' }
-]
+const brandOptions = computed(() =>
+  brandsData.map(b => ({
+    value: b.brand_en,
+    label:`${b.brand_en} ${b.brand_zh}`
+  }))
+)
 
-const brandOptions = [
-  { value: 'Toyota', label: 'Toyota' },
-  { value: 'Honda', label: 'Honda' },
-  { value: 'Nissan', label: 'Nissan' },
-  { value: 'Mazda', label: 'Mazda' },
-  { value: 'Mitsubishi', label: 'Mitsubishi' },
-  { value: 'Lexus', label: 'Lexus' },
-  { value: 'BMW', label: 'BMW' },
-  { value: 'Mercedes-Benz', label: 'Mercedes-Benz' },
-  { value: 'Volkswagen', label: 'Volkswagen' },
-  { value: 'else', label: '其他品牌' }
-]
+const repairOptions = computed(() =>
+  servicesData.map(s => ({
+    value: s.garageservice_id.toString(),
+    label: s.name
+  }))
+)
 
 const citySelector = ref<HTMLDivElement>()
 const router = useRouter()
