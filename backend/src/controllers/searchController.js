@@ -21,7 +21,7 @@ export const searchGarages = async (req, res) => {
 
     let query = supabase
       .from('garages')
-      .select('*', { count: 'exact' }); // count: 'exact' 會回傳總筆數
+      .select('*, brands(id, name), services(id, name)', { count: 'exact' }); // count: 'exact' 會回傳總筆數
 
     if (city) {
       query = query.eq('city', city);
