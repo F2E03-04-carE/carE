@@ -13,12 +13,14 @@ import { mockWorkshopInfo, mockBusinessHours } from '@/composables/garage/mockDa
 interface GarageFormData {
   info: WorkshopInfo;
   hours: BusinessHour[];
+  plan: string;
 }
 
 // 廠房假資料
 const garageInfo = reactive<GarageFormData>({
   info: { ...mockWorkshopInfo },
   hours: JSON.parse(JSON.stringify(mockBusinessHours)),
+  plan: 'free',
 });
 
 // UI 狀態
@@ -80,7 +82,7 @@ const handleSave = async () => {
           <PhotosSection v-model:images="garageInfo.info.images" />
         </EditSection>
 
-        <SubscriptionSection />
+        <SubscriptionSection v-model:plan="garageInfo.plan" />
 
         <div class="flex justify-end mt-8">
           <button
