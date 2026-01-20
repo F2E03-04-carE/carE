@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Member } from '@/components/Admin/composables/memberCore';
+import type { Member } from '@/composables/admin/memberCore';
 import MemberDetailCarOwner from './MemberDetailCarOwner.vue';
 import MemberDetailShop from './MemberDetailShop.vue';
 import {
   getStatusLabel,
   getStatusClass,
   useMemberActions,
-} from '@/components/Admin/composables/memberCore';
+} from '@/composables/admin/memberCore';
 
 const props = defineProps<{ member: Member; type: string }>();
 const emit = defineEmits(['close']);

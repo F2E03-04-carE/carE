@@ -4,7 +4,7 @@ import OrderCard from '@/components/GarageAdmin/OrderCard.vue';
 import OrderDetailModal from '@/components/GarageAdmin/OrderDetailModal.vue';
 import PageHead from '@/components/GarageAdmin/PageHead.vue';
 import SearchBar from '@/components/GarageAdmin/SearchBar.vue';
-import type { Order } from '@/components/GarageAdmin/types';
+import type { Order } from '@/types/garage';
 
 // 假資料
 const orders = ref<Order[]>([

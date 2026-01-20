@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Member } from '@/components/Admin/composables/memberCore';
-import { getStatusLabel, getStatusClass } from '@/components/Admin/composables/memberCore';
+import type { Member } from '@/composables/admin/memberCore';
+import { getStatusLabel, getStatusClass } from '@/composables/admin/memberCore';
 
 defineProps<{
   members: Member[];

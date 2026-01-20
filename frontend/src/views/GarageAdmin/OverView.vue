@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import OrderCard from '@/components/GarageAdmin/OrderCard.vue';
 import OrderDetailModal from '@/components/GarageAdmin/OrderDetailModal.vue';
-import type { Order } from '@/components/GarageAdmin/types';
+import type { Order } from '@/types/garage';
 
 // 假資料
 const stats = [

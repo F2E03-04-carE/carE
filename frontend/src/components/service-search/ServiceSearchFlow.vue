@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import ServiceStepper from './ServiceStepper.vue';
 import ServiceModal from './ServiceModal.vue';
-import BookingTimeSelectorView from '../../views/Search/components/BookingTimeSelectorView.vue';
+import BookingTimeSelectorView from '@/components/Search/BookingTimeSelectorView.vue';
 
 defineEmits<{
   (e: 'back'): void;
