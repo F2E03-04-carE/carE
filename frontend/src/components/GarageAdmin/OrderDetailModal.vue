@@ -80,10 +80,14 @@ const save = () => emit('save', tempStatus.value);
         <!-- 車輛資訊 -->
         <div class="rounded-xl bg-white p-5">
           <p class="mb-3 text-sm font-medium text-[#8a8a7d]">車輛資訊</p>
-          <div class="grid grid-cols-2 gap-4 text-[#4a4a43]">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[#4a4a43">
             <div>
               <p class="text-sm text-[#8a8a7d]">車型</p>
               <p class="font-medium">{{ order?.vehicle.model }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-[#8a8a7d]">車牌號碼</p>
+              <p class="font-medium">{{ order?.vehicle.licensePlate }}</p>
             </div>
             <div>
               <p class="text-sm text-[#8a8a7d]">服務項目</p>
