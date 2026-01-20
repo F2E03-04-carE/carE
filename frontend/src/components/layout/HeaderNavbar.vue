@@ -255,34 +255,31 @@ const currentMenu = computed(() => {
 
         <template v-else-if="currentMenu">
           <div class="flex flex-col gap-2">
-            <button
-              @click="toggleMobileAccordion"
-              class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors flex items-center justify-center gap-2"
+            <!-- User Name Header (Static) -->
+            <div
+              class="w-full py-3 text-[16px] text-[#6b6b5a] border-b border-[#e0e0db] mb-2 font-bold flex items-center justify-center gap-2"
             >
               <i class="fa-solid fa-user text-[14px]"></i>
               <span class="max-w-[200px] truncate">{{ userDisplayName }}</span>
-              <i :class="['fa-solid', isMobileAccordionOpen ? 'fa-chevron-up' : 'fa-chevron-down', 'text-[12px]']"></i>
-            </button>
-            <div
-              v-if="isMobileAccordionOpen"
-              class="flex flex-col gap-2 pl-4"
-            >
-              <button
-                v-for="item in currentMenu.items"
-                :key="item.href"
-                @click="handleNavigate(item.href)"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center cursor-pointer"
-              >
-                {{ item.label }}
-              </button>
-              <div class="border-t border-gray-200 my-1"></div>
-              <button
-                @click="handleLogout"
-                class="w-full py-2 text-[14px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center cursor-pointer"
-              >
-                登出
-              </button>
             </div>
+            
+            <!-- Menu Items -->
+            <button
+              v-for="item in currentMenu.items"
+              :key="item.href"
+              @click="handleNavigate(item.href)"
+              class="w-full py-3 text-[16px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center cursor-pointer"
+            >
+              {{ item.label }}
+            </button>
+            
+            <!-- Logout Button -->
+            <button
+              @click="handleLogout"
+              class="w-full py-3 text-[16px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center cursor-pointer mt-2"
+            >
+              登出
+            </button>
           </div>
         </template>
       </div>
