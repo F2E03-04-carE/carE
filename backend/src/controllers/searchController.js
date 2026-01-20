@@ -1,6 +1,42 @@
 import supabase from '../configs/supabase.js';
 
 
+
+/**
+* GET /api/search
+* 搜尋維修廠
+* 
+* Query 參數範例：
+* /api/search?city=台北市&district=中山區&brand=123&service=456&page=1&limit=10&sort=rating
+* 
+* 回傳格式：
+* {
+*   "data": [
+*     {
+*       "id": "uuid",
+*       "name": "維修廠名稱",
+*       "city": "台北市",
+*       "district": "中山區",
+*       "address": "完整地址",
+*       "lat": 25.0xxx,
+*       "lng": 121.xxx,
+*       "rating": 4.5,
+*       "review_count": 120,
+*       "image_url": "圖片網址",
+*       "brands": [{ "id": "...", "name": "Toyota" }],
+*       "services": [{ "id": "...", "name": "換機油" }]
+*     }
+*   ],
+*   "pagination": {
+*     "page": 1,
+*     "limit": 10,
+*     "total": 150,
+*     "totalPages": 15
+*   }
+* }
+*/
+const MAX_RELATED_ITEMS_PER_GARAGE = 8;
+
 export const searchGarages = async (req, res) => {
   try {
     const {
@@ -45,9 +81,9 @@ export const searchGarages = async (req, res) => {
         });
       }
 
-      const garageIds = brandData.map(item => item.garage_id);
+      const brandGarageIds = brandData.map(item => item.garage_id);
       
-      if (garageIds.length === 0) {
+      if (brandGarageIds.length === 0) {
         return res.json({
           data: [],
           pagination: {
@@ -59,7 +95,7 @@ export const searchGarages = async (req, res) => {
         });
       }
 
-      query = query.in('id', garageIds);
+      query = query.in('id', brandGarageIds);
     }
     if (service) {
       const { data: serviceData, error: serviceError } = await supabase
@@ -75,9 +111,9 @@ export const searchGarages = async (req, res) => {
         });
       }
 
-      const garageIds = serviceData.map(item => item.garage_id);
+      const serviceGarageIds = serviceData.map(item => item.garage_id);
       
-      if (garageIds.length === 0) {
+      if (serviceGarageIds.length === 0) {
         return res.json({
           data: [],
           pagination: {
@@ -89,7 +125,7 @@ export const searchGarages = async (req, res) => {
         });
       }
 
-      query = query.in('id', garageIds);
+      query = query.in('id', serviceGarageIds);
     }
 
     //排序（評分或評論數，由高到低）
@@ -138,7 +174,7 @@ export const searchGarages = async (req, res) => {
 
       const garageRelatedServices = services
         .filter(s => s.garage_id === garage.id)
-        .slice(0, 8)
+        .slice(0, MAX_RELATED_ITEMS_PER_GARAGE)
         .map(s => s.services);
 
       return {
@@ -170,7 +206,18 @@ export const searchGarages = async (req, res) => {
   }
 };
 
-
+/**
+* GET /api/search/filters
+* 獲取篩選選項（品牌、服務）
+* 
+* 城市和行政區由前端 tw-city-selector 處理
+* 
+* 回傳格式：
+* {
+*   "brands": [{ "id": "...", "name": "Toyota" }, ...],
+*   "services": [{ "id": "...", "name": "換機油" }, ...]
+* }
+*/
 
 export const getFilterOptions = async (req, res) => {
   try {
