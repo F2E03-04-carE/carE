@@ -16,63 +16,90 @@ interface GarageFormData {
   plan: string;
 }
 
-// 廠房假資料
+// 廠房資料
 const garageInfo = reactive<GarageFormData>({
   info: { ...mockWorkshopInfo },
   hours: JSON.parse(JSON.stringify(mockBusinessHours)),
-  plan: 'free',
+  plan: '', // 預設為空，強制使用者選擇方案
 });
+
+// 存放使用者選擇的原始圖片檔案
+const garageFiles = ref<File[]>([]);
 
 // UI 狀態
 const isSaving = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');
+const toastType = ref<'success' | 'error'>('success');
 const hasTimeError = ref(false);
 const hasInfoError = ref(false);
 
 const handleSave = async () => {
+  // 再次檢查是否有選擇方案
+  if (!garageInfo.plan) {
+    toastMessage.value = '請選擇一個訂閱方案';
+    toastType.value = 'error';
+    showToast.value = true;
+    return;
+  }
+
   if (isSaving.value || hasTimeError.value || hasInfoError.value) return;
 
   isSaving.value = true;
 
-  // 模擬 API 請求
-  setTimeout(() => {
-    isSaving.value = false;
-    toastMessage.value = '儲存成功，資料已送出審核';
-    showToast.value = true;
+  try {
+    // 建立 FormData 物件，因為要混合上傳「文字資料」與「二進位圖片」
+    const formData = new FormData();
 
-    // 3秒後自動關閉 Toast
+    // 1. 文字資料
+    formData.append('plan', garageInfo.plan);
+    formData.append('info', JSON.stringify(garageInfo.info));
+    formData.append('hours', JSON.stringify(garageInfo.hours));
+
+    // 2. 圖片
+    garageFiles.value.forEach((file) => {
+      formData.append('images', file);
+    });
+
+    // 3. [打API] 呼叫後端接口
+    // 待補
+
+    // 模擬 API 回應延遲
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // 假設成功
+    console.log('FormData 內容已準備好，包含圖片數量:', garageFiles.value.length);
+
+    // 成功提示
+    toastMessage.value = '儲存成功，資料已送出審核';
+    toastType.value = 'success';
+    showToast.value = true;
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    toastMessage.value = '提交失敗，請稍後再試或聯繫管理員';
+    toastType.value = 'error';
+    showToast.value = true;
+  } finally {
+    isSaving.value = false;
+
+    // 3 秒後自動關閉 Toast
     setTimeout(() => {
       showToast.value = false;
     }, 3000);
-  }, 1500);
+  }
 };
 </script>
 
 <template>
   <div class="min-h-screen">
     <div class="space-y-6">
-      <!-- 狀態提示 -->
-      <div class="bg-[#f5f4f0] border-l-4 border-[#6b6b5a] text-[#4a4a43] p-4 rounded-r-lg mb-6">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-[#6b6b5a]">info</span>
-          <h3 class="font-bold">目前模擬資料填寫中的狀態</h3>
-        </div>
-        <p class="mt-1 text-sm ml-8">
-          此頁面目前為純靜態展示，用於預覽版面配置與樣式，暫時無法實際儲存資料。
-        </p>
-      </div>
-
       <div class="mb-8">
         <PageHead title="廠房資訊" subtitle="管理與編輯您的廠房詳細資訊" />
       </div>
 
       <form class="space-y-6" @submit.prevent="handleSave">
         <EditSection title="基本資料" icon="description">
-          <InfoSection 
-            v-model:info="garageInfo.info" 
-            @validation-error="hasInfoError = $event"
-          />
+          <InfoSection v-model:info="garageInfo.info" @validation-error="hasInfoError = $event" />
         </EditSection>
 
         <EditSection title="營業時間設定" icon="alarm">
@@ -83,7 +110,7 @@ const handleSave = async () => {
         </EditSection>
 
         <EditSection title="廠房照片" icon="imagesmode">
-          <PhotosSection v-model:images="garageInfo.info.images" />
+          <PhotosSection v-model:images="garageInfo.info.images" v-model:files="garageFiles" />
         </EditSection>
 
         <SubscriptionSection v-model:plan="garageInfo.plan" />
@@ -91,7 +118,7 @@ const handleSave = async () => {
         <div class="flex justify-end mt-8">
           <button
             type="submit"
-            :disabled="isSaving || hasTimeError || hasInfoError"
+            :disabled="isSaving || hasTimeError || hasInfoError || !garageInfo.plan"
             class="px-8 py-3 rounded-2xl bg-[#6b6b5a] text-white font-bold transition hover:bg-[#57574a] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span v-if="isSaving" class="material-symbols-outlined animate-spin text-sm">sync</span>
@@ -102,6 +129,6 @@ const handleSave = async () => {
     </div>
 
     <!-- Toast 通知 -->
-    <Toast :show="showToast" :message="toastMessage" type="success" @close="showToast = false" />
+    <Toast :show="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
   </div>
 </template>
