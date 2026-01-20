@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import SelectField from '@/components/Home/SelectField.vue'
 import TwCitySelector from 'tw-city-selector'
 
@@ -26,6 +27,7 @@ const brandOptions = [
 ]
 
 const citySelector = ref<HTMLDivElement>()
+const router = useRouter()
 
 onMounted(() => {
   if (citySelector.value) {
@@ -42,14 +44,32 @@ onMounted(() => {
 const handleSubmit = (e: Event) => {
   e.preventDefault()
   const formData = new FormData(e.target as HTMLFormElement)
-  const searchParams = {
-    city: formData.get('city'),
-    location: formData.get('location'),
-    brand: formData.get('brand'),
-    repair: formData.get('repair')
+
+  const city = formData.get('city') as string
+  const location = formData.get('location') as string
+  const brand = formData.get('brand') as string
+  const repair = formData.get('repair') as string
+
+  if (!city || !location) {
+    alert('請選擇縣市和行政區')
+    return
   }
+
+  const searchParams: Record<string, string> = {
+    city,
+    location
+  }
+
+
+  if (brand) searchParams.brand = brand
+  if (repair) searchParams.repair = repair
+
   console.log('搜尋參數:', searchParams)
-  // TODO: 導向搜尋結果頁或呼叫 API
+
+  router.push({
+    name: 'SearchResults',
+    query: searchParams
+  })
 }
 </script>
 
