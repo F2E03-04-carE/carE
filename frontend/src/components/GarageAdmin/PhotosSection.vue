@@ -75,13 +75,13 @@ const removePhoto = (index: number) => {
   <div class="flex-1 overflow-y-auto mt-6 mb-6" v-if="images.length > 0">
     <div class="grid grid-cols-3 gap-6">
       <div
-        v-for="(img, index) in images"
-        :key="index"
+        v-for="img in images"
+        :key="img"
         class="relative aspect-square rounded-2xl overflow-hidden bg-gray-100 group"
       >
         <img :src="img" class="w-full h-full object-cover" alt="preview" />
         <button
-          @click.stop="removePhoto(index)"
+          @click.stop="removePhoto(images.indexOf(img))"
           class="absolute top-2 right-2 bg-black/60 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-500 cursor-pointer"
         >
           ✕
