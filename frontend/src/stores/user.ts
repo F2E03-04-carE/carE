@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  nickname?: string;
 }
 
 export const useUserStore = defineStore('user', () => {

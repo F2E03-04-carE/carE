@@ -22,6 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
         name: user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
         email: user.value.email || '',
         role: user.value.user_metadata?.role || 'member',
+        nickname: user.value.user_metadata?.nickname,
       });
     } else {
       // 登出時清空 userStore
