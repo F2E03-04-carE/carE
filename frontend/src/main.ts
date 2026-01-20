@@ -1,15 +1,21 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
-import App from './App.vue'
-import router from './router'
-import './main.css'
-import { setupCalendar } from 'v-calendar'
+import App from './App.vue';
+import router from './router';
+import './main.css';
+import { setupCalendar } from 'v-calendar';
+import { useAuthStore } from './stores/auth';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(createPinia())
-app.use(router)
-app.use(setupCalendar, {})
+const pinia = createPinia();
+app.use(pinia);
+app.use(router);
+app.use(setupCalendar, {});
 
-app.mount('#app')
+// 初始化認證狀態
+const authStore = useAuthStore();
+authStore.initialize();
+
+app.mount('#app');

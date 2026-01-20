@@ -1,43 +1,202 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter, useRoute } from 'vue-router';
+import { supabase } from '@/lib/supabase';
+
+const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
+
+// 如果未登入，重定向到首頁
+if (!authStore.isAuthenticated) {
+  router.push('/');
+}
+
+const user = computed(() => authStore.user);
+const Email = computed(() => user.value?.email || '');
+const Phone = ref(user.value?.user_metadata?.phone || '');
+const Name = ref(user.value?.user_metadata?.name || Email.value.split('@')[0]);
+const Nickname = ref(user.value?.user_metadata?.nickname || '');
+const LicensePlate = ref(user.value?.user_metadata?.licensePlate || '');
 
 const IsEditing = ref(false);
-const Nickname = ref(`咪毛`);
-const Name = ref(`王貓貓`);
-const Email = ref(`mimimoumou@gmail.com`);
-const Phone = ref(`0912-345-678`);
-const LicensePlate = ref(`ABC-1234`);
+const isSaving = ref(false);
+const saveError = ref('');
+const saveSuccess = ref(false);
+const phoneError = ref('');
+
+// 檢查是否是首次登入
+const isFirstLogin = computed(() => route.query.firstLogin === 'true');
+
+// 如果是首次登入且資料不完整，自動進入編輯模式
+onMounted(() => {
+  if (isFirstLogin.value && !Phone.value) {
+    IsEditing.value = true;
+  }
+});
 
 const ToggleEditing = (): void => {
-	IsEditing.value = !IsEditing.value;
+  if (IsEditing.value) {
+    // 儲存
+    handleSave();
+  } else {
+    // 進入編輯模式
+    IsEditing.value = true;
+    saveError.value = '';
+    saveSuccess.value = false;
+    phoneError.value = '';
+  }
+};
+
+// 驗證電話格式（台灣手機號碼：09開頭的10位數字）
+const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^09\d{8}$/;
+  return phoneRegex.test(phone.replace(/[-\s]/g, ''));
+};
+
+// 限制只能輸入數字
+const handlePhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // 移除所有非數字字符
+  const cleanValue = input.value.replace(/\D/g, '');
+  Phone.value = cleanValue;
+  checkPhoneFormat();
+};
+
+// 即時驗證電話格式
+const checkPhoneFormat = () => {
+  if (!Phone.value) {
+    phoneError.value = '';
+    return;
+  }
+
+  const cleanPhone = Phone.value.replace(/[-\s]/g, '');
+
+  if (cleanPhone.length > 0 && cleanPhone.length < 10) {
+    phoneError.value = '手機號碼需為10位數字';
+  } else if (cleanPhone.length === 10 && !validatePhone(cleanPhone)) {
+    phoneError.value = '請輸入09開頭的手機號碼';
+  } else if (cleanPhone.length === 10) {
+    phoneError.value = '';
+  } else if (cleanPhone.length > 10) {
+    phoneError.value = '手機號碼不得超過10位數字';
+  }
+};
+
+const handleSave = async () => {
+  saveError.value = '';
+  saveSuccess.value = false;
+  phoneError.value = '';
+
+  // 驗證必填欄位
+  if (!Name.value || Name.value.trim() === '') {
+    saveError.value = '請輸入姓名';
+    return;
+  }
+
+  if (Name.value.trim().length > 10) {
+    saveError.value = '姓名不得超過 10 個字';
+    return;
+  }
+
+  if (Nickname.value && Nickname.value.trim().length > 8) {
+    saveError.value = '暱稱不得超過 8 個字';
+    return;
+  }
+
+  if (!Phone.value || Phone.value.trim() === '') {
+    saveError.value = '請輸入電話號碼';
+    return;
+  }
+
+  // 驗證電話格式
+  const cleanPhone = Phone.value.replace(/[-\s]/g, '');
+  if (!validatePhone(cleanPhone)) {
+    saveError.value = '請輸入有效的手機號碼格式（例：0912345678）';
+    return;
+  }
+
+  // 儲存時使用乾淨的電話號碼（移除分隔符號）
+  Phone.value = cleanPhone;
+
+  isSaving.value = true;
+
+  try {
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        name: Name.value.trim(),
+        phone: Phone.value.trim(),
+        nickname: Nickname.value.trim(),
+        licensePlate: LicensePlate.value.trim(),
+      },
+    });
+
+    if (error) throw error;
+
+    saveSuccess.value = true;
+    IsEditing.value = false;
+
+    // 如果是首次登入，2秒後移除查詢參數
+    if (isFirstLogin.value) {
+      setTimeout(() => {
+        router.replace('/member/profile');
+      }, 2000);
+    }
+  } catch (error: any) {
+    saveError.value = error.message || '儲存失敗，請稍後再試';
+    console.error('更新用戶資料失敗:', error);
+  } finally {
+    isSaving.value = false;
+  }
 };
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f4f1eb]">
+	<div class="min-h-screen bg-[#f4f1eb] pt-[60px] sm:pt-[70px]">
 		<header class="bg-[#f9f7f4] border-b border-[#e0dbd3]">
 			<div class="max-w-5xl mx-auto px-6 py-5">
 				<h1 class="text-[#4a4540] tracking-wide">會員中心</h1>
+				<p v-if="isFirstLogin" class="text-sm text-[#8b7f6f] mt-2">
+					歡迎加入！請完善您的個人資訊以繼續使用
+				</p>
 			</div>
 		</header>
 		<main class="max-w-5xl mx-auto px-6 py-8 md:py-10">
 			<div class="space-y-8">
+				<!-- 成功訊息 -->
+				<div v-if="saveSuccess" class="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+					<span class="material-symbols-outlined text-green-500">check_circle</span>
+					<p class="text-sm text-green-700 font-medium">
+						{{ isFirstLogin ? '資料已儲存！歡迎使用 carE' : '資料已成功更新' }}
+					</p>
+				</div>
+
+				<!-- 錯誤訊息 -->
+				<div v-if="saveError" class="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+					<span class="material-symbols-outlined text-red-500">error</span>
+					<p class="text-sm text-red-700 font-medium">{{ saveError }}</p>
+				</div>
+
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
 						<button
 							type="button"
 							@click="ToggleEditing"
+							:disabled="isSaving"
 							:class="[
-								'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200',
+								'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer',
 								IsEditing
 									? 'bg-[#8b7f6f] text-[#f9f7f4] hover:bg-[#7a6f5f]'
 									: 'bg-[#e8e4dc] text-[#6b6460] hover:bg-[#d9d3c9]',
+								isSaving ? 'opacity-60 cursor-not-allowed' : ''
 							]"
 						>
 							<template v-if="IsEditing">
-								<span class="material-symbols-outlined text-[18px] leading-none">save</span>
-								儲存
+								<span v-if="isSaving" class="material-symbols-outlined text-[18px] leading-none animate-spin">progress_activity</span>
+								<span v-else class="material-symbols-outlined text-[18px] leading-none">save</span>
+								{{ isSaving ? '儲存中...' : '儲存' }}
 							</template>
 							<template v-else>
 								<span class="material-symbols-outlined text-[18px] leading-none">edit</span>
@@ -53,46 +212,64 @@ const ToggleEditing = (): void => {
 									v-if="IsEditing"
 									type="text"
 									v-model="Nickname"
+									maxlength="8"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入暱稱"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ Nickname }}
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ Nickname || '未設定' }}
 								</p>
 							</div>
 							<div class="space-y-2">
-								<label class="block text-sm text-[#6b6460]">姓名</label>
+								<label class="block text-sm text-[#6b6460]">
+									姓名
+									<span v-if="IsEditing" class="text-red-500">*</span>
+								</label>
 								<input
 									v-if="IsEditing"
 									type="text"
 									v-model="Name"
+									maxlength="10"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入姓名"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
 									{{ Name }}
 								</p>
 							</div>
 							<div class="space-y-2">
-								<label class="block text-sm text-[#6b6460]">電子郵件</label>
-								<input
-									v-if="IsEditing"
-									type="email"
-									v-model="Email"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
-								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
+								<label class="block text-sm text-[#6b6460]">
+									電子郵件
+									<span v-if="IsEditing" class="text-xs text-[#8b7f6f]">（不可變更）</span>
+								</label>
+								<p class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
 									{{ Email }}
 								</p>
 							</div>
 							<div class="space-y-2">
-								<label class="block text-sm text-[#6b6460]">電話</label>
-								<input
-									v-if="IsEditing"
-									type="tel"
-									v-model="Phone"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
-								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ Phone }}
+								<label class="block text-sm text-[#6b6460]">
+									電話
+									<span v-if="IsEditing" class="text-red-500">*</span>
+								</label>
+								<div v-if="IsEditing">
+									<input
+										type="tel"
+										v-model="Phone"
+										@input="handlePhoneInput"
+										:class="[
+											'w-full border rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 transition-colors',
+											phoneError ? 'border-red-500 focus:ring-red-500/30' : 'border-[#e0dbd3] focus:ring-[#8b7f6f]/30'
+										]"
+										placeholder="請輸入手機號碼（例：0912345678）"
+										maxlength="10"
+										inputmode="numeric"
+									/>
+									<p v-if="phoneError" class="mt-1 text-xs text-red-600">
+										{{ phoneError }}
+									</p>
+								</div>
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ Phone || '未設定' }}
 								</p>
 							</div>
 							<div class="space-y-2">
@@ -102,9 +279,10 @@ const ToggleEditing = (): void => {
 									type="text"
 									v-model="LicensePlate"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入車牌號碼（例：ABC-1234）"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ LicensePlate }}
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ LicensePlate || '未設定' }}
 								</p>
 							</div>
 						</div>

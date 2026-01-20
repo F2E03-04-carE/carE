@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import PricingCard from '@/components/ui/PricingCard.vue';
-import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
 const pricingPlans = [
   {

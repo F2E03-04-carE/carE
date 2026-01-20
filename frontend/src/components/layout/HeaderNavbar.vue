@@ -2,8 +2,8 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { useAuthStore } from '@/stores/auth';
 import LoginMode from '@/views/Auth/LoginMode.vue';
-import RegisterPage from '@/views/Auth/RegisterPage.vue';
 
 export interface HeaderNavbarProps {
   userRole?: 'guest' | 'member' | 'garage';
@@ -15,12 +15,34 @@ const props = withDefaults(defineProps<HeaderNavbarProps>(), {
 
 const router = useRouter();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const currentUserRole = computed(() => {
+  if (authStore.isAuthenticated) {
+    return userStore.userRole || 'member';
+  }
   if (userStore.isLoggedIn) {
     return userStore.userRole;
   }
   return props.userRole;
+});
+
+// 取得用戶顯示名稱（優先顯示 nickname，否則顯示 "用戶"）
+const userDisplayName = computed(() => {
+  if (authStore.user) {
+    const nickname = authStore.user.user_metadata?.nickname;
+    // 檢查 nickname 是否存在且不是空字串
+    if (nickname && nickname.trim() !== '') {
+      return nickname;
+    }
+    return '用戶';
+  }
+  // 對於 userStore.currentUser 也使用相同邏輯
+  const currentNickname = userStore.currentUser?.nickname;
+  if (currentNickname && currentNickname.trim() !== '') {
+    return currentNickname;
+  }
+  return '用戶';
 });
 
 const baseButtonClass =
@@ -30,7 +52,6 @@ const textOnlyButtonClass =
 
 const isMobileMenuOpen = ref(false);
 const isShowLoginModal = ref(false);
-const isShowRegister = ref(false);
 const isDropdownOpen = ref(false);
 const isMobileAccordionOpen = ref(false);
 
@@ -60,7 +81,6 @@ const closeDropdown = () => {
 
 const openLoginModal = () => {
   isShowLoginModal.value = true;
-  isShowRegister.value = false;
   closeMobileMenu();
 };
 
@@ -68,31 +88,29 @@ const closeLoginModal = () => {
   isShowLoginModal.value = false;
 };
 
-const handleGoToRegister = () => {
-  closeLoginModal();
-  isShowRegister.value = true;
-  closeMobileMenu();
-  window.scrollTo(0, 0);
-};
-
-const handleBackToLogin = () => {
-  isShowRegister.value = false;
-  isShowLoginModal.value = true;
-};
-
-const closeRegister = () => {
-  isShowRegister.value = false;
-};
-
-const handleLogout = () => {
-  closeMobileMenu();
-  closeDropdown();
+const handleLogout = async () => {
+  try {
+    await authStore.signOut();
+    userStore.logout();
+    closeMobileMenu();
+    closeDropdown();
+    router.push('/');
+  } catch (error) {
+    console.error('登出失敗:', error);
+  }
 };
 
 // 導航到「加入維修廠」頁面
 const handleGoToJoinGarage = () => {
   closeMobileMenu();
   router.push('/join-garage');
+};
+
+// 導航到指定頁面
+const handleNavigate = (path: string) => {
+  closeDropdown();
+  closeMobileMenu();
+  router.push(path);
 };
 
 interface MenuItem {
@@ -160,19 +178,10 @@ const currentMenu = computed(() => {
               @click="openLoginModal"
               :class="[
                 baseButtonClass,
-                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
-              ]"
-            >
-              登入
-            </button>
-            <button
-              @click="handleGoToRegister"
-              :class="[
-                baseButtonClass,
                 'bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] px-4 sm:px-6 lg:px-6 border border-transparent',
               ]"
             >
-              加入會員
+              登入/註冊
             </button>
           </template>
 
@@ -183,29 +192,31 @@ const currentMenu = computed(() => {
               @mouseleave="closeDropdown"
             >
               <button
-                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform']"
+                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform flex items-center gap-2']"
               >
-                {{ currentMenu.title }}
+                <i class="fa-solid fa-user text-[14px]"></i>
+                <span class="max-w-[150px] truncate">{{ userDisplayName }}</span>
+                <i class="fa-solid fa-chevron-down text-[10px]"></i>
               </button>
               <div
                 v-if="isDropdownOpen"
                 class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#e0e0db] pt-2 pb-2 z-50 before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-full before:h-2 before:bg-transparent"
               >
-                <a
+                <button
                   v-for="item in currentMenu.items"
                   :key="item.href"
-                  :href="item.href"
-                  class="block px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center"
+                  @click="handleNavigate(item.href)"
+                  class="block w-full px-4 py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] transition-colors text-center cursor-pointer"
                 >
                   {{ item.label }}
-                </a>
+                </button>
               </div>
             </div>
             <button
               @click="handleLogout"
               :class="[
                 baseButtonClass,
-                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white',
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white px-4 py-1 sm:py-1.5 transition-all'
               ]"
             >
               登出
@@ -244,47 +255,40 @@ const currentMenu = computed(() => {
           </button>
           <button
             @click="openLoginModal"
-            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
-          >
-            登入
-          </button>
-          <button
-            @click="handleGoToRegister"
             class="w-full py-3 text-[16px] bg-[#6b6b5a] text-white hover:bg-[#5a5a4a] rounded-lg transition-colors text-center"
           >
-            加入會員
+            登入/註冊
           </button>
         </template>
 
         <template v-else-if="currentMenu">
           <div class="flex flex-col gap-2">
-            <button
-              @click="toggleMobileAccordion"
-              class="w-full py-3 text-[16px] text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-            >
-              {{ currentMenu.title }}
-            </button>
+            <!-- User Name Header (Static) -->
             <div
-              v-if="isMobileAccordionOpen"
-              class="flex flex-col gap-2 pl-4"
+              class="w-full py-3 text-[16px] text-[#6b6b5a] border-b border-[#e0e0db] mb-2 font-bold flex items-center justify-center gap-2"
             >
-              <a
-                v-for="item in currentMenu.items"
-                :key="item.href"
-                :href="item.href"
-                class="w-full py-2 text-[14px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center"
-                @click="closeMobileMenu"
-              >
-                {{ item.label }}
-              </a>
+              <i class="fa-solid fa-user text-[14px]"></i>
+              <span class="max-w-[200px] truncate">{{ userDisplayName }}</span>
             </div>
+            
+            <!-- Menu Items -->
+            <button
+              v-for="item in currentMenu.items"
+              :key="item.href"
+              @click="handleNavigate(item.href)"
+              class="w-full py-3 text-[16px] text-[#4a4a43] hover:bg-[#f5f4f0] rounded-lg transition-colors text-center cursor-pointer"
+            >
+              {{ item.label }}
+            </button>
+            
+            <!-- Logout Button -->
+            <button
+              @click="handleLogout"
+              class="w-full py-3 text-[16px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center cursor-pointer mt-2"
+            >
+              登出
+            </button>
           </div>
-          <button
-            @click="handleLogout"
-            class="w-full py-3 text-[16px] border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white rounded-lg transition-colors text-center"
-          >
-            登出
-          </button>
         </template>
       </div>
     </nav>
@@ -292,13 +296,6 @@ const currentMenu = computed(() => {
     <LoginMode
       v-if="isShowLoginModal"
       @close="closeLoginModal"
-      @switch-to-signup="handleGoToRegister"
-    />
-
-    <RegisterPage
-      v-if="isShowRegister"
-      @close="closeRegister"
-      @switch-to-login="handleBackToLogin"
     />
   </header>
 </template>
