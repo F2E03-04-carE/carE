@@ -1,4 +1,3 @@
-// HoursSection.vue
 <script setup lang="ts">
 import { watch } from 'vue';
 import type { BusinessHour } from '@/types/garage';
