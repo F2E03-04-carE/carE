@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router'
 import ShopCard from '@/components/ui/ShopCard.vue';
+
 
 const orderTitle = ref('排序');
 const filterTitle = ref('篩選');
 const sortBy = ref('rating');
+const route = useRoute()
 const filterBy = ref('all');
 
 interface ResultItem {
@@ -47,44 +50,32 @@ const results = computed(() => {
   return filtered;
 });
 const resultsCount = computed(() => results.value.length);
+
 const fetchShops = async () => {
   try {
-    // TODO:從API取得搜尋結果
-    // 範例資料，實際應從API取得
-    allShops.value = [
-      {
-        id: 1,
-        name: '匠心汽車維修中心',
-        score: 5,
-        distance: 1.2,
-        reviewCount: 120,
-        brands: ['Benz', 'BMW', '奧迪', '保時捷'],
-        services: ['保養維護', '故障維修', '年檢服務', '鈑金噴漆', '輪胎更換', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=1',
-      },
-      {
-        id: 2,
-        name: '職人汽車保養廠',
-        score: 4,
-        distance: 2.5,
-        reviewCount: 85,
-        brands: ['豐田', '本田', 'Volvo', '馬自達'],
-        services: ['定期保養', '引擎維修', '變速箱維修', '煞車系統', '電路檢修', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=2',
-      },
-      {
-        id: 3,
-        name: '專業汽車維修站',
-        score: 3,
-        distance: 3.8,
-        reviewCount: 50,
-        brands: ['福斯', '奧迪', '保時捷', 'BMW'],
-        services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
-        image: 'https://picsum.photos/300/200?random=3',
-      },
-    ];
+    const searchParams = {
+      city: route.query.city,
+      location: route.query.location,
+      brand: route.query.brand,
+      repair: route.query.repair
+    }
+
+    console.log('搜尋參數:', searchParams)
+
+    // 呼叫後端 API
+    const params = new URLSearchParams(searchParams as Record<string, string>)
+    const response = await fetch(`/api/search?${params.toString()}`)
+
+    if (!response.ok) {
+      throw new Error('搜尋失敗')
+    }
+
+    const data = await response.json()
+    allShops.value = data
+
   } catch (err) {
-    console.log('沒有符合資料的結果:', err);
+    console.log('沒有符合資料的結果:', err)
+    allShops.value = []
   }
 };
 
