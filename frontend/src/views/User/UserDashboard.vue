@@ -24,6 +24,7 @@ const IsEditing = ref(false);
 const isSaving = ref(false);
 const saveError = ref('');
 const saveSuccess = ref(false);
+const phoneError = ref('');
 
 // 檢查是否是首次登入
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
@@ -44,23 +45,70 @@ const ToggleEditing = (): void => {
     IsEditing.value = true;
     saveError.value = '';
     saveSuccess.value = false;
+    phoneError.value = '';
+  }
+};
+
+// 驗證電話格式（台灣手機號碼：09開頭的10位數字）
+const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^09\d{8}$/;
+  return phoneRegex.test(phone.replace(/[-\s]/g, ''));
+};
+
+// 限制只能輸入數字
+const handlePhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  // 移除所有非數字字符
+  const cleanValue = input.value.replace(/\D/g, '');
+  Phone.value = cleanValue;
+  checkPhoneFormat();
+};
+
+// 即時驗證電話格式
+const checkPhoneFormat = () => {
+  if (!Phone.value) {
+    phoneError.value = '';
+    return;
+  }
+
+  const cleanPhone = Phone.value.replace(/[-\s]/g, '');
+
+  if (cleanPhone.length > 0 && cleanPhone.length < 10) {
+    phoneError.value = '手機號碼需為10位數字';
+  } else if (cleanPhone.length === 10 && !validatePhone(cleanPhone)) {
+    phoneError.value = '請輸入09開頭的手機號碼';
+  } else if (cleanPhone.length === 10) {
+    phoneError.value = '';
+  } else if (cleanPhone.length > 10) {
+    phoneError.value = '手機號碼不得超過10位數字';
   }
 };
 
 const handleSave = async () => {
   saveError.value = '';
   saveSuccess.value = false;
+  phoneError.value = '';
 
   // 驗證必填欄位
+  if (!Name.value || Name.value.trim() === '') {
+    saveError.value = '請輸入姓名';
+    return;
+  }
+
   if (!Phone.value || Phone.value.trim() === '') {
     saveError.value = '請輸入電話號碼';
     return;
   }
 
-  if (!Name.value || Name.value.trim() === '') {
-    saveError.value = '請輸入姓名';
+  // 驗證電話格式
+  const cleanPhone = Phone.value.replace(/[-\s]/g, '');
+  if (!validatePhone(cleanPhone)) {
+    saveError.value = '請輸入有效的手機號碼格式（例：0912345678）';
     return;
   }
+
+  // 儲存時使用乾淨的電話號碼（移除分隔符號）
+  Phone.value = cleanPhone;
 
   isSaving.value = true;
 
@@ -155,9 +203,10 @@ const handleSave = async () => {
 									type="text"
 									v-model="Nickname"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入暱稱"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ Nickname }}
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ Nickname || '未設定' }}
 								</p>
 							</div>
 							<div class="space-y-2">
@@ -170,8 +219,9 @@ const handleSave = async () => {
 									type="text"
 									v-model="Name"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入姓名"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
 									{{ Name }}
 								</p>
 							</div>
@@ -189,14 +239,25 @@ const handleSave = async () => {
 									電話
 									<span v-if="IsEditing" class="text-red-500">*</span>
 								</label>
-								<input
-									v-if="IsEditing"
-									type="tel"
-									v-model="Phone"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
-								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ Phone }}
+								<div v-if="IsEditing">
+									<input
+										type="tel"
+										v-model="Phone"
+										@input="handlePhoneInput"
+										:class="[
+											'w-full border rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 transition-colors',
+											phoneError ? 'border-red-500 focus:ring-red-500/30' : 'border-[#e0dbd3] focus:ring-[#8b7f6f]/30'
+										]"
+										placeholder="請輸入手機號碼（例：0912345678）"
+										maxlength="10"
+										inputmode="numeric"
+									/>
+									<p v-if="phoneError" class="mt-1 text-xs text-red-600">
+										{{ phoneError }}
+									</p>
+								</div>
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ Phone || '未設定' }}
 								</p>
 							</div>
 							<div class="space-y-2">
@@ -206,9 +267,10 @@ const handleSave = async () => {
 									type="text"
 									v-model="LicensePlate"
 									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									placeholder="請輸入車牌號碼（例：ABC-1234）"
 								/>
-								<p v-else class="px-4 py-3 text-[#4a4540]">
-									{{ LicensePlate }}
+								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
+									{{ LicensePlate || '未設定' }}
 								</p>
 							</div>
 						</div>
