@@ -127,19 +127,27 @@ const handleGoogleLogin = async () => {
             </span>
             <span v-else>發送登入連結</span>
           </button>
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t border-gray-300"></span>
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-white px-2 text-gray-500">或</span>
+            </div>
+          </div>
           <button
           type="button"
           @click="handleGoogleLogin"
           :disabled="isLoading"
           class="flex items-center justify-center w-full gap-3 px-4 py-2.5 text-[16px] font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all shadow-sm cursor-pointer disabled:opacity-60"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+          >
+            <img
+            src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png"
             class="w-5 h-5"
             alt="Google"
-          />
-          使用 Google 帳號登入
-        </button>
+            />
+              使用 Google 帳號登入
+          </button>
         </form>
       </div>
     </div>
