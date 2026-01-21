@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import PricingCard from '@/components/ui/PricingCard.vue';
+
+const router = useRouter();
 
 const pricingPlans = [
   {
@@ -30,20 +32,8 @@ const pricingPlans = [
   },
 ];
 
-const isShowRegister = ref(false);
-const openRegisterModal = () => {
-  isShowRegister.value = true;
-};
-const closeRegisterModal = () => {
-  isShowRegister.value = false;
-};
-
-// 處理註冊成功後的導向（導向商家基本資料審核頁面）
-// TODO: 之後需要建立商家審核頁面並使用 router.push
-const handleRegisterSuccess = () => {
-  closeRegisterModal();
-  console.log('註冊成功，將導向商家基本資料審核頁面');
-  // TODO: router.push('/garage/profile-review');
+const navigateToOnboarding = () => {
+  router.push('/garage/onboarding');
 };
 </script>
 
@@ -65,7 +55,7 @@ const handleRegisterSuccess = () => {
           加入 carE 平台，接觸更多潛在客戶，建立專業形象，輕鬆管理預約與評價
         </p>
         <button
-          @click="openRegisterModal"
+          @click="navigateToOnboarding"
           class="px-8 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即加入
@@ -144,7 +134,7 @@ const handleRegisterSuccess = () => {
           :button-text="plan.buttonText"
           :color="plan.color"
           :is-recommended="plan.isRecommended"
-          @button-click="openRegisterModal"
+          @button-click="navigateToOnboarding"
         />
       </div>
     </section>
@@ -158,7 +148,7 @@ const handleRegisterSuccess = () => {
           立即註冊，三分鐘完成設定，開始接收預約
         </p>
         <button
-          @click="openRegisterModal"
+          @click="navigateToOnboarding"
           class="inline-block px-10 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即開始
@@ -170,15 +160,5 @@ const handleRegisterSuccess = () => {
       </div>
     </section>
   </main>
-
-  <!-- 使用 Teleport 將 RegisterPage 模態框渲染到 body -->
-  <Teleport to="body">
-    <RegisterPage
-      v-if="isShowRegister"
-      user-type="garage"
-      @close="closeRegisterModal"
-      @register-success="handleRegisterSuccess"
-    />
-  </Teleport>
 </template>
 

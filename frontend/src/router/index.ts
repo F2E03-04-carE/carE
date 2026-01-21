@@ -65,6 +65,15 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/garage/onboarding',
+      name: 'GarageOnboarding',
+      component: () => import('@/views/Garage/GarageOnboarding.vue'),
+      meta: {
+        title: '商家基本資料 - carE',
+        requiresAuth: true,
+      },
+    },
   ],
 });
 
