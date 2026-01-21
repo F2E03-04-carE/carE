@@ -1,14 +1,43 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+const uiStore = useUiStore()
 
 const isOpenMap = ref(false)
 const isOpenSurroundings = ref(false)
+
+const handleBooking = () => {
+  const garageId = route.params.id as string
+  
+  if (!authStore.isAuthenticated) {
+    // 未登入，開啟登入浮窗並記錄目前路徑
+    uiStore.openLoginModal(route.fullPath)
+  } else {
+    // 已登入，進入預約流程
+    router.push({ name: 'BookingFlow', params: { garageId } })
+  }
+}
+
+const goBack = () => {
+  router.back()
+}
 </script>
 
 <template>
   <div class="min-h-screen py-8 bg-[#FAF8F5] min-w-[450px]">
     <div class="max-w-6xl mx-auto px-4">
-      <div class="inline-flex items-center px-4 py-2 mb-4 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">← 返回搜尋結果</div>
+      <div 
+        @click="goBack"
+        class="inline-flex items-center px-4 py-2 mb-4 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+      >
+        ← 返回搜尋結果
+      </div>
       <div class="flex flex-col lg:flex-row gap-6 items-start">
         <div class="flex-1 w-full min-w-0 space-y-6">
           <section class="p-6 bg-white rounded-2xl shadow-sm">
@@ -76,7 +105,12 @@ const isOpenSurroundings = ref(false)
                 </ul>
               </div>
             </div>
-            <button class="w-full mt-8 py-3 text-white bg-[#6B6B5C] rounded-xl transition hover:opacity-90">立即預約</button>
+            <button 
+              @click="handleBooking"
+              class="w-full mt-8 py-3 text-white bg-[#6B6B5C] rounded-xl transition hover:opacity-90"
+            >
+              立即預約
+            </button>
 
             <!-- 手機版折疊選單 (接在立即預約下方) -->
             <div class="mt-6 space-y-4 lg:hidden">

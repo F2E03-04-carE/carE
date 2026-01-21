@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ShopCard from '@/components/ui/ShopCard.vue';
 
 
@@ -8,6 +8,7 @@ const orderTitle = ref('排序');
 const filterTitle = ref('篩選');
 const sortBy = ref('rating');
 const route = useRoute()
+const router = useRouter()
 const filterBy = ref('all');
 
 interface ResultItem {
@@ -118,8 +119,7 @@ const fetchShops = async () => {
 
 const handleViewDetail = (shopId: number) => {
   console.log('使用者要查看商店詳細，ID:', shopId);
-  // TODO: 之後這裡會接路由跳轉
-  alert(`查看商店 ID: ${shopId} 的詳細資料`);
+  router.push({ name: 'GarageDetail', params: { id: shopId } });
 };
 
 onMounted(() => {
