@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import PageHead from '@/components/GarageAdmin/PageHead.vue';
 import EditSection from '@/components/GarageAdmin/EditSection.vue';
 import InfoSection from '@/components/GarageAdmin/InfoSection.vue';
@@ -8,7 +8,9 @@ import PhotosSection from '@/components/GarageAdmin/PhotosSection.vue';
 import SubscriptionSection from '@/components/GarageAdmin/SubscriptionSection.vue';
 import Toast from '@/components/Admin/Toast.vue';
 import type { WorkshopInfo, BusinessHour } from '@/types/garage';
-import { mockWorkshopInfo, mockBusinessHours } from '@/composables/garage/mockData';
+import { useGarageStore } from '@/stores/garage';
+
+const garageStore = useGarageStore();
 
 interface GarageFormData {
   info: WorkshopInfo;
@@ -16,11 +18,31 @@ interface GarageFormData {
   plan: string;
 }
 
-// 廠房資料
+// 預設營業時間結構 (全空)
+const defaultHours: BusinessHour[] = [
+  { day: '週一', enabled: true, start: '09:00', end: '18:00', capacity: 0 },
+  { day: '週二', enabled: true, start: '09:00', end: '18:00', capacity: 0 },
+  { day: '週三', enabled: true, start: '09:00', end: '18:00', capacity: 0 },
+  { day: '週四', enabled: true, start: '09:00', end: '18:00', capacity: 0 },
+  { day: '週五', enabled: true, start: '09:00', end: '18:00', capacity: 0 },
+  { day: '週六', enabled: false, start: '', end: '', capacity: 0 },
+  { day: '週日', enabled: false, start: '', end: '', capacity: 0 },
+];
+
+// 廠房資料 (初始為空)
 const garageInfo = reactive<GarageFormData>({
-  info: { ...mockWorkshopInfo },
-  hours: JSON.parse(JSON.stringify(mockBusinessHours)),
-  plan: '', // 預設為空，強制使用者選擇方案
+  info: {
+    name: '',
+    phone: '',
+    address: '',
+    taxId: '',
+    description: '',
+    brands: [],
+    skills: [],
+    images: [],
+  },
+  hours: JSON.parse(JSON.stringify(defaultHours)),
+  plan: '',
 });
 
 // 存放使用者選擇的原始圖片檔案
@@ -33,6 +55,18 @@ const toastMessage = ref('');
 const toastType = ref<'success' | 'error'>('success');
 const hasTimeError = ref(false);
 const hasInfoError = ref(false);
+
+onMounted(() => {
+  // 從 GarageStore 載入暫存資料 (來自 Onboarding)
+  if (garageStore.tempGarageInfo) {
+    garageInfo.info = {
+      ...garageInfo.info,
+      ...garageStore.tempGarageInfo,
+    };
+    // 載入後可以選擇是否清除 store，或保留以防重新整理
+    // garageStore.clearTempGarageInfo(); 
+  }
+});
 
 const handleSave = async () => {
   // 再次檢查是否有選擇方案

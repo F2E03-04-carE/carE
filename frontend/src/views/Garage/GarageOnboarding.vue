@@ -3,11 +3,13 @@ import { ref, reactive, computed, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useAuthStore } from '@/stores/auth';
+import { useGarageStore } from '@/stores/garage';
 import FormInput from '@/components/ui/FormInput.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const garageStore = useGarageStore();
 const currentStep = ref(1);
 const isSubmitting = ref(false);
 
@@ -183,6 +185,14 @@ const startCountdown = () => {
 
     // 確保角色已切換為 'garage'
     userStore.switchRole('garage');
+
+    // 將資料存入 GarageStore
+    garageStore.setTempGarageInfo({
+        name: formData.garageName,
+        phone: formData.phone,
+        address: formData.address,
+        taxId: formData.taxId,
+    });
 
 	countdown.value = 3;
 
