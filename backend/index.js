@@ -7,12 +7,29 @@ import 'dotenv/config'
 
 const app = express()
 
-// CORS 設定：根據環境變數允許對應的前端網域
+// CORS 設定：允許前端跨域請求
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://care-f.zeabur.app',
+  process.env.FRONTEND_URL, // 額外的自訂網域
+].filter(Boolean); // 過濾掉 undefined
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL // 生產環境：使用環境變數設定的前端網址
-    : ['http://localhost:5173', 'http://localhost:5174'], // 開發環境：允許本地前端
+  origin: (origin, callback) => {
+    // 允許沒有 origin 的請求（例如 Postman、curl）
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions))
