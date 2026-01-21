@@ -16,12 +16,14 @@ export const useAuthStore = defineStore('auth', () => {
     const userStore = useUserStore();
 
     if (user.value) {
+      const { full_name, name, avatar_url, role } = user.value.user_metadata;
       // 登入時更新 userStore
       userStore.login({
         id: user.value.id,
-        name: user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
+        name: full_name || name || user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
         email: user.value.email || '',
         role: user.value.user_metadata?.role || 'member',
+        avatar: avatar_url,
         nickname: user.value.user_metadata?.nickname,
       });
     } else {
@@ -29,8 +31,6 @@ export const useAuthStore = defineStore('auth', () => {
       userStore.logout();
     }
   }
-
-  // 初始化認證狀態
   async function initialize() {
     loading.value = true;
     try {
@@ -70,6 +70,21 @@ export const useAuthStore = defineStore('auth', () => {
     if (error) throw error;
   }
 
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) throw error;
+  }
+
   // 登出
   async function signOut() {
     const { error } = await supabase.auth.signOut();
@@ -79,6 +94,8 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = null;
   }
 
+
+
   return {
     user,
     session,
@@ -86,6 +103,9 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     initialize,
     signInWithMagicLink,
+    signInWithGoogle,
     signOut,
   };
 });
+
+
