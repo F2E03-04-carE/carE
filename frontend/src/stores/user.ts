@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-export type UserRole = 'guest' | 'member' | 'garage';
+export type UserRole = 'guest' | 'member' | 'garage' | 'admin';
 
 export interface User {
   id: string;

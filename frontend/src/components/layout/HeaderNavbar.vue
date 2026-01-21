@@ -3,10 +3,11 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useAuthStore } from '@/stores/auth';
+import { useUiStore } from '@/stores/ui';
 import LoginMode from '@/views/Auth/LoginMode.vue';
 
 export interface HeaderNavbarProps {
-  userRole?: 'guest' | 'member' | 'garage';
+  userRole?: 'guest' | 'member' | 'garage' | 'admin';
 }
 
 const props = withDefaults(defineProps<HeaderNavbarProps>(), {
@@ -16,6 +17,7 @@ const props = withDefaults(defineProps<HeaderNavbarProps>(), {
 const router = useRouter();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const uiStore = useUiStore();
 
 const currentUserRole = computed(() => {
   if (authStore.isAuthenticated) {
@@ -51,7 +53,6 @@ const textOnlyButtonClass =
   'px-2 py-2 sm:px-4 sm:py-2 lg:px-3 lg:py-2 text-[14px] sm:text-[15px] lg:text-[16px] cursor-pointer';
 
 const isMobileMenuOpen = ref(false);
-const isShowLoginModal = ref(false);
 const isDropdownOpen = ref(false);
 const isMobileAccordionOpen = ref(false);
 
@@ -67,10 +68,6 @@ const closeMobileMenu = () => {
   isMobileAccordionOpen.value = false;
 };
 
-const toggleMobileAccordion = () => {
-  isMobileAccordionOpen.value = !isMobileAccordionOpen.value;
-};
-
 const openDropdown = () => {
   isDropdownOpen.value = true;
 };
@@ -80,12 +77,12 @@ const closeDropdown = () => {
 };
 
 const openLoginModal = () => {
-  isShowLoginModal.value = true;
+  uiStore.openLoginModal();
   closeMobileMenu();
 };
 
 const closeLoginModal = () => {
-  isShowLoginModal.value = false;
+  uiStore.closeLoginModal();
 };
 
 const handleLogout = async () => {
@@ -94,6 +91,7 @@ const handleLogout = async () => {
     userStore.logout();
     closeMobileMenu();
     closeDropdown();
+    // 登出後若在受保護頁面，router 守衛會自動處理，這裡導回首頁較安全
     router.push('/');
   } catch (error) {
     console.error('登出失敗:', error);
@@ -122,26 +120,34 @@ const menuConfig = {
   member: {
     title: '會員管理',
     items: [
-      { label: '會員基本資料', href: '/member/profile' },
+      { label: '會員基本資料', href: '/member' }, // 儀表板/Profile
+      { label: '愛車管理', href: '/member/vehicles' },
       { label: '預約紀錄', href: '/member/bookings' },
-      { label: '維修歷史', href: '/member/history' },
-      { label: '刊登維修廠', href: '/member/post-garage' },
+      { label: '歷史保養', href: '/member/history' },
+      // { label: '刊登維修廠', href: '/join-garage' }, // 會員也可以看招募頁，但不一定要放在選單
     ],
   },
   garage: {
     title: '商家管理',
     items: [
-      { label: '今日總覽', href: '/garage/dashboard' },
-      { label: '商家基本資料', href: '/garage/profile' },
-      { label: '預約排程', href: '/garage/schedule' },
-      { label: '歷史訂單', href: '/garage/orders' },
+      { label: '商家總覽', href: '/garage-admin/overview' },
+      { label: '訂單管理', href: '/garage-admin/orders' },
+      { label: '排程管理', href: '/garage-admin/schedule' },
+      { label: '商家資訊', href: '/garage-admin/edit' },
+    ],
+  },
+  admin: {
+    title: '平台管理',
+    items: [
+      { label: '會員管理', href: '/admin/members' },
+      { label: '評價管理', href: '/admin/reviews' },
     ],
   },
 };
 
 const currentMenu = computed(() => {
   const role = currentUserRole.value;
-  if (role === 'member' || role === 'garage') {
+  if (role === 'member' || role === 'garage' || role === 'admin') {
     return menuConfig[role];
   }
   return null;
@@ -301,7 +307,7 @@ const currentMenu = computed(() => {
     </nav>
 
     <LoginMode
-      v-if="isShowLoginModal"
+      v-if="uiStore.isLoginModalOpen"
       @close="closeLoginModal"
     />
   </header>
