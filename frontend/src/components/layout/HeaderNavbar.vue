@@ -20,11 +20,12 @@ const authStore = useAuthStore();
 const uiStore = useUiStore();
 
 const currentUserRole = computed(() => {
-  if (authStore.isAuthenticated) {
-    return userStore.userRole || 'member';
-  }
+  // 優先使用 userStore 的角色狀態，因為在 Onboarding 流程中我們可能會手動切換角色
   if (userStore.isLoggedIn) {
     return userStore.userRole;
+  }
+  if (authStore.isAuthenticated) {
+    return userStore.userRole || 'member';
   }
   return props.userRole;
 });
@@ -87,14 +88,16 @@ const closeLoginModal = () => {
 
 const handleLogout = async () => {
   try {
-    await authStore.signOut();
+    // 嘗試呼叫 Supabase 登出，但即使失敗也要執行後續的前端登出邏輯
+    await authStore.signOut().catch(err => console.warn('Supabase sign out warning:', err));
+  } catch (error) {
+    console.error('登出過程發生錯誤:', error);
+  } finally {
+    // 無論如何都要清除前端狀態並導航
     userStore.logout();
     closeMobileMenu();
     closeDropdown();
-    // 登出後若在受保護頁面，router 守衛會自動處理，這裡導回首頁較安全
     router.push('/');
-  } catch (error) {
-    console.error('登出失敗:', error);
   }
 };
 
@@ -124,7 +127,6 @@ const menuConfig = {
       { label: '愛車管理', href: '/member/vehicles' },
       { label: '預約紀錄', href: '/member/bookings' },
       { label: '歷史保養', href: '/member/history' },
-      // { label: '刊登維修廠', href: '/join-garage' }, // 會員也可以看招募頁，但不一定要放在選單
     ],
   },
   garage: {
