@@ -7,7 +7,15 @@ import 'dotenv/config'
 
 const app = express()
 
-app.use(cors())
+// CORS 設定：根據環境變數允許對應的前端網域
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.FRONTEND_URL // 生產環境：使用環境變數設定的前端網址
+    : ['http://localhost:5173', 'http://localhost:5174'], // 開發環境：允許本地前端
+  credentials: true,
+};
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 

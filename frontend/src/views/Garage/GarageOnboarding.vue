@@ -108,7 +108,9 @@ const handleSubmit = () => {
   isSubmitting.value = true;
   currentStep.value = 2;
 
-fetch(`/api/verify-taxid?taxId=${formData.taxId}`)
+  // 使用環境變數的後端 API URL
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  fetch(`${apiUrl}/api/verify-taxid?taxId=${formData.taxId}`)
   .then((res) => {
     if (!res.ok) throw new Error('API error');
     return res.json();

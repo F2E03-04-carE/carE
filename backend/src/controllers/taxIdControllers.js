@@ -15,11 +15,12 @@ export const verifyTaxId = (req, res) => {
     .then(data => {
       // 政府 API 回傳陣列，檢查是否有資料且 exist === "Y"
       // data 格式：[{ Year: "115", exist: "Y", TYPE: "公司" }]
-      const exists = Array.isArray(data) && data.some(d => d.exist === 'Y');
+      const hasData = Array.isArray(data) && data.length > 0;
+      const exists = hasData && data[0].exist === 'Y';
 
       res.json({
         exists,
-        type: exists ? data[0].TYPE : null 
+        type: exists ? data[0].TYPE : null
       });
     })
     .catch(err => {
