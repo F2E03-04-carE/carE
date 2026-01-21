@@ -23,7 +23,7 @@ const router = useRouter();
           我們正在努力開發此功能，敬請期待！您將能在此查看所有的預約紀錄。
         </p>
         <button
-          @click="router.push('/member/profile')"
+          @click="router.push('/member')"
           class="px-6 py-3 bg-[#8b7f6f] text-white rounded-lg hover:bg-[#7a6f5f] transition-colors cursor-pointer"
         >
           返回會員中心

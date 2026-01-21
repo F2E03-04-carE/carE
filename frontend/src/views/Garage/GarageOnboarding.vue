@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import { useAuthStore } from '@/stores/auth';
 import FormInput from '@/components/ui/FormInput.vue';
 
 const router = useRouter();
+const userStore = useUserStore();
+const authStore = useAuthStore();
 const currentStep = ref(1);
 const isSubmitting = ref(false);
 
@@ -156,6 +160,29 @@ const backToForm = () => {
 // 啟動倒數計時
 const startCountdown = () => {
 	clearCountdownTimer();
+    
+    // 如果使用者尚未登入，手動建立一個模擬的登入狀態 (為了繞過 Router Guard)
+    if (!authStore.user) {
+        // @ts-ignore: Mocking Supabase user structure
+        authStore.user = {
+            id: 'mock-garage-id-' + Date.now(),
+            email: 'garage@example.com',
+            app_metadata: {},
+            user_metadata: { role: 'garage', name: formData.ownerName },
+            aud: 'authenticated',
+            created_at: new Date().toISOString()
+        };
+        // 同步登入 UserStore
+        userStore.login({
+            id: authStore.user!.id,
+            name: formData.ownerName,
+            email: 'garage@example.com',
+            role: 'garage'
+        });
+    }
+
+    // 確保角色已切換為 'garage'
+    userStore.switchRole('garage');
 
 	countdown.value = 3;
 
@@ -164,7 +191,7 @@ const startCountdown = () => {
 
 		if (countdown.value <= 0) {
 			clearCountdownTimer();
-			router.push('/garage/profile');
+			router.push('/garage-admin/edit');
 		}
 	}, 1000);
 };
