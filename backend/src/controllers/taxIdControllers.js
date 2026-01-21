@@ -1,66 +1,29 @@
-export const verifyTaxId = async (req, res) => {
+export const verifyTaxId = (req, res) => {
   const { taxId } = req.query;
-
   if (!taxId || taxId.length !== 8 || !/^\d+$/.test(taxId)) {
     return res.status(400).json({ exists: false, error: '統編格式錯誤' });
   }
 
-  console.log(`正在驗證統編: ${taxId}`);
-  const url = `https://opendata.vip/data/company?keyword=${taxId}`;
+  const filter = encodeURIComponent(`No eq ${taxId}`);
+  const url = `https://data.gcis.nat.gov.tw/od/data/api/673F0FC0-B3A7-429F-9041-E9866836B66D?$format=json&$filter=${filter}`;
 
-  try {
-    const r = await fetch(url);
-    const text = await r.text(); // 先拿原始字串
+  fetch(url)
+    .then(r => {
+      if (!r.ok) throw new Error('政府 API 回應錯誤');
+      return r.json();
+    })
+    .then(data => {
+      // 政府 API 回傳陣列，檢查是否有資料且 exist === "Y"
+      // data 格式：[{ Year: "115", exist: "Y", TYPE: "公司" }]
+      const exists = Array.isArray(data) && data.some(d => d.exist === 'Y');
 
-    // 🔍 Debug 用
-    console.log('第三方 API raw response 前200字:', text.slice(0, 200));
-
-    let data;
-    try {
-      data = JSON.parse(text); // 嘗試 parse
-    } catch (e) {
-      console.error('不是 JSON，實際內容是 HTML 或錯誤頁');
-      return res.status(502).json({
-        exists: false,
-        error: '第三方 API 回傳非 JSON',
-        fallback: true
+      res.json({
+        exists,
+        type: exists ? data[0].TYPE : null 
       });
-    }
-
-    const hasData = data.output && Array.isArray(data.output) && data.output.length > 0;
-
-    if (!hasData) {
-      return res.json({
-        exists: false,
-        companyName: null,
-        status: null,
-        source: 'third-party'
-      });
-    }
-
-    const company = data.output[0];
-    const taxIdFromAPI = company.Business_Accounting_NO;
-    const companyName = company.Company_Name;
-    const status = company.Company_Status_Desc;
-
-    const isActive = status === '核准設立';
-    const isTaxIdMatch = taxIdFromAPI === taxId;
-
-    return res.json({
-      exists: isActive && isTaxIdMatch,
-      companyName,
-      status,
-      taxId: taxIdFromAPI,
-      source: 'third-party'
+    })
+    .catch(err => {
+      console.error('驗證統編時發生錯誤:', err);
+      res.status(500).json({ exists: false, error: '伺服器錯誤' });
     });
-
-  } catch (err) {
-    console.error('驗證統編時發生錯誤:', err);
-
-    return res.status(500).json({
-      exists: false,
-      error: '第三方 API 失敗',
-      fallback: true
-    });
-  }
 };
