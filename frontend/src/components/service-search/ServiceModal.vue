@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 defineProps<{ bookingCode: string }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'again'): void;
 }>();
+
+const router = useRouter();
+
+const goToBookings = () => {
+  router.push('/member/bookings');
+};
 </script>
 
 <template>
@@ -40,7 +48,7 @@ defineEmits<{
           <button
             type="button"
             class="mt-8 w-full rounded-xl bg-[#6B6B5C] px-6 py-4 text-base font-bold text-white hover:opacity-95 active:opacity-90"
-            @click="$emit('again')"
+            @click="goToBookings"
           >
             查看預約狀態
           </button>
