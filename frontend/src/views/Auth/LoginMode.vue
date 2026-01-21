@@ -38,6 +38,20 @@ const handleLoginSubmit = async () => {
     isLoading.value = false;
   }
 };
+
+const handleGoogleLogin = async () => {
+  formError.value = '';
+  isLoading.value = true;
+
+  try {
+    await authStore.signInWithGoogle();
+
+    // 導向 Google 登入頁
+  } catch (error: any) {
+    formError.value = error.message || 'Google 登入失敗，請稍後再試';
+    isLoading.value = false;
+  }
+};
 </script>
 
 <template>
@@ -113,6 +127,19 @@ const handleLoginSubmit = async () => {
             </span>
             <span v-else>發送登入連結</span>
           </button>
+          <button
+          type="button"
+          @click="handleGoogleLogin"
+          :disabled="isLoading"
+          class="flex items-center justify-center w-full gap-3 px-4 py-2.5 text-[16px] font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all shadow-sm cursor-pointer disabled:opacity-60"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+            class="w-5 h-5"
+            alt="Google"
+          />
+          使用 Google 帳號登入
+        </button>
         </form>
       </div>
     </div>

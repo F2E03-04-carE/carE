@@ -195,7 +195,13 @@ const currentMenu = computed(() => {
               <button
                 :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform flex items-center gap-2']"
               >
-                <i class="fa-solid fa-user text-[14px]"></i>
+                 <img
+                  v-if="userStore.currentUser?.avatar"
+                   :src="userStore.currentUser.avatar"
+                  class="w-8 h-8 rounded-full border border-gray-200"
+                  referrerpolicy="no-referrer"
+                />
+                <i  v-esle class="fa-solid fa-user text-[14px]"></i>
                 <span class="max-w-[150px] truncate">{{ userDisplayName }}</span>
                 <i class="fa-solid fa-chevron-down text-[10px]"></i>
               </button>
@@ -271,7 +277,7 @@ const currentMenu = computed(() => {
               <i class="fa-solid fa-user text-[14px]"></i>
               <span class="max-w-[200px] truncate">{{ userDisplayName }}</span>
             </div>
-            
+
             <!-- Menu Items -->
             <button
               v-for="item in currentMenu.items"
@@ -281,7 +287,7 @@ const currentMenu = computed(() => {
             >
               {{ item.label }}
             </button>
-            
+
             <!-- Logout Button -->
             <button
               @click="handleLogout"
