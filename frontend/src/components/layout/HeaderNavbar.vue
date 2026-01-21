@@ -201,7 +201,7 @@ const currentMenu = computed(() => {
                   class="w-8 h-8 rounded-full border border-gray-200"
                   referrerpolicy="no-referrer"
                 />
-                <i  v-esle class="fa-solid fa-user text-[14px]"></i>
+                <i  v-else class="fa-solid fa-user text-[14px]"></i>
                 <span class="max-w-[150px] truncate">{{ userDisplayName }}</span>
                 <i class="fa-solid fa-chevron-down text-[10px]"></i>
               </button>
