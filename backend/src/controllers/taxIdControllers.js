@@ -5,6 +5,7 @@ export const verifyTaxId = async (req, res) => {
     return res.status(400).json({ exists: false, error: '統編格式錯誤' });
   }
 
+  console.log(`正在驗證統編: ${taxId}`);
   const url = `https://opendata.vip/data/company?keyword=${taxId}`;
 
   try {

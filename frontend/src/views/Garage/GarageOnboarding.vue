@@ -114,6 +114,7 @@ fetch(`/api/verify-taxid?taxId=${formData.taxId}`)
     return res.json();
   })
   .then((data) => {
+    console.log('驗證結果：', data);
     const isValid = data.exists;
 
     if (isValid) {
