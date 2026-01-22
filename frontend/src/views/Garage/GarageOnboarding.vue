@@ -165,26 +165,37 @@ const startCountdown = () => {
     
     // 如果使用者尚未登入，手動建立一個模擬的登入狀態 (為了繞過 Router Guard)
     if (!authStore.user) {
-        // @ts-ignore: Mocking Supabase user structure
-        authStore.user = {
-            id: 'mock-garage-id-' + Date.now(),
-            email: 'garage@example.com',
-            app_metadata: {},
-            user_metadata: { role: 'garage', name: formData.ownerName },
-            aud: 'authenticated',
-            created_at: new Date().toISOString()
-        };
-        // 同步登入 UserStore
-        userStore.login({
-            id: authStore.user!.id,
-            name: formData.ownerName,
-            email: 'garage@example.com',
-            role: 'garage'
-        });
+        // TODO: 接上後端 API 後，這裡應改為處理 API 回傳的真實 Token 與使用者資料
+        if (import.meta.env.DEV) {
+            console.warn('目前為開發模式，使用模擬登入狀態');
+            // @ts-ignore: Mocking Supabase user structure
+            authStore.user = {
+                id: 'mock-garage-id-' + Date.now(),
+                email: 'garage@example.com',
+                app_metadata: {},
+                user_metadata: { role: 'garage', name: formData.ownerName },
+                aud: 'authenticated',
+                created_at: new Date().toISOString()
+            };
+            // 同步登入 UserStore
+            userStore.login({
+                id: authStore.user!.id,
+                name: formData.ownerName,
+                email: 'garage@example.com',
+                role: 'garage'
+            });
+            // 確保角色已切換為 'garage'
+            userStore.switchRole('garage');
+        } else {
+             // TODO: 正式環境邏輯，應導向登入頁或呼叫註冊 API
+             console.error('未登入使用者無法完成開通流程');
+             // router.push('/login');
+             // return; 
+        }
+    } else {
+         // 如果已登入，確認角色權限
+         userStore.switchRole('garage');
     }
-
-    // 確保角色已切換為 'garage'
-    userStore.switchRole('garage');
 
     // 將資料存入 GarageStore
     garageStore.setTempGarageInfo({
