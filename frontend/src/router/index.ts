@@ -57,10 +57,10 @@ const routes: RouteRecordRaw[] = [
     path: '/booking/:garageId',
     name: 'BookingFlow',
     component: () => import('@/components/service-search/ServiceSearchFlow.vue'),
-    meta: { 
-      requiresAuth: true, 
+    meta: {
+      requiresAuth: true,
       allowedRoles: ['member'],
-      title: '預約服務'
+      title: '預約服務',
     },
   },
 
@@ -73,26 +73,26 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'MemberDashboard',
         component: () => import('@/views/User/UserDashboard.vue'),
-        meta: { title: '會員中心' }
+        meta: { title: '會員中心' },
       },
       {
         path: 'vehicles',
         name: 'MemberVehicles',
         component: () => import('@/views/User/VehicleManagement.vue'),
-        meta: { title: '愛車管理' }
+        meta: { title: '愛車管理' },
       },
       {
         path: 'bookings',
         name: 'MemberBookings',
         component: () => import('@/views/User/BookingList.vue'),
-        meta: { title: '預約紀錄' }
+        meta: { title: '預約紀錄' },
       },
       {
         path: 'history',
         name: 'MemberHistory',
         component: () => import('@/views/User/MaintenanceHistory.vue'),
-        meta: { title: '歷史保養' }
-      }
+        meta: { title: '歷史保養' },
+      },
     ],
   },
 
@@ -106,50 +106,51 @@ const routes: RouteRecordRaw[] = [
         path: 'overview',
         name: 'GarageOverview',
         component: () => import('@/views/GarageAdmin/OverView.vue'),
-        meta: { title: '商家總覽' }
+        meta: { title: '商家總覽' },
       },
       {
         path: 'orders',
         name: 'GarageOrders',
         component: () => import('@/views/GarageAdmin/OrdersView.vue'),
-        meta: { title: '訂單管理' }
+        meta: { title: '訂單管理' },
       },
       {
         path: 'schedule',
         name: 'GarageSchedule',
         component: () => import('@/views/GarageAdmin/ScheduleView.vue'),
-        meta: { title: '排程管理' }
+        meta: { title: '排程管理' },
       },
       {
         path: 'edit',
         name: 'GarageEdit',
         component: () => import('@/views/GarageAdmin/EditView.vue'),
-        meta: { title: '商家資訊' }
+        meta: { title: '商家資訊' },
       },
     ],
   },
 
-  // --- 錯誤頁面 ---
-  {
-    path: '/error',
-    name: 'Error',
-    component: () => import('@/views/Error/ErrorView.vue'),
-    meta: { title: '發生錯誤' }
-  },
+  // ErrorView.vue 檔案在其他分支已存在，但 "#84" 還沒出現，這邊只是先寫好，PR 進 dev 可直接解鎖註解
+  // // --- 錯誤頁面 ---
+  // {
+  //   path: '/error',
+  //   name: 'Error',
+  //   component: () => import('@/views/Error/ErrorView.vue'),
+  //   meta: { title: '發生錯誤' }
+  // },
 
-  // --- 404 Catch-all ---
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/Error/ErrorView.vue'),
-    meta: { title: '頁面不存在' }
-  },
+  // // --- 404 Catch-all ---
+  // {
+  //   path: '/:pathMatch(.*)*',
+  //   name: 'NotFound',
+  //   component: () => import('@/views/Error/ErrorView.vue'),
+  //   meta: { title: '頁面不存在' }
+  // },
 ];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior: (to, from, savedPosition) => (savedPosition || { top: 0 }),
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { top: 0 },
 });
 
 router.beforeEach(async (to, from, next) => {
