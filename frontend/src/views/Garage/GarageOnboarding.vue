@@ -202,7 +202,7 @@ onUnmounted(() => {
             type="tel"
             placeholder="0912345678 或 02-12345678"
             inputmode="numeric"
-            pattern="[0-9-]*"
+            pattern="[0-9\-]*"
             required
             :error="showError('phone') ? errors.phone : ''"
             @blur="handleBlur('phone')"
