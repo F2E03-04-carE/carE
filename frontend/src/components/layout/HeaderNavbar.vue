@@ -88,10 +88,11 @@ const closeLoginModal = () => {
 
 const handleLogout = async () => {
   try {
-    // 嘗試呼叫 Supabase 登出，但即使失敗也要執行後續的前端登出邏輯
-    await authStore.signOut().catch((err) => console.warn('Supabase sign out warning:', err));
+    // 嘗試呼叫 Supabase 登出
+    await authStore.signOut();
   } catch (error) {
-    console.error('登出過程發生錯誤:', error);
+    // 即使 Supabase 登出失敗，也只在 console 警告，不中斷後續流程
+    console.warn('Supabase sign out warning:', error);
   } finally {
     // 無論如何都要清除前端狀態並導航
     userStore.logout();
