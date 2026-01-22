@@ -48,6 +48,7 @@ function openTermsModal(tab: 'terms' | 'privacy') {
 
 function closeTermsModal() {
   isTermsModalOpen.value = false;
+  agreedToTerms.value = true;
 }
 
 function selectPaymentMethod(method: 'oen' | 'linepay') {
@@ -67,7 +68,7 @@ async function handleConfirm() {
 }
 
 function handleClose() {
-  if (isProcessing.value) return;
+  if (isProcessing.value || isTermsModalOpen.value) return;
   agreedToTerms.value = false;
   selectedPaymentMethod.value = null;
   emit('close');
@@ -167,7 +168,6 @@ function handleClose() {
                           </div>
                         </button>
 
-                        <!-- LINE Pay -->
                         <button
                           @click="selectPaymentMethod('linepay')"
                           class="w-full p-4 rounded-lg border-2 transition-all text-left"
@@ -197,7 +197,6 @@ function handleClose() {
                         </button>
                       </div>
 
-                      <!-- 付款提示 -->
                       <div v-if="plan.type === 'trial'" class="bg-blue-50 rounded-lg p-4">
                         <div class="flex items-start">
                           <span class="material-symbols-outlined text-blue-600 text-2xl mr-3">
@@ -214,7 +213,6 @@ function handleClose() {
                         </div>
                       </div>
 
-                      <!-- 服務條款 -->
                       <div class="bg-gray-50 rounded-lg p-2">
                         <label class="flex items-start">
                           <input
