@@ -1,3 +1,4 @@
+// 統一管理全站「登入視窗（Login Modal）」的顯示狀態與跳轉邏輯
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
