@@ -105,15 +105,11 @@ const formattedPrice = computed(() => {
         <button
           @click="handleButtonClick"
           class="w-full py-4 text-[16px] sm:text-[18px] font-bold text-white bg-gradient-to-r rounded-xl transition-all"
-          :class="colorClasses.button"
+          :class="[colorClasses.button,'cursor-pointer']"
          >
           {{ buttonText }}
         </button>
       </div>
-        <div v-else class="text-center py-3 text-[#8a8a7d] text-sm">
-        <!-- 可點擊模式 -->
-          點擊查看詳情 →
-        </div>
     </div>
   </div>
 </template>
