@@ -166,7 +166,8 @@ const startCountdown = () => {
 
     if (countdown.value <= 0) {
       clearCountdownTimer();
-      router.push('/garage/profile');
+      //TODO: 跳轉到商家編輯頁面
+      router.push('/');
     }
   }, 1000);
 };
