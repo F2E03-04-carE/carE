@@ -89,7 +89,7 @@ const closeLoginModal = () => {
 const handleLogout = async () => {
   try {
     // 嘗試呼叫 Supabase 登出，但即使失敗也要執行後續的前端登出邏輯
-    await authStore.signOut().catch(err => console.warn('Supabase sign out warning:', err));
+    await authStore.signOut().catch((err) => console.warn('Supabase sign out warning:', err));
   } catch (error) {
     console.error('登出過程發生錯誤:', error);
   } finally {
@@ -123,10 +123,11 @@ const menuConfig = {
   member: {
     title: '會員管理',
     items: [
-      { label: '會員基本資料', href: '/member' }, // 儀表板/Profile
+      { label: '會員基本資料', href: '/member' },
       { label: '愛車管理', href: '/member/vehicles' },
       { label: '預約紀錄', href: '/member/bookings' },
       { label: '歷史保養', href: '/member/history' },
+      { label: '刊登維修廠', href: '/join-garage' },
     ],
   },
   garage: {
@@ -195,13 +196,12 @@ const currentMenu = computed(() => {
           </template>
 
           <template v-else-if="currentMenu">
-            <div
-              class="relative group"
-              @mouseenter="openDropdown"
-              @mouseleave="closeDropdown"
-            >
+            <div class="relative group" @mouseenter="openDropdown" @mouseleave="closeDropdown">
               <button
-                :class="[textOnlyButtonClass, 'text-[#6b6b5a] hover:scale-110 transition-transform flex items-center gap-2']"
+                :class="[
+                  textOnlyButtonClass,
+                  'text-[#6b6b5a] hover:scale-110 transition-transform flex items-center gap-2',
+                ]"
               >
                  <img
                   v-if="userStore.currentUser?.avatar"
@@ -231,7 +231,7 @@ const currentMenu = computed(() => {
               @click="handleLogout"
               :class="[
                 baseButtonClass,
-                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white px-4 py-1 sm:py-1.5 transition-all'
+                'border border-[#6b6b5a] text-[#6b6b5a] hover:bg-[#6b6b5a] hover:text-white px-4 py-1 sm:py-1.5 transition-all',
               ]"
             >
               登出
@@ -308,9 +308,6 @@ const currentMenu = computed(() => {
       </div>
     </nav>
 
-    <LoginMode
-      v-if="uiStore.isLoginModalOpen"
-      @close="closeLoginModal"
-    />
+    <LoginMode v-if="uiStore.isLoginModalOpen" @close="closeLoginModal" />
   </header>
 </template>
