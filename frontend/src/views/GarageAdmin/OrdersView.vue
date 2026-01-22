@@ -5,10 +5,9 @@ import OrderDetailModal from '@/components/GarageAdmin/OrderDetailModal.vue';
 import PageHead from '@/components/GarageAdmin/PageHead.vue';
 import SearchBar from '@/components/GarageAdmin/SearchBar.vue';
 import type { Order } from '@/types/garage';
-import { mockOrders } from '@/composables/garage/mockData';
 
-// 假資料
-const orders = ref<Order[]>([...mockOrders]);
+// 假資料 -> 暫時改為空陣列，等待 API
+const orders = ref<Order[]>([]);
 
 const showModal = ref(false);
 const selectedOrder = ref<Order | null>(null);
@@ -17,9 +16,9 @@ const keyword = ref('');
 // 搜尋過濾邏輯
 const filteredOrders = computed(() => {
   if (!keyword.value.trim()) return orders.value;
-  
+
   const k = keyword.value.toLowerCase().trim();
-  return orders.value.filter(order => {
+  return orders.value.filter((order) => {
     return (
       order.id.toLowerCase().includes(k) ||
       order.customer.name.toLowerCase().includes(k) ||
