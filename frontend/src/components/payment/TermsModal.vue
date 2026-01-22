@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 
 interface Props {
@@ -14,12 +14,21 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   close: [];
 }>();
+
 const currentTab = ref<'terms' | 'privacy'>(props.initialTab);
 
+watch(() => props.initialTab, (newTab) => {
+  currentTab.value = newTab;
+});
+
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    currentTab.value = props.initialTab;
+  }
+});
 function switchTab(tab: 'terms' | 'privacy') {
   currentTab.value = tab;
 }
-
 function handleClose() {
   emit('close');
 }
@@ -36,13 +45,13 @@ const title = computed(() => {
       <TransitionChild
         as="template"
         enter="ease-out duration-300"
-        enter-from="opacity-0"
-        enter-to="opacity-100"
+        enter-from="opacity-50"
+        enter-to="opacity-0"
         leave="ease-in duration-200"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
+        leave-from="opacity-0"
+        leave-to="opacity-50"
       >
-        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
+        <div class="fixed inset-0 bg-black opacity-70" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -149,15 +158,6 @@ const title = computed(() => {
                       本服務條款依中華民國法律處理，並以台灣台北地方法院為第一審管轄法院。
                     </p>
                   </section>
-
-                  <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-xs text-blue-900">
-                      <strong>完整條款：</strong>詳細內容請參閱
-                      <a href="/terms" target="_blank" class="text-[#6b6b5a] hover:underline font-semibold">
-                        完整版服務條款
-                      </a>
-                    </p>
-                  </div>
                 </div>
 
                 <div v-else class="space-y-6 text-[#4a4a43]">
@@ -217,26 +217,8 @@ const title = computed(() => {
                       我們使用 Cookie 來記錄您的偏好設定與使用行為。您可以透過瀏覽器設定拒絕 Cookie，但可能影響部分功能。
                     </p>
                   </section>
-
-                  <div class="mt-6 p-4 bg-green-50 rounded-lg">
-                    <p class="text-xs text-green-900">
-                      <strong>完整政策：</strong>詳細內容請參閱
-                      <a href="/privacy" target="_blank" class="text-[#6b6b5a] hover:underline font-semibold">
-                        完整版隱私權政策
-                      </a>
-                    </p>
-                  </div>
-
-                  <div class="p-4 bg-gray-50 rounded-lg">
-                    <p class="text-xs text-gray-700">
-                      <strong>📧 聯絡我們：</strong>privacy@care.com.tw<br>
-                      <strong>📞 客服專線：</strong>0800-XXX-XXX
-                    </p>
-                  </div>
                 </div>
               </div>
-
-              <!-- Footer -->
               <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
                 <button
                   @click="handleClose"
