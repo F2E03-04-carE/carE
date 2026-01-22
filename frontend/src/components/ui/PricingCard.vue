@@ -7,23 +7,33 @@ export interface PricingCardProps {
   price: string | number;
   priceUnit: string;
   features: string[];
-  buttonText: string;
+  buttonText?: string;
   color?: 'orange' | 'green';
   isRecommended?: boolean;
+  variant?: 'button' | 'clickable';
 }
 
 const props = withDefaults(defineProps<PricingCardProps>(), {
   color: 'orange',
   isRecommended: false,
+  variant: 'button',
 });
 
 const emit = defineEmits<{
   (e: 'button-click'): void;
+  (e: 'card-click'): void;
 }>();
+
+const handleClick = () => {
+  if (props.variant === 'clickable') {
+    emit('card-click');
+  }
+};
 
 const handleButtonClick = () => {
   emit('button-click');
 };
+
 
 const colorClasses = computed(() => {
   const colors = {
@@ -33,6 +43,7 @@ const colorClasses = computed(() => {
       button: 'from-[#DB914B] to-[#E0A975] hover:from-[#D6853A] hover:to-[#D4985F]',
       border: 'border-[#DB914B]',
       badge: 'bg-[#DB914B]',
+      hover: 'hover:shadow-2xl hover:border-[#DB914B]',
     },
     green: {
       gradient: 'from-[#70c287] to-[#8fd19f]',
@@ -40,6 +51,7 @@ const colorClasses = computed(() => {
       button: 'from-[#70c287] to-[#8fd19f] hover:from-[#5fb176] hover:to-[#7ec08e]',
       border: 'border-[#70c287]',
       badge: 'bg-[#70c287]',
+      hover: 'hover:shadow-2xl hover:border-[#70c287]',
     },
   };
   return colors[props.color];
@@ -54,9 +66,13 @@ const formattedPrice = computed(() => {
 </script>
 
 <template>
-  <div
-    class="flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden"
-    :class="{ 'border-2': isRecommended, [colorClasses.border]: isRecommended }"
+   <div
+    @click="handleClick"
+    class="flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
+    :class="[
+      { 'border-2': isRecommended, [colorClasses.border]: isRecommended },
+      variant === 'clickable' ? ['cursor-pointer', colorClasses.hover] : ''
+    ]"
   >
     <div class="h-3 bg-gradient-to-r" :class="colorClasses.gradient"></div>
     <div class="p-8 flex-1 flex flex-col">
@@ -85,13 +101,19 @@ const formattedPrice = computed(() => {
           <span class="text-[14px] sm:text-[16px] text-[#4a4a43]">{{ feature }}</span>
         </li>
       </ul>
-      <button
-        @click="handleButtonClick"
-        class="w-full py-4 text-[16px] sm:text-[18px] font-bold text-white bg-gradient-to-r rounded-xl transition-all"
-        :class="colorClasses.button"
-      >
-        {{ buttonText }}
-      </button>
+      <div v-if="variant === 'button'">
+        <button
+          @click="handleButtonClick"
+          class="w-full py-4 text-[16px] sm:text-[18px] font-bold text-white bg-gradient-to-r rounded-xl transition-all"
+          :class="colorClasses.button"
+         >
+          {{ buttonText }}
+        </button>
+      </div>
+        <div v-else class="text-center py-3 text-[#8a8a7d] text-sm">
+        <!-- 可點擊模式 -->
+          點擊查看詳情 →
+        </div>
     </div>
   </div>
 </template>
