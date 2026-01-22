@@ -49,13 +49,15 @@ function closeDrawer() {
   }, 300);
 }
 
-async function handlePaymentMethodSelect(paymentMethod: 'oen' | 'linepay') {
+async function handlePaymentMethodSelect(paymentMethod: 'oen' | 'linepay' | 'trial') {
   if (!selectedPlan.value) return;
 
   try {
-    if (selectedPlan.value.type === 'trial') {
+    if (paymentMethod === 'trial') {
+      // 免費試用方案
       await activateFreeTrial();
     } else {
+      // 付費方案，使用選擇的付款方式
       await createPayment(selectedPlan.value, paymentMethod);
     }
   } catch (error) {
@@ -83,6 +85,7 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
     ? '/api/payment/oen/create-checkout'
     : '/api/payment/linepay/create-checkout';
 
+  // 由後端產生唯一的 orderId，確保安全性和唯一性
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -90,7 +93,7 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
     },
     body: JSON.stringify({
       amount: plan.price,
-      orderId: `ORDER-${Date.now()}`,
+      planType: plan.type,
       description: `${plan.title} - carE 平台訂閱`,
       successUrl: `${window.location.origin}/garage/subscription/success?type=lifetime`,
       failureUrl: `${window.location.origin}/garage/subscription/failure`,
@@ -99,6 +102,7 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
 
   const data = await response.json();
 
+  // 後端會回傳包含 orderId 和 checkoutUrl 的資料
   if (data.success && data.checkoutUrl) {
     window.location.href = data.checkoutUrl;
   } else {
