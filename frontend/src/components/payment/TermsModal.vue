@@ -45,11 +45,11 @@ const title = computed(() => {
       <TransitionChild
         as="template"
         enter="ease-out duration-300"
-        enter-from="opacity-50"
-        enter-to="opacity-0"
+        enter-from="opacity-0"
+        enter-to="opacity-50"
         leave="ease-in duration-200"
-        leave-from="opacity-0"
-        leave-to="opacity-50"
+        leave-from="opacity-50"
+        leave-to="opacity-0"
       >
         <div class="fixed inset-0 bg-black opacity-70" />
       </TransitionChild>

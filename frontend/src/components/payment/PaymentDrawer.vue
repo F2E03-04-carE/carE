@@ -20,7 +20,7 @@ const props = defineProps<PaymentDrawerProps>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'select-payment', paymentMethod: 'oen' | 'linepay'): void;
+  (e: 'select-payment', paymentMethod: 'oen' | 'linepay' | 'trial'): void;
 }>();
 
 const agreedToTerms = ref(false);
@@ -61,8 +61,10 @@ async function handleConfirm() {
   isProcessing.value = true;
 
   if (props.plan.type === 'trial') {
-    emit('select-payment', 'oen');
+    // 免費試用方案，傳遞 'trial' 作為識別
+    emit('select-payment', 'trial');
   } else {
+    // 付費方案，傳遞使用者選擇的付款方式
     emit('select-payment', selectedPaymentMethod.value!);
   }
 }
@@ -81,13 +83,13 @@ function handleClose() {
       <TransitionChild
         as="template"
         enter="ease-in-out duration-400"
-        enter-from="opacity-0"
-        enter-to="opacity-25"
+        enter-from="opacity-25"
+        enter-to="opacity-0"
         leave="ease-in-out duration-400"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
+        leave-from="opacity-50"
+        leave-to="opacity-50"
       >
-        <div class="fixed inset-0 bg-black opacity-50 " />
+        <div class="fixed inset-0 bg-black opacity-50" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-hidden">
