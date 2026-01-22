@@ -54,7 +54,10 @@ const save = () => {
       <h2 class="text-xl font-semibold text-[#4a4a43]">近期工單</h2>
       <!-- 工單列表 -->
       <section class="mt-5 space-y-6">
-        <OrderCard v-for="order in todayOrders" :key="order.id" :order="order" @open="open" />
+        <template v-if="todayOrders.length > 0">
+          <OrderCard v-for="order in todayOrders" :key="order.id" :order="order" @open="open" />
+        </template>
+        <div v-else class="text-center py-12 text-[#8a8a7d]">近期無工單</div>
       </section>
     </div>
   </div>
