@@ -1,11 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { WorkshopInfo } from '@/types/garage';
-
-const props = defineProps<{
-  garageInfo: WorkshopInfo;
-  isEditing: boolean;
-}>();
 
 // 訂閱方案資料 (資料變動不頻繁，寫死在前端)
 const subscriptionPlans = ref([
