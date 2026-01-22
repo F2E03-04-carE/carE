@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
+import TermsModal from './TermsModal.vue';
 
 export interface PaymentDrawerProps {
   isOpen: boolean;
@@ -37,6 +38,18 @@ const canSubmit = computed(() => {
   }
 });
 
+const isTermsModalOpen = ref(false);
+const termsModalTab = ref<'terms' | 'privacy'>('terms');
+
+function openTermsModal(tab: 'terms' | 'privacy') {
+  termsModalTab.value = tab;
+  isTermsModalOpen.value = true;
+}
+
+function closeTermsModal() {
+  isTermsModalOpen.value = false;
+}
+
 function selectPaymentMethod(method: 'oen' | 'linepay') {
   selectedPaymentMethod.value = method;
 }
@@ -47,10 +60,8 @@ async function handleConfirm() {
   isProcessing.value = true;
 
   if (props.plan.type === 'trial') {
-    // 免費試用不需要選擇付款方式
     emit('select-payment', 'oen');
   } else {
-    // 付費方案傳遞選中的付款方式
     emit('select-payment', selectedPaymentMethod.value!);
   }
 }
@@ -205,7 +216,7 @@ function handleClose() {
 
                       <!-- 服務條款 -->
                       <div class="bg-gray-50 rounded-lg p-2">
-                        <label class="flex items-start cursor-pointer">
+                        <label class="flex items-start">
                           <input
                             v-model="agreedToTerms"
                             type="checkbox"
@@ -213,20 +224,27 @@ function handleClose() {
                           />
                           <span class="ml-3 text-sm text-gray-700">
                             我已閱讀並同意
-                            <a href="/terms" target="_blank" class="text-[#6b6b5a] hover:underline font-semibold">
+                            <button
+                              type="button"
+                              @click.stop="openTermsModal('terms')"
+                              class="text-[#6b6b5a] hover:underline font-semibold"
+                            >
                               服務條款
-                            </a>
+                            </button>
                             及
-                            <a href="/privacy" target="_blank" class="text-[#6b6b5a] hover:underline font-semibold">
+                            <button
+                              type="button"
+                              @click.stop="openTermsModal('privacy')"
+                              class="text-[#6b6b5a] hover:underline font-semibold"
+                            >
                               隱私權政策
-                            </a>
+                            </button>
                           </span>
                         </label>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Footer - 按鈕區 -->
                   <div class="border-t border-gray-200 px-6 py-6 bg-gray-50">
                     <button
                       @click="handleConfirm"
@@ -259,4 +277,9 @@ function handleClose() {
       </div>
     </Dialog>
   </TransitionRoot>
+  <TermsModal
+    :is-open="isTermsModalOpen"
+    :initial-tab="termsModalTab"
+    @close="closeTermsModal"
+  />
 </template>
