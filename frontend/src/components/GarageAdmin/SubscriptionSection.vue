@@ -1,5 +1,31 @@
 <script setup lang="ts">
-import { mockSubscriptionPlans } from '@/composables/garage/mockData';
+import { ref } from 'vue';
+import type { WorkshopInfo } from '@/types/garage';
+
+const props = defineProps<{
+  garageInfo: WorkshopInfo;
+  isEditing: boolean;
+}>();
+
+// 訂閱方案資料 (資料變動不頻繁，寫死在前端)
+const subscriptionPlans = ref([
+  {
+    id: 'free',
+    title: '免費試用方案',
+    subtitle: '先試用，滿意再升級',
+    price: 'NT$ 0',
+    features: ['完整預約管理功能', '評價系統功能', '商家資料展示 （試用期滿僅剩此功能）'],
+    tag: null,
+  },
+  {
+    id: 'pro',
+    title: '永久會員方案',
+    subtitle: '一次付費，終身使用',
+    price: 'NT$ 5,555',
+    features: ['完整預約管理功能', '評價系統功能', '商家資料展示', '永久使用權限'],
+    tag: '一次性買斷',
+  },
+]);
 
 const selectedPlanId = defineModel<string>('plan', { required: true });
 
@@ -14,7 +40,7 @@ const selectPlan = (id: string) => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div
-        v-for="plan in mockSubscriptionPlans"
+        v-for="plan in subscriptionPlans"
         :key="plan.id"
         @click="selectPlan(plan.id)"
         class="border-2 rounded-2xl p-6 flex flex-col items-center text-center transition relative bg-white hover:shadow-md cursor-pointer select-none"
@@ -33,10 +59,7 @@ const selectPlan = (id: string) => {
         </div>
 
         <!-- 選取狀態勾勾 -->
-        <div
-          v-if="selectedPlanId === plan.id"
-          class="absolute top-4 right-4 text-[#6b6b5a]"
-        >
+        <div v-if="selectedPlanId === plan.id" class="absolute top-4 right-4 text-[#6b6b5a]">
           <span class="material-symbols-outlined text-2xl">check_circle</span>
         </div>
 
@@ -46,7 +69,7 @@ const selectPlan = (id: string) => {
         <ul class="text-[#4a4a43] text-sm space-y-2 mb-6">
           <li v-for="feature in plan.features" :key="feature">{{ feature }}</li>
         </ul>
-        
+
         <button
           type="button"
           class="mt-auto px-6 py-2 rounded-2xl font-medium transition w-full"
