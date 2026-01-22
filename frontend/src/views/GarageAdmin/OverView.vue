@@ -3,10 +3,14 @@ import { ref } from 'vue';
 import OrderCard from '@/components/GarageAdmin/OrderCard.vue';
 import OrderDetailModal from '@/components/GarageAdmin/OrderDetailModal.vue';
 import type { Order } from '@/types/garage';
-import { mockStats, mockOrders } from '@/composables/garage/mockData';
 
-// 假資料
-const orders = ref<Order[]>([...mockOrders]);
+const stats = ref([
+  { label: '今日預約', value: 0, icon: 'event_note' },
+  { label: '待確認工單', value: 0, icon: 'assignment' },
+  { label: '本月完成', value: 0, icon: 'trending_up' },
+]);
+
+const todayOrders = ref<Order[]>([]); // 暫時為空，等待 API 串接
 
 const showModal = ref(false);
 const selectedOrder = ref<Order | null>(null);
@@ -32,7 +36,7 @@ const save = () => {
     <!-- 統計卡片 -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div
-        v-for="item in mockStats"
+        v-for="item in stats"
         :key="item.label"
         class="bg-[#f5f4f0] rounded-2xl p-6 flex items-center justify-between shadow-sm"
       >
@@ -50,7 +54,7 @@ const save = () => {
       <h2 class="text-xl font-semibold text-[#4a4a43]">近期工單</h2>
       <!-- 工單列表 -->
       <section class="mt-5 space-y-6">
-        <OrderCard v-for="order in orders" :key="order.id" :order="order" @open="open" />
+        <OrderCard v-for="order in todayOrders" :key="order.id" :order="order" @open="open" />
       </section>
     </div>
   </div>

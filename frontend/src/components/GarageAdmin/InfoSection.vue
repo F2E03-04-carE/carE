@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { reactive, computed, watch } from 'vue';
+import { reactive, computed, watch, ref } from 'vue';
 import type { WorkshopInfo } from '@/types/garage';
-import { mockBrandOptions, mockSkillOptions } from '@/composables/garage/mockData';
+// import { mockBrandOptions, mockSkillOptions } from '@/composables/garage/mockData';
+
+// 假資料 -> 暫時改為空陣列，等待 API
+const mockBrandOptions = ref<string[]>([]);
+const mockSkillOptions = ref<string[]>([]);
 
 const info = defineModel<WorkshopInfo>('info', {
   required: true,
