@@ -10,19 +10,6 @@ import type { CalendarOptions, DayCellMountArg } from '@fullcalendar/core';
 
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
 
-// 假資料
-const mockEvents = [
-  {
-    title: '維修: Toyota Altis',
-    start: new Date().toISOString().split('T')[0] + 'T10:00:00',
-    end: new Date().toISOString().split('T')[0] + 'T12:00:00',
-  },
-  {
-    title: '保養: Honda CRV',
-    start: new Date().toISOString().split('T')[0] + 'T14:00:00',
-    end: new Date().toISOString().split('T')[0] + 'T16:00:00',
-  },
-];
 
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -50,7 +37,8 @@ const calendarOptions = ref<CalendarOptions>({
   },
 
   eventColor: '#6b6b5a',
-  events: mockEvents,
+  // TODO: 這裡之後要改接真實 API 資料
+  events: [],
   // 手機端點擊事件優化
   displayEventTime: true,
   dayMaxEvents: true, // 更多事件時顯示 +N
