@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useUserStore, type UserRole } from '@/stores/user';
 import { useUiStore } from '@/stores/ui';
 
+// 擴充 vue-router 的型別定義
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string;
@@ -44,27 +45,29 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '商家開通' },
   },
 
-  // --- 認證與預約 ---
+  // --- 認證相關 ---
   {
     path: '/auth/callback',
     name: 'AuthCallback',
     component: () => import('@/views/Auth/AuthCallback.vue'),
   },
+
+  // --- 需登入功能 ---
   {
     path: '/booking/:garageId',
     name: 'BookingFlow',
     component: () => import('@/components/service-search/ServiceSearchFlow.vue'),
     meta: { 
       requiresAuth: true, 
-      allowedRoles: ['member', 'admin'],
+      allowedRoles: ['member'],
       title: '預約服務'
     },
   },
 
-  // --- 會員中心 (依 Navbar 路徑為主) ---
+  // --- 會員中心 ---
   {
     path: '/member',
-    meta: { requiresAuth: true, allowedRoles: ['member', 'admin'] },
+    meta: { requiresAuth: true, allowedRoles: ['member'] },
     children: [
       {
         path: '',
@@ -93,10 +96,10 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // --- 車廠後台 (依 Navbar 路徑為主) ---
+  // --- 車廠後台 ---
   {
     path: '/garage-admin',
-    meta: { requiresAuth: true, allowedRoles: ['garage', 'admin'] },
+    meta: { requiresAuth: true, allowedRoles: ['garage'] },
     component: () => import('@/layouts/GarageAdminLayout.vue'),
     children: [
       {
@@ -126,36 +129,20 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // --- 管理員專區 ---
+  // --- 錯誤頁面 ---
   {
-    path: '/admin/login',
-    name: 'AdminLogin',
-    component: () => import('@/views/Admin/AdminLogin.vue'),
-    meta: { title: '管理員登入' }
-  },
-  {
-    path: '/admin',
-    meta: { requiresAuth: true, allowedRoles: ['admin'] },
-    component: () => import('@/layouts/AdminLayout.vue'),
-    children: [
-      {
-        path: 'members',
-        name: 'AdminMembers',
-        component: () => import('@/views/Admin/MemberManagement.vue'),
-        meta: { title: '會員管理' }
-      },
-      {
-        path: 'reviews',
-        name: 'AdminReviews',
-        component: () => import('@/views/Admin/ReviewManagement.vue'),
-        meta: { title: '評價管理' }
-      },
-    ]
+    path: '/error',
+    name: 'Error',
+    component: () => import('@/views/Error/ErrorView.vue'),
+    meta: { title: '發生錯誤' }
   },
 
+  // --- 404 Catch-all ---
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/',
+    name: 'NotFound',
+    component: () => import('@/views/Error/ErrorView.vue'),
+    meta: { title: '頁面不存在' }
   },
 ];
 
@@ -178,13 +165,9 @@ router.beforeEach(async (to, from, next) => {
       return next('/');
     }
     if (to.meta.allowedRoles && !to.meta.allowedRoles.includes(userStore.userRole)) {
-      alert('權限不足');
-      return next('/');
+      // 權限不足導向 403 錯誤狀態
+      return next({ name: 'Error', query: { status: '403' } });
     }
-  }
-
-  if (to.name === 'AdminLogin' && authStore.isAuthenticated && userStore.userRole === 'admin') {
-    return next({ name: 'AdminMembers' });
   }
 
   next();
