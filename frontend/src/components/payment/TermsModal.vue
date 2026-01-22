@@ -4,7 +4,7 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 
 interface Props {
   isOpen: boolean;
-  initialTab?: 'terms' | 'privacy'; 
+  initialTab?: 'terms' | 'privacy';
 }
 
 const props = withDefaults(defineProps<Props>(), {
