@@ -8,7 +8,6 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
-// 如果未登入，重定向到首頁
 if (!authStore.isAuthenticated) {
   router.push('/');
 }
@@ -27,10 +26,8 @@ const saveSuccess = ref(false);
 const phoneError = ref('');
 const isLoadingProfile = ref(true);
 
-// 檢查是否是首次登入
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
 
-// 從 profiles table 載入用戶資料
 const loadUserProfile = async () => {
   if (!user.value?.id) return;
 
@@ -43,7 +40,6 @@ const loadUserProfile = async () => {
 
     if (error) {
       console.error('載入用戶資料失敗:', error);
-      // Fallback 到 user_metadata
       Phone.value = user.value.user_metadata?.phone || '';
       Name.value = user.value.user_metadata?.name || Email.value.split('@')[0];
       Nickname.value = user.value.user_metadata?.nickname || '';
@@ -61,7 +57,6 @@ const loadUserProfile = async () => {
   }
 };
 
-// 如果是首次登入且資料不完整，自動進入編輯模式
 onMounted(async () => {
   await loadUserProfile();
 
@@ -72,10 +67,8 @@ onMounted(async () => {
 
 const ToggleEditing = (): void => {
   if (IsEditing.value) {
-    // 儲存
     handleSave();
   } else {
-    // 進入編輯模式
     IsEditing.value = true;
     saveError.value = '';
     saveSuccess.value = false;
@@ -83,13 +76,11 @@ const ToggleEditing = (): void => {
   }
 };
 
-// 驗證電話格式（台灣手機號碼：09開頭的10位數字）
 const validatePhone = (phone: string): boolean => {
   const phoneRegex = /^09\d{8}$/;
   return phoneRegex.test(phone.replace(/[-\s]/g, ''));
 };
 
-// 限制只能輸入數字
 const handlePhoneInput = (event: Event) => {
   const input = event.target as HTMLInputElement;
   // 移除所有非數字字符
@@ -98,7 +89,6 @@ const handlePhoneInput = (event: Event) => {
   checkPhoneFormat();
 };
 
-// 即時驗證電話格式
 const checkPhoneFormat = () => {
   if (!Phone.value) {
     phoneError.value = '';
@@ -123,7 +113,6 @@ const handleSave = async () => {
   saveSuccess.value = false;
   phoneError.value = '';
 
-  // 驗證必填欄位
   if (!Name.value || Name.value.trim() === '') {
     saveError.value = '請輸入姓名';
     return;
@@ -144,14 +133,12 @@ const handleSave = async () => {
     return;
   }
 
-  // 驗證電話格式
   const cleanPhone = Phone.value.replace(/[-\s]/g, '');
   if (!validatePhone(cleanPhone)) {
     saveError.value = '請輸入有效的手機號碼格式（例：0912345678）';
     return;
   }
 
-  // 儲存時使用乾淨的電話號碼（移除分隔符號）
   Phone.value = cleanPhone;
 
   isSaving.value = true;
@@ -162,7 +149,6 @@ const handleSave = async () => {
       throw new Error('未找到用戶 ID');
     }
 
-    // 更新 profiles table
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -176,10 +162,28 @@ const handleSave = async () => {
 
     if (profileError) throw profileError;
 
+    const updateMetadata = supabase.auth.updateUser({
+      data: {
+        name: Name.value.trim(),
+        phone: Phone.value.trim(),
+        nickname: Nickname.value.trim(),
+        licensePlate: LicensePlate.value.trim(),
+      },
+    });
+
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+
+    try {
+      await Promise.race([updateMetadata, timeout]);
+    } catch (metadataError) {
+      console.warn('user_metadata 更新失敗或超時，但 profiles 已更新:', metadataError);
+    }
+
     saveSuccess.value = true;
     IsEditing.value = false;
 
-    // 如果是首次登入，2秒後移除查詢參數
     if (isFirstLogin.value) {
       setTimeout(() => {
         router.replace('/member/profile');
@@ -206,20 +210,16 @@ const handleSave = async () => {
 		</header>
 		<main class="max-w-5xl mx-auto px-6 py-8 md:py-10">
 			<div class="space-y-8">
-				<!-- 成功訊息 -->
 				<div v-if="saveSuccess" class="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
 					<span class="material-symbols-outlined text-green-500">check_circle</span>
 					<p class="text-sm text-green-700 font-medium">
 						{{ isFirstLogin ? '資料已儲存！歡迎使用 carE' : '資料已成功更新' }}
 					</p>
 				</div>
-
-				<!-- 錯誤訊息 -->
 				<div v-if="saveError" class="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
 					<span class="material-symbols-outlined text-red-500">error</span>
 					<p class="text-sm text-red-700 font-medium">{{ saveError }}</p>
 				</div>
-
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
