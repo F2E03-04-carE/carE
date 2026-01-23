@@ -3,8 +3,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import PricingCard from '@/components/ui/PricingCard.vue';
 import PaymentDrawer from '@/components/payment/PaymentDrawer.vue';
+import { useSubscriptionStore } from '@/stores/subscription';
 
 const router = useRouter();
+const subscriptionStore = useSubscriptionStore();
 
 const pricingPlans = [
   {
@@ -67,16 +69,17 @@ async function handlePaymentMethodSelect(paymentMethod: 'oen' | 'linepay' | 'tri
 }
 
 async function activateFreeTrial() {
-  // TODO: 呼叫後端 API
-  // const response = await fetch('/api/trial/activate', { method: 'POST' });
+  const result = await subscriptionStore.activateTrial();
 
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  closeDrawer();
-  router.push({
-    name: 'SubscriptionSuccess',
-    query: { type: 'trial' }
-  });
+  if (result.success) {
+    closeDrawer();
+    router.push({
+      name: 'SubscriptionSuccess',
+      query: { type: 'trial' }
+    });
+  } else {
+    alert(result.message || '啟動試用失敗，請稍後再試');
+  }
 }
 
 async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' | 'linepay') {
