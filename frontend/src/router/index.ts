@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  // 路由跳轉後的滾動行為
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition;
@@ -27,6 +26,22 @@ const router = createRouter({
       component: () => import('@/views/Garage/JoinGarage.vue'),
       meta: {
         title: '刊登維修廠 - carE',
+      },
+    },
+    {
+      path: '/terms',
+      name: 'TermsOfService',
+      component: () => import('@/views/Legal/TermsOfService.vue'),
+      meta: {
+        title: '服務條款 - carE',
+      },
+    },
+    {
+      path: '/privacy',
+      name: 'PrivacyPolicy',
+      component: () => import('@/views/Legal/PrivacyPolicy.vue'),
+      meta: {
+        title: '隱私權政策 - carE',
       },
     },
     {
