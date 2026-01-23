@@ -1,24 +1,4 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import TermsModal from '../payment/TermsModal.vue';
-
-const isTermsOpen = ref(false);
-const termsTab = ref<'terms' | 'privacy'>('terms');
-
-const openTerms = () => {
-  termsTab.value = 'terms';
-  isTermsOpen.value = true;
-};
-
-const openPrivacy = () => {
-  termsTab.value = 'privacy';
-  isTermsOpen.value = true;
-};
-
-const closeTerms = () => {
-  isTermsOpen.value = false;
-};
-</script>
+<script setup lang="ts"></script>
 <template>
   <footer class="bg-stone-400 text-white py-20">
     <div class="max-w-[1440px] mx-auto px-[5%] sm:px-[8%] lg:px-[5%]">
@@ -42,8 +22,8 @@ const closeTerms = () => {
         <div class="text-center">
           <h3 class="font-bold mb-5 text-[18px]">法律條款</h3>
           <ul class="space-y-2 text-sm">
-            <li><button @click="openTerms" class="hover:text-[#e9c667]">服務條款</button></li>
-            <li><button @click="openPrivacy" class="hover:text-[#e9c667]">隱私權政策</button></li>
+            <li><a href="/terms" class="hover:text-[#e9c667]">服務條款</a></li>
+            <li><a href="/privacy" class="hover:text-[#e9c667]">隱私權政策</a></li>
           </ul>
         </div>
         <div class="text-center">
@@ -58,10 +38,4 @@ const closeTerms = () => {
       </div>
     </div>
   </footer>
-
-  <TermsModal
-    :isOpen="isTermsOpen"
-    :initialTab="termsTab"
-    @close="closeTerms"
-  />
 </template>
