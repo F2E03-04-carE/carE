@@ -69,7 +69,6 @@ function goToUpgrade() {
     :class="[bannerStyle?.bg, bannerStyle?.border]"
   >
     <div class="flex items-start gap-3">
-      <!-- Icon -->
       <span
         class="material-symbols-outlined text-2xl mt-0.5"
         :class="bannerStyle?.icon"
@@ -77,7 +76,6 @@ function goToUpgrade() {
         {{ subscriptionStore.isExpired ? 'error' : 'schedule' }}
       </span>
 
-      <!-- Content -->
       <div class="flex-1">
         <p class="font-semibold mb-1" :class="bannerStyle?.text">
           {{ subscriptionStore.isExpired ? '試用期已到期' : '試用期即將到期' }}
@@ -87,7 +85,6 @@ function goToUpgrade() {
           升級至永久會員，享有完整功能！
         </p>
 
-        <!-- Action Button -->
         <button
           @click="goToUpgrade"
           class="px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors"
