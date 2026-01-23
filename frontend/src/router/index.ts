@@ -87,6 +87,33 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/garage/subscription',
+      name: 'SubscriptionSelection',
+      component: () => import('@/views/Garage/SubscriptionSelection.vue'),
+      meta: {
+        title: '選擇訂閱方案 - carE',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/garage/subscription/success',
+      name: 'SubscriptionSuccess',
+      component: () => import('@/views/Garage/SubscriptionSuccess.vue'),
+      meta: {
+        title: '訂閱成功 - carE',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/garage/subscription/failure',
+      name: 'SubscriptionFailure',
+      component: () => import('@/views/Garage/SubscriptionFailure.vue'),
+      meta: {
+        title: '訂閱失敗 - carE',
+        requiresAuth: true,
+      },
+    },
   ],
 });
 
