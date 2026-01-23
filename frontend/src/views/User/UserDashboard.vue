@@ -161,8 +161,8 @@ const handleSave = async () => {
     if (!userId) {
       throw new Error('未找到用戶 ID');
     }
-	console.log(userId);
-    // 1. 更新 profiles table
+
+    // 更新 profiles table
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -175,21 +175,6 @@ const handleSave = async () => {
       .eq('user_id', userId);
 
     if (profileError) throw profileError;
-
-    // 2. 同步更新 user_metadata（保持向後兼容）
-    const { error: metadataError } = await supabase.auth.updateUser({
-      data: {
-        name: Name.value.trim(),
-        phone: Phone.value.trim(),
-        nickname: Nickname.value.trim(),
-        licensePlate: LicensePlate.value.trim(),
-      },
-    });
-
-    if (metadataError) throw metadataError;
-
-    // 重新載入用戶資料以同步顯示
-    await loadUserProfile();
 
     saveSuccess.value = true;
     IsEditing.value = false;
