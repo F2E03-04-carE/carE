@@ -60,6 +60,7 @@ const goBack = () => {
               <li>本平台不保證服務不中斷或無錯誤</li>
               <li>不對維修廠服務品質或糾紛負責</li>
               <li>不保證搜尋結果的完整性或準確性</li>
+              <li>對於因使用本平台所產生的任何直接、間接、附帶或衍生性損害不負任何責任              </li>
             </ul>
           </section>
 
@@ -71,7 +72,7 @@ const goBack = () => {
           </section>
 
           <section class="text-sm text-gray-500 pt-4 border-t">
-            <p>最後更新日期：2025年1月</p>
+            <p>最後更新日期：2026年1月</p>
           </section>
         </div>
 

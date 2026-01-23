@@ -76,7 +76,7 @@ const goBack = () => {
           </section>
 
           <section class="text-sm text-gray-500 pt-4 border-t">
-            <p>最後更新日期：2025年1月</p>
+            <p>最後更新日期：2026年1月</p>
           </section>
         </div>
 
