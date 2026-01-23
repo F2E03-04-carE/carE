@@ -36,13 +36,13 @@ export const useAuthStore = defineStore('auth', () => {
           nickname: user.value.user_metadata?.nickname,
         });
       } else if (profile) {
-        // 使用 profiles table 的資料
+        // 使用 profiles table 的資料，但頭像從 user_metadata 讀取（OAuth provider 提供）
         userStore.login({
           id: profile.id,
           name: profile.name || user.value.email?.split('@')[0] || 'User',
           email: profile.email,
           role: profile.role || 'member',
-          avatar: profile.avatar_url,
+          avatar: user.value.user_metadata?.avatar_url || user.value.user_metadata?.picture,
           nickname: profile.nickname,
         });
       }
