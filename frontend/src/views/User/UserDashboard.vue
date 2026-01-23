@@ -28,22 +28,35 @@ const isLoadingProfile = ref(true);
 
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
 
+const loadFallbackData = () => {
+  Phone.value = user.value?.user_metadata?.phone || '';
+  Name.value = user.value?.user_metadata?.name || Email.value.split('@')[0];
+  Nickname.value = user.value?.user_metadata?.nickname || '';
+  LicensePlate.value = user.value?.user_metadata?.licensePlate || '';
+};
+
 const loadUserProfile = async () => {
-  if (!user.value?.id) return;
+  if (!user.value?.id) {
+    isLoadingProfile.value = false;
+    return;
+  }
 
   try {
-    const { data: profile, error } = await supabase
+    const profileQuery = supabase
       .from('profiles')
       .select('*')
       .eq('user_id', user.value.id)
       .single();
 
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('載入超時')), 3000)
+    );
+
+    const { data: profile, error } = await Promise.race([profileQuery, timeout as any]);
+
     if (error) {
       console.error('載入用戶資料失敗:', error);
-      Phone.value = user.value.user_metadata?.phone || '';
-      Name.value = user.value.user_metadata?.name || Email.value.split('@')[0];
-      Nickname.value = user.value.user_metadata?.nickname || '';
-      LicensePlate.value = user.value.user_metadata?.licensePlate || '';
+      loadFallbackData();
     } else if (profile) {
       Phone.value = profile.phone || '';
       Name.value = profile.name || Email.value.split('@')[0];
@@ -51,7 +64,8 @@ const loadUserProfile = async () => {
       LicensePlate.value = profile.license_plate || '';
     }
   } catch (error) {
-    console.error('載入用戶資料時發生錯誤:', error);
+    console.warn('載入用戶資料超時:', error);
+    loadFallbackData();
   } finally {
     isLoadingProfile.value = false;
   }
@@ -83,7 +97,6 @@ const validatePhone = (phone: string): boolean => {
 
 const handlePhoneInput = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  // 移除所有非數字字符
   const cleanValue = input.value.replace(/\D/g, '');
   Phone.value = cleanValue;
   checkPhoneFormat();
@@ -149,12 +162,16 @@ const handleSave = async () => {
       throw new Error('未找到用戶 ID');
     }
 
+    const userData = {
+      name: Name.value.trim(),
+      phone: Phone.value.trim(),
+      nickname: Nickname.value.trim(),
+    };
+
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
-        name: Name.value.trim(),
-        phone: Phone.value.trim(),
-        nickname: Nickname.value.trim(),
+        ...userData,
         license_plate: LicensePlate.value.trim(),
         updated_at: new Date().toISOString(),
       })
@@ -164,9 +181,7 @@ const handleSave = async () => {
 
     const updateMetadata = supabase.auth.updateUser({
       data: {
-        name: Name.value.trim(),
-        phone: Phone.value.trim(),
-        nickname: Nickname.value.trim(),
+        ...userData,
         licensePlate: LicensePlate.value.trim(),
       },
     });
