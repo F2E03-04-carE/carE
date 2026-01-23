@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.value.id)
+        .eq('user_id', user.value.id)
         .single();
 
       if (error) {
