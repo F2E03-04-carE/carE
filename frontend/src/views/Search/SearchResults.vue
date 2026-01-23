@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 import ShopCard from '@/components/ui/ShopCard.vue';
 
 
@@ -8,7 +8,12 @@ const orderTitle = ref('排序');
 const filterTitle = ref('篩選');
 const sortBy = ref('rating');
 const route = useRoute()
+const router = useRouter()
 const filterBy = ref('all');
+
+// 分頁相關設定
+const currentPage = ref(Number(route.query.page) || 1);
+const itemsPerPage = 8; // 每頁顯示 8 筆 (一行4格 x 2行)
 
 interface ResultItem {
   image?: string;
@@ -23,6 +28,7 @@ interface ResultItem {
 
 const allShops = ref<ResultItem[]>([]);
 
+// 篩選與排序邏輯
 const results = computed(() => {
   let filtered = [...allShops.value];
   if (filterBy.value === 'nearby') {
@@ -49,7 +55,35 @@ const results = computed(() => {
   }
   return filtered;
 });
+
+// 分頁計算
+const paginatedResults = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return results.value.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(results.value.length / itemsPerPage));
 const resultsCount = computed(() => results.value.length);
+
+// 監聽篩選或排序改變，重置頁碼
+watch([sortBy, filterBy], () => {
+  updatePage(1);
+});
+
+// 監聽路由參數變化（處理瀏覽器上一頁/下一頁）
+watch(() => route.query.page, (newPage) => {
+  currentPage.value = Number(newPage) || 1;
+});
+
+const updatePage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    router.push({
+      query: { ...route.query, page: page.toString() }
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
 
 const fetchShops = async () => {
   try {
@@ -60,11 +94,8 @@ const fetchShops = async () => {
       service: route.query.service
     }
 
-    console.log('搜尋參數:', searchParams)
-
-    // 暫時使用 Mock Data (資料庫尚未建立時測試用)
-    // TODO: 資料庫建立後改用真實 API
-    allShops.value = [
+    // 擴充 Mock Data 以測試分頁 (12筆)
+    const mockData: ResultItem[] = [
       {
         id: 1,
         name: '匠心汽車維修中心',
@@ -95,20 +126,99 @@ const fetchShops = async () => {
         services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
         image: 'https://picsum.photos/300/200?random=3',
       },
-    ]
+      {
+        id: 4,
+        name: '極速維修中心',
+        score: 4.5,
+        distance: 0.8,
+        reviewCount: 200,
+        brands: ['Tesla', 'BMW', 'Benz'],
+        services: ['電池檢測', '馬達維修', '軟體更新', '底盤強化'],
+        image: 'https://picsum.photos/300/200?random=4',
+      },
+      {
+        id: 5,
+        name: '安心汽修廠',
+        score: 4.2,
+        distance: 5.1,
+        reviewCount: 30,
+        brands: ['Nissan', 'Mitsubishi', 'Ford'],
+        services: ['快速保養', '輪胎定位', '鈑金烤漆'],
+        image: 'https://picsum.photos/300/200?random=5',
+      },
+      {
+        id: 6,
+        name: '城市車庫',
+        score: 3.8,
+        distance: 1.5,
+        reviewCount: 65,
+        brands: ['Honda', 'Toyota'],
+        services: ['引擎調校', '冷氣保養', '皮帶更換'],
+        image: 'https://picsum.photos/300/200?random=6',
+      },
+      {
+        id: 7,
+        name: '老張修車行',
+        score: 4.8,
+        distance: 0.5,
+        reviewCount: 300,
+        brands: ['Toyota', 'Nissan', 'Lexus'],
+        services: ['老車翻新', '疑難雜症', '定期檢查'],
+        image: 'https://picsum.photos/300/200?random=7',
+      },
+      {
+        id: 8,
+        name: '德系精修館',
+        score: 5,
+        distance: 10.2,
+        reviewCount: 15,
+        brands: ['Porsche', 'Audi', 'VW'],
+        services: ['動力改裝', '電腦編程', '賽道設定'],
+        image: 'https://picsum.photos/300/200?random=8',
+      },
+      {
+        id: 9,
+        name: '未來汽車工坊',
+        score: 4.1,
+        distance: 6.7,
+        reviewCount: 45,
+        brands: ['Hyundai', 'Kia'],
+        services: ['混合動力維修', '高壓電系統', '電池更換'],
+        image: 'https://picsum.photos/300/200?random=9',
+      },
+      {
+        id: 10,
+        name: '山路救援站',
+        score: 4.9,
+        distance: 15.3,
+        reviewCount: 10,
+        brands: ['Subaru', 'Suzuki'],
+        services: ['越野改裝', '底盤升高', '絞盤安裝'],
+        image: 'https://picsum.photos/300/200?random=10',
+      },
+      {
+        id: 11,
+        name: '濱海保養所',
+        score: 3.5,
+        distance: 20.0,
+        reviewCount: 5,
+        brands: ['Luxgen', 'Ford'],
+        services: ['防鏽處理', '底盤防護', '基本保養'],
+        image: 'https://picsum.photos/300/200?random=11',
+      },
+       {
+        id: 12,
+        name: '優質輪胎館',
+        score: 4.6,
+        distance: 1.8,
+        reviewCount: 180,
+        brands: ['Michelin', 'Bridgestone', 'Continental'],
+        services: ['輪胎更換', '四輪定位', '補胎服務'],
+        image: 'https://picsum.photos/300/200?random=12',
+      },
+    ];
 
-    // 真實 API 呼叫 (資料庫建立後使用)
-    /*
-    const params = new URLSearchParams(searchParams as Record<string, string>)
-    const response = await fetch(`/api/search?${params.toString()}`)
-
-    if (!response.ok) {
-      throw new Error('搜尋失敗')
-    }
-
-    const data = await response.json()
-    allShops.value = data.data || []
-    */
+    allShops.value = mockData;
 
   } catch (err) {
     console.log('沒有符合資料的結果:', err)
@@ -117,9 +227,7 @@ const fetchShops = async () => {
 };
 
 const handleViewDetail = (shopId: number) => {
-  console.log('使用者要查看商店詳細，ID:', shopId);
-  // TODO: 之後這裡會接路由跳轉
-  alert(`查看商店 ID: ${shopId} 的詳細資料`);
+  router.push(`/search/${shopId}`);
 };
 
 onMounted(() => {
@@ -173,20 +281,69 @@ onMounted(() => {
     </div>
   </section>
 
-  <section class="pt-5 bg-[#f5f1ed] pb-10 min-h-[60vh]">
-    <div class="container mx-auto">
-      <div v-if="!resultsCount" class="text-center py-10">
+  <section class="pt-5 bg-[#f5f1ed] pb-20 min-h-[60vh]">
+    <div class="container mx-auto px-4">
+      <div v-if="!resultsCount" class="text-center py-20">
         <p class="text-[#4a4a43] text-lg">查無相關結果</p>
         <p class="text-[#4a4a43] text-sm mt-2">請嘗試調整篩選條件</p>
       </div>
-      <div v-else class="grid grid-cols-1 mx-2 md:grid-cols-2 mx-2 gap-3 lg:grid-cols-3 gap-5">
-        <ShopCard
-          v-for="shop in results"
-          :key="shop.id"
-          :shop="shop"
-          @view-detail="handleViewDetail"
-        />
+      
+      <div v-else>
+        <!-- 一行四格 (lg:grid-cols-4) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ShopCard
+            v-for="shop in paginatedResults"
+            :key="shop.id"
+            :shop="shop"
+            @view-detail="handleViewDetail"
+          />
+        </div>
+
+        <!-- 分頁 UI -->
+        <div v-if="totalPages > 1" class="flex justify-center items-center mt-12 gap-3">
+          <button
+            @click="updatePage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="flex items-center justify-center w-10 h-10 rounded-full border border-[#DBCEBD] bg-white text-[#4a4a43] hover:bg-[#8b7d6b] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            aria-label="上一頁"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          
+          <div class="flex gap-2">
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              @click="updatePage(page)"
+              :class="[
+                'w-10 h-10 rounded-full border transition-all font-medium text-sm',
+                currentPage === page
+                  ? 'bg-[#8b7d6b] text-white border-[#8b7d6b] shadow-sm' 
+                  : 'bg-white text-[#4a4a43] border-[#DBCEBD] hover:border-[#8b7d6b] hover:text-[#8b7d6b]'
+              ]"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button
+            @click="updatePage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="flex items-center justify-center w-10 h-10 rounded-full border border-[#DBCEBD] bg-white text-[#4a4a43] hover:bg-[#8b7d6b] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            aria-label="下一頁"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+/* 確保箭頭圖示垂直居中 */
+.material-symbols-outlined {
+  font-size: 20px;
+  line-height: 1;
+}
+</style>
