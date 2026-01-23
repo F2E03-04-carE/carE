@@ -22,8 +22,8 @@
         <div class="text-center">
           <h3 class="font-bold mb-5 text-[18px]">法律條款</h3>
           <ul class="space-y-2 text-sm">
-            <li><a href="/terms" class="hover:text-[#e9c667]">服務條款</a></li>
-            <li><a href="/privacy" class="hover:text-[#e9c667]">隱私權政策</a></li>
+            <li><router-link to="/terms" class="hover:text-[#e9c667]">服務條款</router-link></li>
+            <li><router-link to="/privacy" class="hover:text-[#e9c667]">隱私權政策</router-link></li>
           </ul>
         </div>
         <div class="text-center">
