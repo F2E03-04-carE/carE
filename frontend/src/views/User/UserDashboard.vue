@@ -15,22 +15,56 @@ if (!authStore.isAuthenticated) {
 
 const user = computed(() => authStore.user);
 const Email = computed(() => user.value?.email || '');
-const Phone = ref(user.value?.user_metadata?.phone || '');
-const Name = ref(user.value?.user_metadata?.name || Email.value.split('@')[0]);
-const Nickname = ref(user.value?.user_metadata?.nickname || '');
-const LicensePlate = ref(user.value?.user_metadata?.licensePlate || '');
+const Phone = ref('');
+const Name = ref('');
+const Nickname = ref('');
+const LicensePlate = ref('');
 
 const IsEditing = ref(false);
 const isSaving = ref(false);
 const saveError = ref('');
 const saveSuccess = ref(false);
 const phoneError = ref('');
+const isLoadingProfile = ref(true);
 
 // 檢查是否是首次登入
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
 
+// 從 profiles table 載入用戶資料
+const loadUserProfile = async () => {
+  if (!user.value?.id) return;
+
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.value.id)
+      .single();
+
+    if (error) {
+      console.error('載入用戶資料失敗:', error);
+      // Fallback 到 user_metadata
+      Phone.value = user.value.user_metadata?.phone || '';
+      Name.value = user.value.user_metadata?.name || Email.value.split('@')[0];
+      Nickname.value = user.value.user_metadata?.nickname || '';
+      LicensePlate.value = user.value.user_metadata?.licensePlate || '';
+    } else if (profile) {
+      Phone.value = profile.phone || '';
+      Name.value = profile.name || Email.value.split('@')[0];
+      Nickname.value = profile.nickname || '';
+      LicensePlate.value = profile.license_plate || '';
+    }
+  } catch (error) {
+    console.error('載入用戶資料時發生錯誤:', error);
+  } finally {
+    isLoadingProfile.value = false;
+  }
+};
+
 // 如果是首次登入且資料不完整，自動進入編輯模式
-onMounted(() => {
+onMounted(async () => {
+  await loadUserProfile();
+
   if (isFirstLogin.value && !Phone.value) {
     IsEditing.value = true;
   }
@@ -123,7 +157,27 @@ const handleSave = async () => {
   isSaving.value = true;
 
   try {
-    const { error } = await supabase.auth.updateUser({
+    const userId = authStore.user?.id;
+    if (!userId) {
+      throw new Error('未找到用戶 ID');
+    }
+	console.log(userId);
+    // 1. 更新 profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        name: Name.value.trim(),
+        phone: Phone.value.trim(),
+        nickname: Nickname.value.trim(),
+        license_plate: LicensePlate.value.trim(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId);
+
+    if (profileError) throw profileError;
+
+    // 2. 同步更新 user_metadata（保持向後兼容）
+    const { error: metadataError } = await supabase.auth.updateUser({
       data: {
         name: Name.value.trim(),
         phone: Phone.value.trim(),
@@ -132,7 +186,10 @@ const handleSave = async () => {
       },
     });
 
-    if (error) throw error;
+    if (metadataError) throw metadataError;
+
+    // 重新載入用戶資料以同步顯示
+    await loadUserProfile();
 
     saveSuccess.value = true;
     IsEditing.value = false;
@@ -181,7 +238,12 @@ const handleSave = async () => {
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
+						<div v-if="isLoadingProfile" class="flex items-center gap-2 text-[#8b7f6f]">
+							<span class="material-symbols-outlined text-[18px] leading-none animate-spin">progress_activity</span>
+							<span class="text-sm">載入中...</span>
+						</div>
 						<button
+							v-else
 							type="button"
 							@click="ToggleEditing"
 							:disabled="isSaving"

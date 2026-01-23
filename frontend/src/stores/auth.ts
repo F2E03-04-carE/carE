@@ -12,20 +12,40 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!user.value);
 
   // 同步更新 userStore
-  function syncUserStore() {
+  async function syncUserStore() {
     const userStore = useUserStore();
 
     if (user.value) {
-      const { full_name, name, avatar_url, role } = user.value.user_metadata;
-      // 登入時更新 userStore
-      userStore.login({
-        id: user.value.id,
-        name: full_name || name || user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
-        email: user.value.email || '',
-        role: user.value.user_metadata?.role || 'member',
-        avatar: avatar_url,
-        nickname: user.value.user_metadata?.nickname,
-      });
+      // 從 profiles table 獲取用戶資料
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.value.id)
+        .single();
+
+      if (error) {
+        console.error('獲取用戶資料失敗:', error);
+        // 如果 profiles table 查詢失敗，fallback 到 user_metadata
+        const { full_name, name, avatar_url, role } = user.value.user_metadata;
+        userStore.login({
+          id: user.value.id,
+          name: full_name || name || user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
+          email: user.value.email || '',
+          role: user.value.user_metadata?.role || 'member',
+          avatar: avatar_url,
+          nickname: user.value.user_metadata?.nickname,
+        });
+      } else if (profile) {
+        // 使用 profiles table 的資料
+        userStore.login({
+          id: profile.id,
+          name: profile.name || user.value.email?.split('@')[0] || 'User',
+          email: profile.email,
+          role: profile.role || 'member',
+          avatar: profile.avatar_url,
+          nickname: profile.nickname,
+        });
+      }
     } else {
       // 登出時清空 userStore
       userStore.logout();
@@ -41,15 +61,15 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = currentSession?.user ?? null;
 
       // 同步 userStore
-      syncUserStore();
+      await syncUserStore();
 
       // 監聽認證狀態變化
-      supabase.auth.onAuthStateChange((_event, newSession) => {
+      supabase.auth.onAuthStateChange(async (_event, newSession) => {
         session.value = newSession;
         user.value = newSession?.user ?? null;
 
         // 每次認證狀態變化時同步 userStore
-        syncUserStore();
+        await syncUserStore();
       });
     } catch (error) {
       console.error('初始化認證狀態失敗:', error);
