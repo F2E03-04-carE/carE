@@ -30,9 +30,10 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
     const today = new Date();
     const expiry = new Date(subscription.value.trialExpiryDate);
-    const diff = expiry.getTime() - today.getTime();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfExpiryDay = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
+    const diffTime = startOfExpiryDay.getTime() - startOfToday.getTime();
+    const days = Math.round(diffTime / (1000 * 60 * 60 * 24));
     return days > 0 ? days : 0;
   });
 
