@@ -17,14 +17,6 @@ const isRetrying = ref(false);
 const goBackToSelection = () => {
   router.push({ name: 'SubscriptionSelection' });
 };
-
-const retryPayment = () => {
-  isRetrying.value = true;
-  setTimeout(() => {
-    router.push({ name: 'SubscriptionSelection' });
-  }, 300);
-};
-
 onMounted(() => {
   console.error('Payment failed:', {
     message: errorMessage.value,
@@ -62,14 +54,13 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Content Card -->
       <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex-1 overflow-y-auto">
         <!-- Possible Reasons -->
-        <div class="mb-4">
+        <div class="mb-6">
           <h3 class="text-[18px] font-bold text-[#4a4a43] mb-4 text-center">
             可能的原因：
           </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
               <span class="material-symbols-outlined text-red-500 text-[20px] flex-shrink-0">
                 error
@@ -108,13 +99,11 @@ onMounted(() => {
             </div>
           </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="space-y-3 mb-4">
+        <div class="space-y-4 mb-5">
           <button
-            @click="retryPayment"
+            @click="goBackToSelection"
             :disabled="isRetrying"
-            class="w-full px-6 py-3 text-[16px] font-bold text-white bg-gradient-to-r from-[#6B6B5C] to-[#5a5a4a] hover:from-[#5a5a4a] hover:to-[#4a4a3a] rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full px-6 py-4 text-[16px] font-bold text-white bg-gradient-to-r from-[#6B6B5C] to-[#5a5a4a] hover:from-[#5a5a4a] hover:to-[#4a4a3a] rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span v-if="isRetrying" class="flex items-center justify-center">
               <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
@@ -122,16 +111,8 @@ onMounted(() => {
             </span>
             <span v-else>重新選擇方案</span>
           </button>
-
-          <button
-            @click="goBackToSelection"
-            class="w-full px-6 py-2 text-[14px] text-[#8a8a7d] hover:text-[#6B6B5C] transition-colors"
-          >
-            返回首頁
-          </button>
         </div>
 
-        <!-- Help Section -->
         <div class="p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
           <div class="flex items-start gap-3">
             <span class="material-symbols-outlined text-blue-600 text-[28px] flex-shrink-0">
