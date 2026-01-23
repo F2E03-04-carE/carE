@@ -8,7 +8,7 @@ const subscriptionStore = useSubscriptionStore();
 const bannerStyle = computed(() => {
   const days = subscriptionStore.daysRemaining;
 
-  if (!days) return null;
+  if (days === null) return null;
 
   if (days === 0) {
     return {
@@ -42,7 +42,7 @@ const bannerStyle = computed(() => {
 const message = computed(() => {
   const days = subscriptionStore.daysRemaining;
 
-  if (!days) return '';
+  if (days === null) return '';
 
   if (days === 0) {
     return '您的試用期已到期，目前僅保留「商家資料展示」功能。';
