@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
+
+const router = useRouter()
+
+const handleCategorySearch = (category: string) => {
+  router.push({
+    path: '/search',
+    query: { category }
+  })
+}
 </script>
 
 <template>
@@ -16,12 +26,12 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
 
         <HomeSearchBar />
         <!-- 六大常見搜尋主題 -->
-        <!-- TODO: button 待加 click event function -->
         <h3 class="mt-[50px] text-[24px] text-[#4a4a43] pb-5 font-bold">六大熱門搜尋主題</h3>
         <div
           class="flex flex-row flex-wrap lg:flex-nowrap justify-evenly items-center w-full mt-[5%] lg:mt-[0%]"
         >
           <button
+            @click="handleCategorySearch('維修')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
@@ -30,6 +40,7 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
             </p>
           </button>
           <button
+            @click="handleCategorySearch('保養')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
@@ -38,6 +49,7 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
             </p>
           </button>
           <button
+            @click="handleCategorySearch('改裝')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
@@ -46,6 +58,7 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
             </p>
           </button>
           <button
+            @click="handleCategorySearch('鈑金')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
@@ -54,6 +67,7 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
             </p>
           </button>
           <button
+            @click="handleCategorySearch('輪胎')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
@@ -62,6 +76,7 @@ import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
             </p>
           </button>
           <button
+            @click="handleCategorySearch('救援')"
             class="inline-block relative w-[150px] h-[150px] m-[10px] p-[10px] bg-[#f5f4f0] hover:bg-[#e5c58e] rounded-[1000px] cursor-pointer"
           >
             <p class="flex flex-col justify-evenly items-center text-[#4a4a43]">
