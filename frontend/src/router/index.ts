@@ -38,6 +38,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/search/:id',
+      name: 'ShopDetail',
+      component: () => import('@/components/Search/DetailView.vue'),
+      meta: {
+        title: '保養廠詳情 - carE',
+      },
+    },
+    {
       path: '/auth/callback',
       name: 'auth-callback',
       component: () => import('@/views/Auth/AuthCallback.vue'),
