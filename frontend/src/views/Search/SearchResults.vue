@@ -91,8 +91,14 @@ const fetchShops = async () => {
       city: route.query.city,
       district: route.query.district,
       brand: route.query.brand,
-      service: route.query.service
+      service: route.query.service,
+      category: route.query.category
     }
+
+    // TODO: 未來串接真實後端 API 時使用這些參數
+    // const response = await fetch(`/api/search?${new URLSearchParams(searchParams).toString()}`)
+    // const data = await response.json()
+    // allShops.value = data
 
     // 擴充 Mock Data 以測試分頁 (12筆)
     const mockData: ResultItem[] = [
