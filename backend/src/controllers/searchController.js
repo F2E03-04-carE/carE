@@ -133,7 +133,7 @@ export const searchGarages = async (req, res) => {
     if (category) {
       const { data: categoryServices, error: categoryServicesError } = await supabase
         .from('services')
-        .select('id')
+        .select('garageservice_id')
         .eq('category', category);
 
       if (categoryServicesError) {
@@ -144,7 +144,7 @@ export const searchGarages = async (req, res) => {
         });
       }
 
-      const categoryServiceIds = categoryServices.map(item => item.id);
+      const categoryServiceIds = categoryServices.map(item => item.garageservice_id);
 
       if (categoryServiceIds.length === 0) {
         return res.json({
