@@ -5,10 +5,10 @@ import supabase from '../configs/supabase.js';
 /**
 * GET /api/search
 * 搜尋維修廠
-* 
+*
 * Query 參數範例：
-* /api/search?city=台北市&district=中山區&brand=123&service=456&page=1&limit=10&sort=rating
-* 
+* /api/search?city=台北市&district=中山區&brand=123&service=456&category=維修&page=1&limit=10&sort=rating
+*
 * 回傳格式：
 * {
 *   "data": [
@@ -44,6 +44,7 @@ export const searchGarages = async (req, res) => {
       district,
       brand,
       service,
+      category,
       page = 1,
       limit = 10,
       sort = 'rating'
@@ -112,7 +113,7 @@ export const searchGarages = async (req, res) => {
       }
 
       const serviceGarageIds = serviceData.map(item => item.garage_id);
-      
+
       if (serviceGarageIds.length === 0) {
         return res.json({
           data: [],
@@ -126,6 +127,65 @@ export const searchGarages = async (req, res) => {
       }
 
       query = query.in('id', serviceGarageIds);
+    }
+
+    // 六大主題篩選
+    if (category) {
+      const { data: categoryServices, error: categoryServicesError } = await supabase
+        .from('services')
+        .select('id')
+        .eq('category', category);
+
+      if (categoryServicesError) {
+        console.error('類別服務查詢錯誤:', categoryServicesError);
+        return res.status(500).json({
+          error: '類別篩選失敗',
+          message: categoryServicesError.message
+        });
+      }
+
+      const categoryServiceIds = categoryServices.map(item => item.id);
+
+      if (categoryServiceIds.length === 0) {
+        return res.json({
+          data: [],
+          pagination: {
+            page: pageNum,
+            limit: limitNum,
+            total: 0,
+            totalPages: 0
+          }
+        });
+      }
+      //根據 category 在哪個service_id 再去抓 garage_id
+      const { data: categoryGarageData, error: categoryGarageError } = await supabase
+        .from('garage_services')
+        .select('garage_id')
+        .in('service_id', categoryServiceIds);
+
+      if (categoryGarageError) {
+        console.error('類別維修廠查詢錯誤:', categoryGarageError);
+        return res.status(500).json({
+          error: '類別篩選失敗',
+          message: categoryGarageError.message
+        });
+      }
+
+      const categoryGarageIds = [...new Set(categoryGarageData.map(item => item.garage_id))];
+
+      if (categoryGarageIds.length === 0) {
+        return res.json({
+          data: [],
+          pagination: {
+            page: pageNum,
+            limit: limitNum,
+            total: 0,
+            totalPages: 0
+          }
+        });
+      }
+
+      query = query.in('id', categoryGarageIds);
     }
 
     //排序（評分或評論數，由高到低）
