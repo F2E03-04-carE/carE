@@ -58,7 +58,7 @@ export const searchGarages = async (req, res) => {
 
     let query = supabase
       .from('garages')
-      .select('*, brands(id, name), services(id, name)', { count: 'exact' }); // count: 'exact' 會回傳總筆數
+      .select('*', { count: 'exact' }); 
 
     if (city) {
       query = query.eq('city', city);
@@ -129,7 +129,6 @@ export const searchGarages = async (req, res) => {
       query = query.in('id', serviceGarageIds);
     }
 
-    // 六大主題篩選
     if (category) {
       const { data: categoryServices, error: categoryServicesError } = await supabase
         .from('services')
@@ -157,7 +156,8 @@ export const searchGarages = async (req, res) => {
           }
         });
       }
-      //根據 category 在哪個service_id 再去抓 garage_id
+
+      // 根據 category 找到對應的 service_id 再查關聯的garage_id
       const { data: categoryGarageData, error: categoryGarageError } = await supabase
         .from('garage_services')
         .select('garage_id')
@@ -188,7 +188,7 @@ export const searchGarages = async (req, res) => {
       query = query.in('id', categoryGarageIds);
     }
 
-    //排序（評分或評論數，由高到低）
+    // 排序（評分或評論數，由高到低）
     query = query.order(sortField, { ascending: false });
 
     query = query.range(offset, offset + limitNum - 1);
@@ -210,19 +210,38 @@ export const searchGarages = async (req, res) => {
     if (garageIds.length > 0) {
       const { data: brandRelations } = await supabase
         .from('garage_brands')
-        .select('garage_id, brands(id, name)')
+        .select('garage_id, brand_id')
         .in('garage_id', garageIds);
 
-      if (brandRelations) {
-        brands = brandRelations;
+      if (brandRelations && brandRelations.length > 0) {
+        const brandIds = [...new Set(brandRelations.map(b => b.brand_id))];
+        const { data: brandsData } = await supabase
+          .from('brands')
+          .select('carbrand_id, brand_en, brand_zh')
+          .in('carbrand_id', brandIds);
+
+        brands = brandRelations.map(rel => ({
+          garage_id: rel.garage_id,
+          brands: brandsData?.find(b => b.carbrand_id === rel.brand_id) || null
+        })).filter(item => item.brands !== null);
       }
+
       const { data: serviceRelations } = await supabase
         .from('garage_services')
-        .select('garage_id, services(id, name)')
+        .select('garage_id, service_id')
         .in('garage_id', garageIds);
 
-      if (serviceRelations) {
-        services = serviceRelations;
+      if (serviceRelations && serviceRelations.length > 0) {
+        const serviceIds = [...new Set(serviceRelations.map(s => s.service_id))];
+        const { data: servicesData } = await supabase
+          .from('services')
+          .select('garageservice_id, name, category')
+          .in('garageservice_id', serviceIds);
+
+        services = serviceRelations.map(rel => ({
+          garage_id: rel.garage_id,
+          services: servicesData?.find(s => s.garageservice_id === rel.service_id) || null
+        })).filter(item => item.services !== null);
       }
     }
 
