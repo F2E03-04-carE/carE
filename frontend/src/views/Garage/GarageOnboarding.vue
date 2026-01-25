@@ -177,7 +177,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="relative min-h-screen bg-[#f5f4f0] pt-[60px] sm:pt-[70px]">
+  <main class="relative min-h-screen bg-[#f5f4f0]">
     <div class="w-full max-w-[800px] mx-auto px-4 sm:px-6 py-12">
       <div v-if="currentStep === 1" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
         <h1 class="text-[28px] sm:text-[32px] font-bold text-[#4a4a43] mb-2 text-center">

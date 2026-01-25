@@ -119,7 +119,7 @@ function goBack() {
 </script>
 
 <template>
-  <main class="relative min-h-screen bg-[#f5f4f0] pt-[60px] sm:pt-[70px]">
+  <main class="relative min-h-screen bg-[#f5f4f0]">
     <div class="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
       <div class="text-center mb-12">
         <h3 class="text-[32px] sm:text-[40px] font-bold text-[#4a4a43] mb-4">

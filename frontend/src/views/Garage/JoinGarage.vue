@@ -38,7 +38,7 @@ const navigateToOnboarding = () => {
 </script>
 
 <template>
-  <main class="relative mt-[60px] sm:mt-[70px]">
+  <div class="relative">
     <section
       class="text-center bg-[url(https://picsum.photos/id/133/1200/900)] bg-no-repeat bg-center bg-cover"
     >
@@ -159,6 +159,6 @@ const navigateToOnboarding = () => {
         </p>
       </div>
     </section>
-  </main>
+  </div>
 </template>
 
