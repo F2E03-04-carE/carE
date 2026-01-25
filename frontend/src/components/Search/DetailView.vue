@@ -113,6 +113,12 @@ const goBack = () => {
   router.back()
 }
 
+const openGoogleMaps = () => {
+  if (!garage.value) return
+  const url = `https://www.google.com/maps/search/?api=1&query=${garage.value.lat},${garage.value.lng}`
+  window.open(url, '_blank')
+}
+
 onMounted(() => {
   fetchGarageDetail()
 })
@@ -238,7 +244,7 @@ onMounted(() => {
                     <p>地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
                   </div>
                   <button
-                    @click="window.open(`https://www.google.com/maps/search/?api=1&query=${garage.lat},${garage.lng}`, '_blank')"
+                    @click="openGoogleMaps"
                     class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
                   >
                     開啟 Google Maps 導航
@@ -306,7 +312,7 @@ onMounted(() => {
               </div>
               <p class="mt-4 text-sm text-gray-500">地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
               <button
-                @click="window.open(`https://www.google.com/maps/search/?api=1&query=${garage.lat},${garage.lng}`, '_blank')"
+                @click="openGoogleMaps"
                 class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
               >
                 開啟 Google Maps 導航
