@@ -159,12 +159,12 @@ function handleClose() {
                         >
                           <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-4">
-                                <span class="text-white font-bold text-lg">應援</span>
+                              <div class="w-12 h-12 flex items-center justify-center mr-4">
+                                <span><img src="https://content.pstmn.io/18ff50bf-4171-49ef-ad8c-228216994aad/bG9nby5wbmc="></span>
                               </div>
                               <div>
-                                <p class="font-semibold text-gray-900">應援 Pay</p>
-                                <p class="text-sm text-gray-600">支援信用卡、ATM、超商付款</p>
+                                <p class="font-bold text-gray-900">應援金流</p>
+                                <p class="font-semibold text-sm text-gray-600">支援信用卡付款</p>
                               </div>
                             </div>
                             <div
@@ -187,12 +187,12 @@ function handleClose() {
                         >
                           <div class="flex items-center justify-between">
                             <div class="flex items-center">
-                              <div class="w-12 h-12 bg-[#00B900] rounded-lg flex items-center justify-center mr-4">
-                                <span class="text-white font-bold text-lg">LINE</span>
+                              <div class="w-12 h-12 flex items-center justify-center mr-4">
+                                <span><img src="https://d.line-scdn.net/linepay/portal/assets/img/portal/login-logo-pay.svg"></span>
                               </div>
                               <div>
-                                <p class="font-semibold text-gray-900">LINE Pay</p>
-                                <p class="text-sm text-gray-600">使用 LINE Pay 快速付款</p>
+                                <p class="font-bold text-gray-900">LINE Pay</p>
+                                <p class="font-semibold text-sm text-gray-600">使用 LINE Pay 快速付款</p>
                               </div>
                             </div>
                             <div
