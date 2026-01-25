@@ -1,43 +1,175 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { supabase } from '@/lib/supabase'
+import { calculateDistance, DEFAULT_LOCATION } from '@/utils/distance'
+import type { GarageDetail } from '@/types/database'
 
 const router = useRouter()
+const route = useRoute()
 const isOpenMap = ref(false)
 const isOpenSurroundings = ref(false)
+
+// 資料狀態
+const garage = ref<GarageDetail | null>(null)
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+// 評分星星顯示
+const ratingStars = computed(() => {
+  if (!garage.value) return '☆☆☆☆☆'
+  const fullStars = Math.floor(garage.value.score)
+  const emptyStars = 5 - fullStars
+  return '★'.repeat(fullStars) + '☆'.repeat(emptyStars)
+})
+
+// 取得保養廠詳細資訊
+const fetchGarageDetail = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const garageId = Number(route.params.id)
+
+    if (!garageId || isNaN(garageId)) {
+      throw new Error('無效的保養廠 ID')
+    }
+
+    // 查詢保養廠資料（包含關聯的品牌和服務）
+    const { data, error: fetchError } = await supabase
+      .from('garages')
+      .select(`
+        *,
+        garage_brands (
+          brands (
+            brand_zh,
+            brand_en
+          )
+        ),
+        garage_services (
+          services (
+            name,
+            category
+          )
+        )
+      `)
+      .eq('id', garageId)
+      .single()
+
+    if (fetchError) {
+      throw fetchError
+    }
+
+    if (!data) {
+      throw new Error('找不到該保養廠')
+    }
+
+    // 計算距離
+    const userLocation = { lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng }
+    const distance = data.lat && data.lng
+      ? calculateDistance(userLocation.lat, userLocation.lng, data.lat, data.lng)
+      : 0
+
+    // 提取品牌名稱 - 處理可能為 null 的情況
+    const brands = (data.garage_brands || [])
+      .map((gb: any) => gb.brands?.brand_zh)
+      .filter((brand: any): brand is string => brand !== null && brand !== undefined)
+
+    // 提取服務項目名稱 - 處理可能為 null 的情況
+    const services = (data.garage_services || [])
+      .map((gs: any) => gs.services?.name)
+      .filter((service: any): service is string => service !== null && service !== undefined)
+
+    // 轉換為前端格式
+    garage.value = {
+      id: data.id,
+      name: data.name,
+      city: data.city,
+      district: data.district,
+      address: data.address,
+      lat: data.lat,
+      lng: data.lng,
+      score: data.rating ?? 0,
+      distance,
+      reviewCount: data.review_count ?? 0,
+      brands,
+      services,
+      image: data.image_url ?? undefined,
+      phone: data.phone ?? undefined,
+      ownerName: data.garage_owner_name ?? data.garage_owner ?? undefined,
+      operatingHours: data.operating_hours ?? undefined,
+    }
+
+  } catch (err) {
+    console.error('查詢保養廠失敗:', err)
+    error.value = err instanceof Error ? err.message : '查詢失敗，請稍後再試'
+    garage.value = null
+  } finally {
+    loading.value = false
+  }
+}
 
 const goBack = () => {
   router.back()
 }
+
+onMounted(() => {
+  fetchGarageDetail()
+})
 </script>
 
 <template>
   <div class="min-h-screen py-8 bg-[#FAF8F5] min-w-[375px]">
     <div class="max-w-6xl mx-auto px-4">
-      <button 
+      <button
         @click="goBack"
         class="inline-flex items-center px-4 py-2 mb-4 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
       >
         ← 返回搜尋結果
       </button>
+
+      <!-- Loading 狀態 -->
+      <div v-if="loading" class="text-center py-20">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#8b7d6b] border-t-transparent"></div>
+        <p class="text-[#4a4a43] text-lg mt-4">載入中...</p>
+      </div>
+
+      <!-- 錯誤狀態 -->
+      <div v-else-if="error" class="max-w-md mx-auto mt-10 p-6 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-red-600 text-lg font-medium">{{ error }}</p>
+        <button
+          @click="fetchGarageDetail"
+          class="mt-4 px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+        >
+          重新載入
+        </button>
+      </div>
+
+      <!-- 查無資料 -->
+      <div v-else-if="!garage" class="text-center py-20">
+        <p class="text-[#4a4a43] text-lg">找不到該保養廠</p>
+      </div>
+
+      <!-- 保養廠詳細資料 -->
+      <div v-else>
       <div class="flex flex-col lg:flex-row gap-6 items-start">
         <div class="flex-1 w-full min-w-0 space-y-6">
           <section class="p-6 bg-white rounded-2xl shadow-sm">
             <div class="flex items-start justify-between">
               <div class="flex items-end gap-3">
-                <h1 class="text-xl font-semibold text-gray-900">匠心汽車維修中心</h1>
-                <span class="text-xs text-gray-500 mb-1">台北市咪咪毛毛區 123 號</span>
+                <h1 class="text-xl font-semibold text-gray-900">{{ garage.name }}</h1>
+                <span class="text-xs text-gray-500 mb-1">{{ garage.city }}{{ garage.district }} {{ garage.address }}</span>
               </div>
-              <div class="text-yellow-400">★★★★★</div>
+              <div class="text-yellow-400">{{ ratingStars }}</div>
             </div>
             <div class="mt-4 space-y-2 text-sm text-gray-600">
-              <div class="flex items-center gap-2">
+              <div v-if="garage.ownerName" class="flex items-center gap-2">
                 <span>店長姓名:</span>
-                <span>陳貓貓</span>
+                <span>{{ garage.ownerName }}</span>
               </div>
-              <div class="flex items-center gap-2">
+              <div v-if="garage.phone" class="flex items-center gap-2">
                 <span>聯絡電話:</span>
-                <span>(02) 2345-6789</span>
+                <span>{{ garage.phone }}</span>
               </div>
             </div>
             <div class="mt-6">
@@ -60,30 +192,30 @@ const goBack = () => {
                 </div>
               </div>
             </div>
-            <div class="mt-6">
+            <div class="mt-6" v-if="garage.brands.length > 0">
               <h3 class="mb-2 font-medium text-gray-800">專修品牌</h3>
               <div class="flex flex-wrap gap-2">
-                <span class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full">Toyota</span>
-                <span class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full">Honda</span>
-                <span class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full">Nissan</span>
-                <span class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full">Mazda</span>
-                <span class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full">Lexus</span>
+                <span
+                  v-for="brand in garage.brands"
+                  :key="brand"
+                  class="px-4 py-1 text-sm bg-[#E8E3DB] rounded-full"
+                >
+                  {{ brand }}
+                </span>
               </div>
             </div>
-            <div class="mt-6">
+            <div class="mt-6" v-if="garage.services.length > 0">
               <h3 class="mb-2 font-medium text-gray-800">服務項目</h3>
               <div class="flex flex-row gap-8 text-sm text-gray-700 sm:gap-12">
                 <ul class="pl-4 space-y-1 list-disc">
-                  <li>定期保養</li>
-                  <li>變速箱維修</li>
-                  <li>冷氣系統</li>
-                  <li>鈑金烤漆</li>
+                  <li v-for="(service, index) in garage.services" :key="service" v-show="index % 2 === 0">
+                    {{ service }}
+                  </li>
                 </ul>
                 <ul class="pl-4 space-y-1 list-disc">
-                  <li>引擎維修</li>
-                  <li>煞車系統</li>
-                  <li>電路系統</li>
-                  <li>輪胎更換</li>
+                  <li v-for="(service, index) in garage.services" :key="service" v-show="index % 2 === 1">
+                    {{ service }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -103,9 +235,14 @@ const goBack = () => {
                     <span class="text-sm">Google Map 載入中...</span>
                   </div>
                   <div class="mt-4 text-sm text-gray-500">
-                    <p>地址：台北市咪咪毛毛區 123 號</p>
+                    <p>地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
                   </div>
-                  <button class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition">開啟 Google Maps 導航</button>
+                  <button
+                    @click="window.open(`https://www.google.com/maps/search/?api=1&query=${garage.lat},${garage.lng}`, '_blank')"
+                    class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
+                  >
+                    開啟 Google Maps 導航
+                  </button>
                 </div>
               </div>
               <div class="border border-gray-200 rounded-xl overflow-hidden">
@@ -167,12 +304,19 @@ const goBack = () => {
                 <span class="text-4xl mb-2">🗺️</span>
                 <span class="text-sm">Google Map 載入中...</span>
               </div>
-              <p class="mt-4 text-sm text-gray-500">地址：台北市咪咪毛毛區 123 號</p>
-              <button class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition">開啟 Google Maps 導航</button>
+              <p class="mt-4 text-sm text-gray-500">地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
+              <button
+                @click="window.open(`https://www.google.com/maps/search/?api=1&query=${garage.lat},${garage.lng}`, '_blank')"
+                class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
+              >
+                開啟 Google Maps 導航
+              </button>
             </div>
           </div>
         </div>
       </div>
+      </div>
+      <!-- End of v-else garage data -->
     </div>
   </div>
 </template>
