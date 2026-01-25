@@ -2,9 +2,10 @@
 // TODO: 之後整合 Supabase 資料庫
 const subscriptions = new Map();
 
+const getUserId = (req) => req.headers['x-user-id'] || 'demo-user';
+
 export const getCurrentSubscription = async (req, res) => {
-  // TODO: 從 session/JWT 取得用戶 ID
-  const userId = req.headers['x-user-id'] || 'demo-user';
+  const userId = getUserId(req);
 
   const subscription = subscriptions.get(userId);
 
@@ -22,8 +23,7 @@ export const getCurrentSubscription = async (req, res) => {
 };
 
 export const activateTrial = async (req, res) => {
-  // TODO: 從 session/JWT 取得用戶 ID
-  const userId = req.headers['x-user-id'] || 'demo-user';
+  const userId = getUserId(req);
 
   // 檢查是否已有訂閱
   if (subscriptions.has(userId)) {
@@ -59,8 +59,7 @@ export const activateTrial = async (req, res) => {
 };
 
 export const activateLifetime = async (req, res) => {
-  // TODO: 從 session/JWT 取得用戶 ID 和 webhook 驗證的交易資訊
-  const userId = req.headers['x-user-id'] || 'demo-user';
+  const userId = getUserId(req);
   const { orderId, transactionId } = req.body;
 
   // TODO: 驗證交易是否成功（從資料庫查詢 webhook 記錄）
@@ -85,4 +84,23 @@ export const activateLifetime = async (req, res) => {
     success: true,
     subscription
   });
+};
+
+export const setLifetimeFromPayment = ({ userId, orderId, transactionId }) => {
+  const subscription = {
+    id: `lifetime_${Date.now()}`,
+    planType: 'lifetime',
+    status: 'active',
+    purchaseDate: new Date().toISOString(),
+    orderId,
+    transactionId,
+    features: {
+      bookingManagement: true,
+      reviewSystem: true,
+      profileDisplay: true
+    }
+  };
+
+  subscriptions.set(userId, subscription);
+  return subscription;
 };

@@ -99,6 +99,7 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
       amount: plan.price,
       currency: 'TWD',
       orderId: orderId,
+      planType: plan.type,
       successUrl: `${window.location.origin}/garage/subscription/success?type=${plan.type}`,
       failureUrl: `${window.location.origin}/garage/subscription/failure`,
       productDetail: `${plan.title} - carE 平台訂閱`,

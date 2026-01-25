@@ -1,3 +1,5 @@
+import { setLifetimeFromPayment } from './subscriptionController.js';
+
 const OEN_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://payment-api.oen.tw'
   : 'https://payment-api.testing.oen.tw';
@@ -8,6 +10,29 @@ const OEN_CHECKOUT_HOST = process.env.NODE_ENV === 'production'
 
 const buildRedirectUrl = (merchantId, checkoutId) => `https://${merchantId}.${OEN_CHECKOUT_HOST}/checkout/${checkoutId}`;
 
+// 簡易記憶體紀錄：將 orderId / checkoutId / transactionHid 對應到 user 與方案
+const paymentSessions = {
+  byOrderId: new Map(),
+  byCheckoutId: new Map(),
+  byTransactionHid: new Map()
+};
+
+const rememberPaymentSession = ({ orderId, checkoutId, transactionHid, userId, planType, amount }) => {
+  const session = {
+    orderId,
+    checkoutId,
+    transactionHid,
+    userId,
+    planType,
+    amount,
+    createdAt: new Date().toISOString()
+  };
+
+  if (orderId) paymentSessions.byOrderId.set(orderId, session);
+  if (checkoutId) paymentSessions.byCheckoutId.set(checkoutId, session);
+  if (transactionHid) paymentSessions.byTransactionHid.set(transactionHid, session);
+};
+
 export const createOenCheckout = async (req, res) => {
   const {
     amount,
@@ -15,8 +40,11 @@ export const createOenCheckout = async (req, res) => {
     orderId,
     successUrl,
     failureUrl,
-    productDetail
+    productDetail,
+    planType
   } = req.body || {};
+
+  const userId = req.headers['x-user-id'] || 'demo-user';
 
   const merchantId = process.env.OEN_MERCHANT_ID;
   const token = process.env.OEN_TOKEN;
@@ -37,6 +65,10 @@ export const createOenCheckout = async (req, res) => {
       success: false,
       message: 'orderId, successUrl, failureUrl are required'
     });
+  }
+
+  if (!planType) {
+    return res.status(400).json({ success: false, message: 'planType is required' });
   }
 
   const payload = {
@@ -80,6 +112,15 @@ export const createOenCheckout = async (req, res) => {
 
     const checkoutId = result.data.id;
     const transactionHid = result.data.transactionHid;
+
+    rememberPaymentSession({
+      orderId,
+      checkoutId,
+      transactionHid,
+      userId,
+      planType,
+      amount: Number(amount)
+    });
     const redirectUrl = buildRedirectUrl(merchantId, checkoutId);
 
     return res.json({
@@ -148,9 +189,33 @@ export const handleOenWebhook = async (req, res) => {
   }
 
   try {
-    // TODO: 將 webhook 狀態寫入資料庫（transactionId、status、purpose、success 等）並做冪等更新
-    // 目前先記錄 log 與回覆 200，避免 OEN 重試
-    console.log('OEN webhook received:', payload);
+    const transactionId = payload.id;
+    const status = payload.status;
+    const success = payload.success === true;
+
+    // 盡量定位到原始 session（orderId -> user）
+    let session = paymentSessions.byTransactionHid.get(transactionId);
+
+    // 若未找到，透過交易查詢取回 orderId，再映射 session
+    if (!session) {
+      const tx = await fetchTransactionById(transactionId);
+      if (tx?.orderId) {
+        session = paymentSessions.byOrderId.get(tx.orderId);
+      }
+    }
+
+    // 判斷成功條件：success=true 或 status=charged
+    const isSuccess = success || status === 'charged';
+
+    if (session && isSuccess && session.planType === 'lifetime') {
+      setLifetimeFromPayment({
+        userId: session.userId,
+        orderId: session.orderId,
+        transactionId
+      });
+    }
+
+    // 總是回 200 讓 OEN 不要重試
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Failed to process webhook:', error);
@@ -158,3 +223,26 @@ export const handleOenWebhook = async (req, res) => {
     return res.status(500).json({ success: false });
   }
 };
+
+async function fetchTransactionById(id) {
+  const token = process.env.OEN_TOKEN;
+  if (!token || !id) return null;
+
+  try {
+    const response = await fetch(`${getOEN_BASE_URL()}/transactions/${encodeURIComponent(id)}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.code !== 'S0000') {
+      return null;
+    }
+    return result.data;
+  } catch (error) {
+    console.error('Failed to fetch transaction detail:', error);
+    return null;
+  }
+}
