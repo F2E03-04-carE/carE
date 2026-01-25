@@ -175,8 +175,8 @@ function handleClose() {
                             </div>
                           </div>
                         </button>
-
-                        <button
+//TODO: 暫時隱藏 Line Pay 選項(時間允許再補上)
+                        <!-- <button
                           @click="selectPaymentMethod('linepay')"
                           class="w-full p-4 rounded-lg border-2 transition-all text-left"
                           :class="[
@@ -202,7 +202,7 @@ function handleClose() {
                               <span class="material-symbols-outlined text-white text-sm">check</span>
                             </div>
                           </div>
-                        </button>
+                        </button> -->
                       </div>
 
                       <div v-if="plan.type === 'trial'" class="bg-blue-50 rounded-lg p-4">
