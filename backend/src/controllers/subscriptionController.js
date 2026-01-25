@@ -26,12 +26,15 @@ const mapGarageToSubscription = (garage) => {
 export const getCurrentSubscription = async (req, res) => {
   const garageId = getGarageId(req);
 
-  if (!garageId) {
-    return res.status(400).json({
-      success: false,
-      message: 'garage ID required (x-garage-id or x-user-id header)'
-    });
+ if (!garageId) {
+  if (process.env.NODE_ENV !== 'production') {
+    return res.json({ success: true, subscription: null });
   }
+  return res.status(400).json({
+    success: false,
+    message: 'garage ID required (x-garage-id or x-user-id header)'
+  });
+}
 
   try {
     const { data: garage, error } = await supabase

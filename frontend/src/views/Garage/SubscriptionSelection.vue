@@ -100,13 +100,13 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
   // 從登入狀態取得 garageId，未登入時使用測試 ID
   const garageId = userStore.currentUser?.id
     ? String(userStore.currentUser.id)
-    : '1'; // 開發測試用 fallback
+    : (import.meta.env.DEV ? '1' : null); // 開發測試用 fallback
 
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-garage-id': String(garageId)
+      ...(garageId ? { 'x-garage-id': String(garageId) } : {})
     },
     body: JSON.stringify({
       amount: plan.price,

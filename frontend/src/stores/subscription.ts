@@ -88,16 +88,18 @@ export const useSubscriptionStore = defineStore('subscription', () => {
       const userStore = useUserStore();
 
       // 從登入狀態取得 garageId，未登入時使用測試 ID
-      const garageId = userStore.currentUser?.id || '1'; // 使用 user id 作為 garageId
+      const garageId = userStore.currentUser?.id || (import.meta.env.DEV ? '1' : null);
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (garageId) {
+        headers['x-garage-id'] = garageId;
+      }
       const response = await fetch(`${apiUrl}/api/subscription/current`, {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-garage-id': garageId
-        }
+        headers,
       });
-
       const data = await response.json();
 
       if (data.success && data.subscription) {
@@ -125,15 +127,19 @@ export const useSubscriptionStore = defineStore('subscription', () => {
       const userStore = useUserStore();
 
       // 從登入狀態取得 garageId，未登入時使用測試 ID
-      const garageId = userStore.currentUser?.id || '1'; // 使用 user id 作為 garageId
+      const garageId = userStore.currentUser?.id || (import.meta.env.DEV ? '1' : null);
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (garageId) {
+        headers['x-garage-id'] = garageId;
+      }
 
       const response = await fetch(`${apiUrl}/api/trial/activate`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-garage-id': garageId
-        }
+        headers,
       });
 
       const data = await response.json();
