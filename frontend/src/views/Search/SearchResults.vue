@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router';
 import ShopCard from '@/components/ui/ShopCard.vue';
+import { supabase } from '@/lib/supabase';
+import { calculateDistance, getUserLocation, DEFAULT_LOCATION } from '@/utils/distance';
+import type { GarageItem } from '@/types/database';
 
 
 const orderTitle = ref('排序');
@@ -15,18 +18,10 @@ const filterBy = ref('all');
 const currentPage = ref(Number(route.query.page) || 1);
 const itemsPerPage = 8; // 每頁顯示 8 筆 (一行4格 x 2行)
 
-interface ResultItem {
-  image?: string;
-  id: number;
-  name: string;
-  score: number;
-  distance: number;
-  reviewCount: number;
-  brands: string[];
-  services: string[];
-}
-
-const allShops = ref<ResultItem[]>([]);
+// 資料狀態
+const allShops = ref<GarageItem[]>([]);
+const loading = ref(false);
+const error = ref<string | null>(null);
 
 // 篩選與排序邏輯
 const results = computed(() => {
@@ -86,149 +81,122 @@ const updatePage = (page: number) => {
 };
 
 const fetchShops = async () => {
+  loading.value = true;
+  error.value = null;
+
   try {
+    // 取得搜尋參數，並將繁體「臺」轉換為簡體「台」以匹配資料庫
+    const normalizeCity = (city: string | undefined) => {
+      if (!city) return city;
+      return city.replace(/臺/g, '台');
+    };
+
     const searchParams = {
-      city: route.query.city,
-      district: route.query.district,
-      brand: route.query.brand,
-      service: route.query.service,
-      category: route.query.category
+      city: normalizeCity(route.query.city as string | undefined),
+      district: route.query.district as string | undefined,
+      brand: route.query.brand as string | undefined,
+      service: route.query.service as string | undefined,
+    };
+
+    // 取得使用者位置（用於計算距離）
+    let userLocation = { lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng };
+
+    // 建立 Supabase 查詢
+    let query = supabase
+      .from('garages')
+      .select(`
+        id,
+        name,
+        city,
+        district,
+        address,
+        lat,
+        lng,
+        rating,
+        review_count,
+        image_url,
+        garage_brands (
+          brands (
+            brand_zh,
+            brand_en
+          )
+        ),
+        garage_services (
+          services (
+            name,
+            category
+          )
+        )
+      `);
+
+    // 套用篩選條件
+    if (searchParams.city) {
+      query = query.eq('city', searchParams.city);
     }
 
-    // TODO: 未來串接真實後端 API 時使用這些參數
-    // const response = await fetch(`/api/search?${new URLSearchParams(searchParams).toString()}`)
-    // const data = await response.json()
-    // allShops.value = data
+    if (searchParams.district) {
+      query = query.eq('district', searchParams.district);
+    }
 
-    // 擴充 Mock Data 以測試分頁 (12筆)
-    const mockData: ResultItem[] = [
-      {
-        id: 1,
-        name: '匠心汽車維修中心',
-        score: 5,
-        distance: 1.2,
-        reviewCount: 120,
-        brands: ['Benz', 'BMW', '奧迪', '保時捷'],
-        services: ['保養維護', '故障維修', '年檢服務', '鈑金噴漆', '輪胎更換', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=1',
-      },
-      {
-        id: 2,
-        name: '職人汽車保養廠',
-        score: 4,
-        distance: 2.5,
-        reviewCount: 85,
-        brands: ['豐田', '本田', 'Volvo', '馬自達'],
-        services: ['定期保養', '引擎維修', '變速箱維修', '煞車系統', '電路檢修', '冷氣維修'],
-        image: 'https://picsum.photos/300/200?random=2',
-      },
-      {
-        id: 3,
-        name: '專業汽車維修站',
-        score: 3,
-        distance: 3.8,
-        reviewCount: 50,
-        brands: ['福斯', '奧迪', '保時捷', 'BMW'],
-        services: ['專業診斷', '原廠配件', '精密維修', '性能升級', '保養套餐', '質保服務'],
-        image: 'https://picsum.photos/300/200?random=3',
-      },
-      {
-        id: 4,
-        name: '極速維修中心',
-        score: 4.5,
-        distance: 0.8,
-        reviewCount: 200,
-        brands: ['Tesla', 'BMW', 'Benz'],
-        services: ['電池檢測', '馬達維修', '軟體更新', '底盤強化'],
-        image: 'https://picsum.photos/300/200?random=4',
-      },
-      {
-        id: 5,
-        name: '安心汽修廠',
-        score: 4.2,
-        distance: 5.1,
-        reviewCount: 30,
-        brands: ['Nissan', 'Mitsubishi', 'Ford'],
-        services: ['快速保養', '輪胎定位', '鈑金烤漆'],
-        image: 'https://picsum.photos/300/200?random=5',
-      },
-      {
-        id: 6,
-        name: '城市車庫',
-        score: 3.8,
-        distance: 1.5,
-        reviewCount: 65,
-        brands: ['Honda', 'Toyota'],
-        services: ['引擎調校', '冷氣保養', '皮帶更換'],
-        image: 'https://picsum.photos/300/200?random=6',
-      },
-      {
-        id: 7,
-        name: '老張修車行',
-        score: 4.8,
-        distance: 0.5,
-        reviewCount: 300,
-        brands: ['Toyota', 'Nissan', 'Lexus'],
-        services: ['老車翻新', '疑難雜症', '定期檢查'],
-        image: 'https://picsum.photos/300/200?random=7',
-      },
-      {
-        id: 8,
-        name: '德系精修館',
-        score: 5,
-        distance: 10.2,
-        reviewCount: 15,
-        brands: ['Porsche', 'Audi', 'VW'],
-        services: ['動力改裝', '電腦編程', '賽道設定'],
-        image: 'https://picsum.photos/300/200?random=8',
-      },
-      {
-        id: 9,
-        name: '未來汽車工坊',
-        score: 4.1,
-        distance: 6.7,
-        reviewCount: 45,
-        brands: ['Hyundai', 'Kia'],
-        services: ['混合動力維修', '高壓電系統', '電池更換'],
-        image: 'https://picsum.photos/300/200?random=9',
-      },
-      {
-        id: 10,
-        name: '山路救援站',
-        score: 4.9,
-        distance: 15.3,
-        reviewCount: 10,
-        brands: ['Subaru', 'Suzuki'],
-        services: ['越野改裝', '底盤升高', '絞盤安裝'],
-        image: 'https://picsum.photos/300/200?random=10',
-      },
-      {
-        id: 11,
-        name: '濱海保養所',
-        score: 3.5,
-        distance: 20.0,
-        reviewCount: 5,
-        brands: ['Luxgen', 'Ford'],
-        services: ['防鏽處理', '底盤防護', '基本保養'],
-        image: 'https://picsum.photos/300/200?random=11',
-      },
-       {
-        id: 12,
-        name: '優質輪胎館',
-        score: 4.6,
-        distance: 1.8,
-        reviewCount: 180,
-        brands: ['Michelin', 'Bridgestone', 'Continental'],
-        services: ['輪胎更換', '四輪定位', '補胎服務'],
-        image: 'https://picsum.photos/300/200?random=12',
-      },
-    ];
+    // 品牌篩選
+    if (searchParams.brand) {
+      query = query.eq('garage_brands.brands.brand_zh', searchParams.brand);
+    }
 
-    allShops.value = mockData;
+    // 服務項目篩選
+    if (searchParams.service) {
+      query = query.eq('garage_services.services.name', searchParams.service);
+    }
+
+    const { data, error: fetchError } = await query;
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    if (!data || data.length === 0) {
+      allShops.value = [];
+      return;
+    }
+
+    // 轉換資料格式並計算距離
+    const garages: GarageItem[] = data.map((garage: any) => {
+      // 計算距離
+      const distance =
+        garage.lat && garage.lng
+          ? calculateDistance(userLocation.lat, userLocation.lng, garage.lat, garage.lng)
+          : 0;
+
+      // 提取品牌名稱（中文）- 處理可能為 null 的情況
+      const brands = (garage.garage_brands || [])
+        .map((gb: any) => gb.brands?.brand_zh)
+        .filter((brand: any): brand is string => brand !== null && brand !== undefined);
+
+      // 提取服務項目名稱 - 處理可能為 null 的情況
+      const services = (garage.garage_services || [])
+        .map((gs: any) => gs.services?.name)
+        .filter((service: any): service is string => service !== null && service !== undefined);
+
+      return {
+        id: garage.id,
+        name: garage.name,
+        score: garage.rating ?? 0,
+        distance,
+        reviewCount: garage.review_count ?? 0,
+        brands,
+        services,
+        image: garage.image_url ?? undefined,
+      };
+    });
+
+    allShops.value = garages;
 
   } catch (err) {
-    console.log('沒有符合資料的結果:', err)
-    allShops.value = []
+    console.error('查詢保養廠失敗:', err);
+    error.value = err instanceof Error ? err.message : '查詢失敗，請稍後再試';
+    allShops.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -242,33 +210,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="pt-10 bg-[#f5f1ed]">
+  <section class="pt-10 bg-[#EBE8E3]">
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-5">
-        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
-          <label for="order" class="py-2 pl-3">{{ orderTitle }}：</label>
-          <select name="order" id="order" class="grow py-2 outline-none" v-model="sortBy">
+        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border-2 border-[#D4CEC4] rounded-[8px] hover:border-[#6B6B5C] transition-colors">
+          <label for="order" class="py-2 pl-3 font-medium">{{ orderTitle }}：</label>
+          <select name="order" id="order" class="grow py-2 pr-3 outline-none bg-transparent cursor-pointer" v-model="sortBy">
             <option value="rating" selected>依評價</option>
             <option value="distance">依距離</option>
             <option value="reviewCount">依評論數</option>
           </select>
         </div>
-        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border border-[#DBCEBD] rounded-[5px]">
-          <label for="filter" class="py-2 pl-3">{{ filterTitle }}：</label>
-          <select name="filter" id="filter" class="grow py-2 outline-none" v-model="filterBy">
+        <div class="w-full flex text-[#4a4a43] bg-[#ffffff] border-2 border-[#D4CEC4] rounded-[8px] hover:border-[#6B6B5C] transition-colors">
+          <label for="filter" class="py-2 pl-3 font-medium">{{ filterTitle }}：</label>
+          <select name="filter" id="filter" class="grow py-2 pr-3 outline-none bg-transparent cursor-pointer" v-model="filterBy">
             <option value="all" selected>全部</option>
             <option value="nearby">附近(3公里內)</option>
             <option value="ratingGood">評價 4 星以上</option>
           </select>
         </div>
       </div>
-      <div class="mt-4 text-[#4a4a43] text-sm" v-if="allShops.length > 0">
-        <p>
+      <div class="mt-4 text-[#6B6B5C] text-sm" v-if="allShops.length > 0">
+        <div class="bg-white/50 backdrop-blur-sm px-4 py-2 rounded-lg inline-block border border-[#D4CEC4]">
           <span class="font-semibold">顯示：</span>
           <span v-if="filterBy === 'all'">全部</span>
           <span v-else-if="filterBy === 'nearby'">附近（3公里內）</span>
           <span v-else-if="filterBy === 'ratingGood'">評價 4 星以上</span>
-          <span class="mx-2">|</span>
+          <span class="mx-2 text-[#D4CEC4]">|</span>
           <span class="font-semibold">排序：</span>
           <span v-if="filterBy === 'all'">
             <span v-if="sortBy === 'rating'">依評價</span>
@@ -281,19 +249,40 @@ onMounted(() => {
             <span v-else-if="sortBy === 'distance'">依距離</span>
             <span v-else>依評論數</span>
           </span>
-          <span class="ml-2 text-gray-600">(共 {{ resultsCount }} 間)</span>
-        </p>
+          <span class="ml-2 text-[#8a8a7d]">(共 {{ resultsCount }} 間)</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="pt-5 bg-[#f5f1ed] pb-20 min-h-[60vh]">
+  <section class="pt-5 bg-[#EBE8E3] pb-20 min-h-[60vh]">
     <div class="container mx-auto px-4">
-      <div v-if="!resultsCount" class="text-center py-20">
-        <p class="text-[#4a4a43] text-lg">查無相關結果</p>
-        <p class="text-[#4a4a43] text-sm mt-2">請嘗試調整篩選條件</p>
+      <!-- Loading 狀態 -->
+      <div v-if="loading" class="text-center py-20">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#6B6B5C] border-t-transparent"></div>
+        <p class="text-[#4a4a43] text-lg mt-4">載入中...</p>
       </div>
-      
+
+      <!-- 錯誤狀態 -->
+      <div v-else-if="error" class="max-w-md mx-auto mt-10 p-6 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-red-600 text-lg font-medium">{{ error }}</p>
+        <button
+          @click="fetchShops"
+          class="mt-4 px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+        >
+          重新載入
+        </button>
+      </div>
+
+      <!-- 查無結果 -->
+      <div v-else-if="!resultsCount && !loading" class="text-center py-20">
+        <div class="max-w-md mx-auto p-8 bg-white border-2 border-[#D4CEC4] rounded-lg">
+          <p class="text-[#6B6B5C] text-xl font-medium">查無相關結果</p>
+          <p class="text-[#8a8a7d] text-sm mt-3">請嘗試調整篩選條件或更換搜尋地區</p>
+        </div>
+      </div>
+
+      <!-- 搜尋結果 -->
       <div v-else>
         <!-- 一行四格 (lg:grid-cols-4) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -310,22 +299,22 @@ onMounted(() => {
           <button
             @click="updatePage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="flex items-center justify-center w-10 h-10 rounded-full border border-[#DBCEBD] bg-white text-[#4a4a43] hover:bg-[#8b7d6b] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-[#D4CEC4] bg-white text-[#4a4a43] hover:bg-[#6B6B5C] hover:text-white hover:border-[#6B6B5C] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             aria-label="上一頁"
           >
             <span class="material-symbols-outlined text-sm">chevron_left</span>
           </button>
-          
+
           <div class="flex gap-2">
             <button
               v-for="page in totalPages"
               :key="page"
               @click="updatePage(page)"
               :class="[
-                'w-10 h-10 rounded-full border transition-all font-medium text-sm',
+                'w-10 h-10 rounded-full border-2 transition-all font-medium text-sm',
                 currentPage === page
-                  ? 'bg-[#8b7d6b] text-white border-[#8b7d6b] shadow-sm' 
-                  : 'bg-white text-[#4a4a43] border-[#DBCEBD] hover:border-[#8b7d6b] hover:text-[#8b7d6b]'
+                  ? 'bg-[#6B6B5C] text-white border-[#6B6B5C] shadow-md'
+                  : 'bg-white text-[#4a4a43] border-[#D4CEC4] hover:border-[#6B6B5C] hover:text-[#6B6B5C]'
               ]"
             >
               {{ page }}
@@ -335,7 +324,7 @@ onMounted(() => {
           <button
             @click="updatePage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="flex items-center justify-center w-10 h-10 rounded-full border border-[#DBCEBD] bg-white text-[#4a4a43] hover:bg-[#8b7d6b] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-[#D4CEC4] bg-white text-[#4a4a43] hover:bg-[#6B6B5C] hover:text-white hover:border-[#6B6B5C] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             aria-label="下一頁"
           >
             <span class="material-symbols-outlined text-sm">chevron_right</span>

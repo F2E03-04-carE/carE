@@ -27,7 +27,7 @@ const handleViewDetail = () => {
 </script>
 
 <template>
-  <div class="border border-[#DBCEBD] rounded-[5px] overflow-hidden hover:shadow-md duration-300 bg-white">
+  <div class="border border-[#D4CEC4] rounded-[5px] overflow-hidden hover:shadow-lg duration-300 bg-white">
     <img
       :src="shop.image || 'https://picsum.photos/300/200?random=1'"
       :alt="`${shop.name}環境圖片`"
@@ -62,7 +62,7 @@ const handleViewDetail = () => {
       </div>
       <button
         @click="handleViewDetail"
-        class="w-full block p-3 bg-[#8b7d6b] text-[14px] text-white rounded-[8px] cursor-pointer hover:bg-[#6d6250] transition-colors"
+        class="w-full block p-3 bg-[#6B6B5C] text-[14px] text-white rounded-[8px] cursor-pointer hover:bg-[#5A5A4D] transition-colors"
       >
         查看詳細資料
       </button>
