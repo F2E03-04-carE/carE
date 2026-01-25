@@ -160,7 +160,7 @@ const fetchShops = async () => {
     }
 
     // 轉換資料格式並計算距離
-    const garages: GarageItem[] = data.map((garage: any) => {
+    const garages: GarageItem[] = data.map((garage: any, index: number) => {
       // 計算距離
       const distance =
         garage.lat && garage.lng
@@ -176,6 +176,13 @@ const fetchShops = async () => {
       const services = (garage.garage_services || [])
         .map((gs: any) => gs.services?.name)
         .filter((service: any): service is string => service !== null && service !== undefined);
+
+      // 除錯：檢查第一筆資料
+      if (index === 0) {
+        console.log('📦 第一筆保養廠原始資料:', garage);
+        console.log('🏷️ 提取到的品牌:', brands);
+        console.log('🔧 提取到的服務:', services);
+      }
 
       return {
         id: garage.id,
