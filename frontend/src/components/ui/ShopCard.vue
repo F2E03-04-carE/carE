@@ -70,8 +70,8 @@ const handleViewDetail = () => {
       <!-- 地址 -->
       <div class="flex items-start gap-1 text-xs text-[#6B6B5C] my-1">
         <span class="material-symbols-outlined text-base flex-shrink-0">home</span>
-        <span class="line-clamp-1" :title="`${shop.city}${shop.district} ${shop.address}`">
-          {{ shop.city }}{{ shop.district }} {{ shop.address }}
+        <span class="line-clamp-1" :title="shop.address">
+          {{ shop.address }}
         </span>
       </div>
       <!-- 品牌標籤（最多3個） -->
