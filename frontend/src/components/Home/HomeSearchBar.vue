@@ -62,14 +62,17 @@ const handleSubmit = (e: Event) => {
 
   console.log('原始表單資料:', { city, district, brand, repair })
 
-  if (!city || !district) {
-    alert('請選擇縣市和行政區')
+  if (!city) {
+    alert('請至少選擇縣市')
     return
   }
 
   const searchParams: Record<string, string> = {
-    city: city,
-    district: district
+    city: city
+  }
+
+  if (district) {
+    searchParams.district = district
   }
 
   if (brand) searchParams.brand = brand

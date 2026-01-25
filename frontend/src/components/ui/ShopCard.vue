@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import Tag from './Tag.vue';
 import emptyStar from '@/assets/icons/emptyStar.svg';
 import filledStar from '@/assets/icons/fillStar.svg';
@@ -20,6 +21,12 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   viewDetail: [shopId: number];
 }>();
+
+// 限制顯示的品牌數量（最多3個）
+const displayedBrands = computed(() => props.shop.brands.slice(0, 3));
+
+// 限制顯示的服務數量（最多3個）
+const displayedServices = computed(() => props.shop.services.slice(0, 3));
 
 const handleViewDetail = () => {
   emit('viewDetail', props.shop.id);
@@ -49,16 +56,20 @@ const handleViewDetail = () => {
         <span class="material-symbols-outlined pr-2 mt-2">location_on</span>
         {{ shop.distance }} 公里
       </p>
-      <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
-        <Tag v-for="(brand, index) in shop.brands" :key="brand" :label="brand" variant="filled" />
+      <!-- 品牌標籤（最多3個） -->
+      <div v-if="displayedBrands.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-3">
+        <Tag v-for="brand in displayedBrands" :key="brand" :label="brand" variant="filled" />
+        <span v-if="shop.brands.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.brands.length - 3 }}</span>
       </div>
-      <div class="flex flex-row flex-wrap justify-start items-center gap-2 my-5">
+      <!-- 服務標籤（最多3個） -->
+      <div v-if="displayedServices.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-3">
         <Tag
-          v-for="(service, index) in shop.services"
+          v-for="service in displayedServices"
           :key="service"
           :label="service"
           variant="outlined"
         />
+        <span v-if="shop.services.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.services.length - 3 }}</span>
       </div>
       <button
         @click="handleViewDetail"
