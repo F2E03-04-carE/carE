@@ -83,12 +83,13 @@ async function activateFreeTrial() {
 }
 
 async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' | 'linepay') {
-  // TODO: 呼叫不同的金流 API
   const endpoint = paymentMethod === 'oen'
-    ? '/api/payment/oen/create-checkout'
-    : '/api/payment/linepay/create-checkout';
+    ? 'http://localhost:3000/api/payment/oen/checkout'
+    : 'http://localhost:3000/api/payment/linepay/checkout';
 
-  // 由後端產生唯一的 orderId，確保安全性和唯一性
+  // 生成唯一的 orderId
+  const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -96,18 +97,19 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
     },
     body: JSON.stringify({
       amount: plan.price,
-      planType: plan.type,
-      description: `${plan.title} - carE 平台訂閱`,
-      successUrl: `${window.location.origin}/garage/subscription/success?type=lifetime`,
+      currency: 'TWD',
+      orderId: orderId,
+      successUrl: `${window.location.origin}/garage/subscription/success?type=${plan.type}`,
       failureUrl: `${window.location.origin}/garage/subscription/failure`,
+      productDetail: `${plan.title} - carE 平台訂閱`,
     }),
   });
 
   const data = await response.json();
 
-  // 後端會回傳包含 orderId 和 checkoutUrl 的資料
-  if (data.success && data.checkoutUrl) {
-    window.location.href = data.checkoutUrl;
+  // 後端回傳 redirectUrl（跳轉到應援金流頁面）
+  if (data.success && data.redirectUrl) {
+    window.location.href = data.redirectUrl;
   } else {
     throw new Error(data.message || '建立付款失敗');
   }
