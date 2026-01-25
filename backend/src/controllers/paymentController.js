@@ -9,8 +9,15 @@ const OEN_CHECKOUT_HOST = process.env.NODE_ENV === 'production'
   : 'testing.oen.tw';
 
 const buildRedirectUrl = (merchantId, checkoutId) => `https://${merchantId}.${OEN_CHECKOUT_HOST}/checkout/${checkoutId}`;
-
-// 簡易記憶體紀錄：將 orderId / checkoutId / transactionHid 對應到 garage 與方案
+/**
+ * ⚠️ NOTE:
+ * This in-memory paymentSessions store is used ONLY for demo / development.
+ * It is NOT production-ready.
+ *
+ * In a production environment, payment session data should be persisted
+ * in a database or Redis to prevent data loss on server restart or
+ * multi-instance deployments.
+ */
 const paymentSessions = {
   byOrderId: new Map(),
   byCheckoutId: new Map(),
@@ -208,6 +215,15 @@ export const handleOenWebhook = async (req, res) => {
         session = paymentSessions.byOrderId.get(tx.orderId);
       }
     }
+    if (!session) {
+         console.warn('[PAYMENT] Webhook skipped due to missing session (demo mode).', {
+         transactionId
+        });
+
+         // IMPORTANT:
+         // Always return 200 to prevent webhook retry storm
+          return res.status(200).json({ success: true });
+        }
 
     // 判斷成功條件：success=true 或 status=charged
     const isSuccess = success || status === 'charged';
@@ -229,7 +245,7 @@ export const handleOenWebhook = async (req, res) => {
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Failed to process webhook:', error);
-    
+
     return res.status(500).json({ success: false });
   }
 };
