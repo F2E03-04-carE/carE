@@ -186,6 +186,9 @@ const fetchShops = async () => {
         brands,
         services,
         image: garage.image_url ?? undefined,
+        address: garage.address,
+        city: garage.city,
+        district: garage.district,
       };
     });
 

@@ -12,6 +12,9 @@ export interface GarageItem {
   brands: string[];
   services: string[];
   image?: string;
+  address: string;
+  city: string;
+  district: string;
 }
 
 // 詳情頁使用的保養廠格式（DetailView）
