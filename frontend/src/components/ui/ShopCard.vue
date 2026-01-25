@@ -14,6 +14,9 @@ interface Props {
     reviewCount: number;
     brands: string[];
     services: string[];
+    address: string;
+    city: string;
+    district: string;
   };
 }
 const props = defineProps<Props>();
@@ -41,28 +44,44 @@ const handleViewDetail = () => {
       class="w-full aspect-[3/2] object-cover"
     />
     <div class="px-5 py-3 text-[#4a4a43]">
-      <p class="my-2 font-semibold text-lg">{{ shop.name }}</p>
-      <p class="my-2">
-        <img
-          v-for="i in 5"
-          :key="i"
-          :src="i <= shop.score ? filledStar : emptyStar"
-          alt="star"
-          class="w-5 h-5 inline-block"
-        />
-      </p>
-      <span class="px-2 text-[#8a8a7d] text-xs">({{ shop.reviewCount }})</span>
-      <p class="flex flex-row justify-start items-center my-1">
-        <span class="material-symbols-outlined pr-2 mt-2">location_on</span>
-        {{ shop.distance }} 公里
-      </p>
+      <!-- 保養廠名稱 -->
+      <h3 class="my-2 font-semibold text-lg truncate" :title="shop.name">{{ shop.name }}</h3>
+
+      <!-- 評分和評論數 -->
+      <div class="flex items-center gap-2 my-2">
+        <div class="flex items-center">
+          <img
+            v-for="i in 5"
+            :key="i"
+            :src="i <= shop.score ? filledStar : emptyStar"
+            alt="star"
+            class="w-4 h-4"
+          />
+        </div>
+        <span class="text-[#8a8a7d] text-xs">({{ shop.reviewCount }})</span>
+      </div>
+
+      <!-- 距離 -->
+      <div class="flex items-center gap-1 text-sm my-1">
+        <span class="material-symbols-outlined text-base">location_on</span>
+        <span>{{ shop.distance }} 公里</span>
+      </div>
+
+      <!-- 地址 -->
+      <div class="flex items-start gap-1 text-xs text-[#6B6B5C] my-1">
+        <span class="material-symbols-outlined text-base flex-shrink-0">home</span>
+        <span class="line-clamp-1" :title="`${shop.city}${shop.district} ${shop.address}`">
+          {{ shop.city }}{{ shop.district }} {{ shop.address }}
+        </span>
+      </div>
       <!-- 品牌標籤（最多3個） -->
-      <div v-if="displayedBrands.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-3">
+      <div v-if="displayedBrands.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 mt-3 mb-2">
         <Tag v-for="brand in displayedBrands" :key="brand" :label="brand" variant="filled" />
         <span v-if="shop.brands.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.brands.length - 3 }}</span>
       </div>
+
       <!-- 服務標籤（最多3個） -->
-      <div v-if="displayedServices.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-3">
+      <div v-if="displayedServices.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-2">
         <Tag
           v-for="service in displayedServices"
           :key="service"
@@ -71,9 +90,11 @@ const handleViewDetail = () => {
         />
         <span v-if="shop.services.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.services.length - 3 }}</span>
       </div>
+
+      <!-- 查看詳細資料按鈕 -->
       <button
         @click="handleViewDetail"
-        class="w-full block p-3 bg-[#6B6B5C] text-[14px] text-white rounded-[8px] cursor-pointer hover:bg-[#5A5A4D] transition-colors"
+        class="w-full mt-3 p-3 bg-[#6B6B5C] text-[14px] text-white rounded-[8px] cursor-pointer hover:bg-[#5A5A4D] transition-colors"
       >
         查看詳細資料
       </button>

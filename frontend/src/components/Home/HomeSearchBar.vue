@@ -37,12 +37,10 @@ onMounted(() => {
         onChange: (data: any) => {
           selectedCity.value = data.county
           selectedDistrict.value = data.district
-          console.log('當前選擇:', selectedCity.value, selectedDistrict.value)
         }
       } as any)
-      console.log('✅ 縣市選擇器初始化成功')
     } catch (error) {
-      console.error('❌ 縣市選擇器初始化失敗:', error)
+      console.error('縣市選擇器初始化失敗:', error)
     }
   }
 })
@@ -79,8 +77,6 @@ const handleSubmit = (e: Event) => {
   router.push({
     name: 'SearchResults',
     query: searchParams
-  }).catch(err => {
-    console.error('路由錯誤:', err)
   })
 }
 </script>
