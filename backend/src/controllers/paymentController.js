@@ -79,12 +79,13 @@ export const createOenCheckout = async (req, res) => {
     }
 
     const checkoutId = result.data.id;
+    const transactionHid = result.data.transactionHid;
     const redirectUrl = buildRedirectUrl(merchantId, checkoutId);
 
     return res.json({
       success: true,
       checkoutId,
-      transactionHid: result.data.transactionHid,
+      transactionHid,
       redirectUrl
     });
   } catch (error) {
