@@ -60,8 +60,6 @@ const handleSubmit = (e: Event) => {
   const brand = formData.get('brand') as string
   const repair = formData.get('repair') as string
 
-  console.log('原始表單資料:', { city, district, brand, repair })
-
   if (!city) {
     alert('請至少選擇縣市')
     return
@@ -77,8 +75,6 @@ const handleSubmit = (e: Event) => {
 
   if (brand) searchParams.brand = brand
   if (repair) searchParams.service = repair
-
-  console.log('搜尋參數:', searchParams)
 
   router.push({
     name: 'SearchResults',

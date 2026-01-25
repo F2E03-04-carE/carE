@@ -160,29 +160,22 @@ const fetchShops = async () => {
     }
 
     // 轉換資料格式並計算距離
-    const garages: GarageItem[] = data.map((garage: any, index: number) => {
+    const garages: GarageItem[] = data.map((garage: any) => {
       // 計算距離
       const distance =
         garage.lat && garage.lng
           ? calculateDistance(userLocation.lat, userLocation.lng, garage.lat, garage.lng)
           : 0;
 
-      // 提取品牌名稱（中文）- 處理可能為 null 的情況
+      // 提取品牌名稱（中文）
       const brands = (garage.garage_brands || [])
         .map((gb: any) => gb.brands?.brand_zh)
         .filter((brand: any): brand is string => brand !== null && brand !== undefined);
 
-      // 提取服務項目名稱 - 處理可能為 null 的情況
+      // 提取服務項目名稱
       const services = (garage.garage_services || [])
         .map((gs: any) => gs.services?.name)
         .filter((service: any): service is string => service !== null && service !== undefined);
-
-      // 除錯：檢查第一筆資料
-      if (index === 0) {
-        console.log('📦 第一筆保養廠原始資料:', garage);
-        console.log('🏷️ 提取到的品牌:', brands);
-        console.log('🔧 提取到的服務:', services);
-      }
 
       return {
         id: garage.id,
