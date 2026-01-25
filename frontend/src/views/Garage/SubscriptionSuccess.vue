@@ -44,7 +44,7 @@ const trialExpiryInfo = computed(() => {
   return `試用期限至 ${formatted}`;
 });
 
-const countdown = ref(5);
+const countdown = ref(10);
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
 const startCountdown = () => {
