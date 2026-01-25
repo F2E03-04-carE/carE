@@ -175,34 +175,6 @@ function handleClose() {
                             </div>
                           </div>
                         </button>
-//TODO: 暫時隱藏 Line Pay 選項(時間允許再補上)
-                        <!-- <button
-                          @click="selectPaymentMethod('linepay')"
-                          class="w-full p-4 rounded-lg border-2 transition-all text-left"
-                          :class="[
-                            selectedPaymentMethod === 'linepay'
-                              ? 'border-[#00B900] bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          ]"
-                        >
-                          <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                              <div class="w-12 h-12 flex items-center justify-center mr-4">
-                                <span><img src="https://d.line-scdn.net/linepay/portal/assets/img/portal/login-logo-pay.svg"></span>
-                              </div>
-                              <div>
-                                <p class="font-bold text-gray-900">LINE Pay</p>
-                                <p class="font-semibold text-sm text-gray-600">使用 LINE Pay 快速付款</p>
-                              </div>
-                            </div>
-                            <div
-                              v-if="selectedPaymentMethod === 'linepay'"
-                              class="w-6 h-6 rounded-full bg-[#00B900] flex items-center justify-center"
-                            >
-                              <span class="material-symbols-outlined text-white text-sm">check</span>
-                            </div>
-                          </div>
-                        </button> -->
                       </div>
 
                       <div v-if="plan.type === 'trial'" class="bg-blue-50 rounded-lg p-4">
