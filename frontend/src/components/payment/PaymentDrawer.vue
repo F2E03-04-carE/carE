@@ -60,12 +60,17 @@ async function handleConfirm() {
 
   isProcessing.value = true;
 
-  if (props.plan.type === 'trial') {
-    // 免費試用方案，傳遞 'trial' 作為識別
-    emit('select-payment', 'trial');
-  } else {
-    // 付費方案，傳遞使用者選擇的付款方式
-    emit('select-payment', selectedPaymentMethod.value!);
+  try {
+    if (props.plan.type === 'trial') {
+      // 免費試用方案，傳遞 'trial' 作為識別
+      emit('select-payment', 'trial');
+    } else {
+      // 付費方案，傳遞使用者選擇的付款方式
+      emit('select-payment', selectedPaymentMethod.value!);
+    }
+  } finally {
+    // 確保無論成功或失敗都能重置狀態
+    // 由父組件決定是否關閉 drawer
   }
 }
 
@@ -73,6 +78,7 @@ function handleClose() {
   if (isProcessing.value || isTermsModalOpen.value) return;
   agreedToTerms.value = false;
   selectedPaymentMethod.value = null;
+  isProcessing.value = false;
   emit('close');
 }
 </script>

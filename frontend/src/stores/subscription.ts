@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { useUserStore } from './user';
 
 export type PlanType = 'trial' | 'lifetime' | null;
 
@@ -84,10 +85,16 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || '';
+      const userStore = useUserStore();
+
+      // 從登入狀態取得 garageId，未登入時使用測試 ID
+      const garageId = userStore.currentUser?.id || '1'; // 使用 user id 作為 garageId
+
       const response = await fetch(`${apiUrl}/api/subscription/current`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'x-garage-id': garageId
         }
       });
 
@@ -115,11 +122,17 @@ export const useSubscriptionStore = defineStore('subscription', () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || '';
+      const userStore = useUserStore();
+
+      // 從登入狀態取得 garageId，未登入時使用測試 ID
+      const garageId = userStore.currentUser?.id || '1'; // 使用 user id 作為 garageId
+
       const response = await fetch(`${apiUrl}/api/trial/activate`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'x-garage-id': garageId
         }
       });
 

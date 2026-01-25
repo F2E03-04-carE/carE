@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router';
 import PricingCard from '@/components/ui/PricingCard.vue';
 import PaymentDrawer from '@/components/payment/PaymentDrawer.vue';
 import { useSubscriptionStore } from '@/stores/subscription';
+import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
 const subscriptionStore = useSubscriptionStore();
+const userStore = useUserStore();
 
 const pricingPlans = [
   {
@@ -60,11 +62,15 @@ async function handlePaymentMethodSelect(paymentMethod: 'oen' | 'linepay' | 'tri
       await activateFreeTrial();
     } else {
       // 付費方案，使用選擇的付款方式
+      // 注意：成功時會直接跳轉，不會回到這裡
       await createPayment(selectedPlan.value, paymentMethod);
     }
   } catch (error) {
     console.error('處理失敗:', error);
-    alert('操作失敗,請稍後再試');
+    const message = error instanceof Error ? error.message : '請稍後再試';
+    alert('操作失敗：' + message);
+    // 失敗時關閉 drawer，讓用戶可以重新選擇
+    closeDrawer();
   }
 }
 
@@ -78,7 +84,7 @@ async function activateFreeTrial() {
       query: { type: 'trial' }
     });
   } else {
-    alert(result.message || '啟動試用失敗，請稍後再試');
+    throw new Error(result.message || '啟動試用失敗');
   }
 }
 
@@ -87,13 +93,18 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
     ? 'http://localhost:3000/api/payment/oen/checkout'
     : 'http://localhost:3000/api/payment/linepay/checkout';
 
-  // 生成唯一的 orderId
   const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // 從登入狀態取得 garageId，未登入時使用測試 ID
+  const garageId = userStore.currentUser?.id
+    ? String(userStore.currentUser.id)
+    : '1'; // 開發測試用 fallback
 
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-garage-id': String(garageId)
     },
     body: JSON.stringify({
       amount: plan.price,

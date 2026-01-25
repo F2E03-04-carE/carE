@@ -10,19 +10,19 @@ const OEN_CHECKOUT_HOST = process.env.NODE_ENV === 'production'
 
 const buildRedirectUrl = (merchantId, checkoutId) => `https://${merchantId}.${OEN_CHECKOUT_HOST}/checkout/${checkoutId}`;
 
-// 簡易記憶體紀錄：將 orderId / checkoutId / transactionHid 對應到 user 與方案
+// 簡易記憶體紀錄：將 orderId / checkoutId / transactionHid 對應到 garage 與方案
 const paymentSessions = {
   byOrderId: new Map(),
   byCheckoutId: new Map(),
   byTransactionHid: new Map()
 };
 
-const rememberPaymentSession = ({ orderId, checkoutId, transactionHid, userId, planType, amount }) => {
+const rememberPaymentSession = ({ orderId, checkoutId, transactionHid, garageId, planType, amount }) => {
   const session = {
     orderId,
     checkoutId,
     transactionHid,
-    userId,
+    garageId,
     planType,
     amount,
     createdAt: new Date().toISOString()
@@ -44,7 +44,7 @@ export const createOenCheckout = async (req, res) => {
     planType
   } = req.body || {};
 
-  const userId = req.headers['x-user-id'] || 'demo-user';
+  const garageId = req.headers['x-garage-id'] || req.headers['x-user-id'] || null;
 
   const merchantId = process.env.OEN_MERCHANT_ID;
   const token = process.env.OEN_TOKEN;
@@ -69,6 +69,10 @@ export const createOenCheckout = async (req, res) => {
 
   if (!planType) {
     return res.status(400).json({ success: false, message: 'planType is required' });
+  }
+
+  if (!garageId) {
+    return res.status(400).json({ success: false, message: 'garageId required (x-garage-id or x-user-id header)' });
   }
 
   const payload = {
@@ -117,7 +121,7 @@ export const createOenCheckout = async (req, res) => {
       orderId,
       checkoutId,
       transactionHid,
-      userId,
+      garageId,
       planType,
       amount: Number(amount)
     });
@@ -193,11 +197,12 @@ export const handleOenWebhook = async (req, res) => {
     const status = payload.status;
     const success = payload.success === true;
 
-    // 盡量定位到原始 session（orderId -> user）
+    // 盡量定位到原始 session（transactionId -> garageId）
     let session = paymentSessions.byTransactionHid.get(transactionId);
 
     // 若未找到，透過交易查詢取回 orderId，再映射 session
     if (!session) {
+      console.log('Session not found by transactionHid, fetching from OEN API...');
       const tx = await fetchTransactionById(transactionId);
       if (tx?.orderId) {
         session = paymentSessions.byOrderId.get(tx.orderId);
@@ -207,19 +212,24 @@ export const handleOenWebhook = async (req, res) => {
     // 判斷成功條件：success=true 或 status=charged
     const isSuccess = success || status === 'charged';
 
+    console.log('Webhook processing:', { transactionId, isSuccess, hasSession: !!session, planType: session?.planType });
+
     if (session && isSuccess && session.planType === 'lifetime') {
-      setLifetimeFromPayment({
-        userId: session.userId,
+      await setLifetimeFromPayment({
+        garageId: session.garageId,
         orderId: session.orderId,
         transactionId
       });
+      console.log('✅ Lifetime subscription activated for garage:', session.garageId);
+    } else {
+      console.log('⚠️ Webhook conditions not met:', { session: !!session, isSuccess, planType: session?.planType });
     }
 
     // 總是回 200 讓 OEN 不要重試
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Failed to process webhook:', error);
-    // 依據金流文件，失敗會重試；仍回 500 讓金流重試
+    
     return res.status(500).json({ success: false });
   }
 };
