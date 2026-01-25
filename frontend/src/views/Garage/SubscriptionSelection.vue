@@ -89,9 +89,11 @@ async function activateFreeTrial() {
 }
 
 async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' | 'linepay') {
+  // 使用環境變數設定 API URL
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const endpoint = paymentMethod === 'oen'
-    ? 'http://localhost:3000/api/payment/oen/checkout'
-    : 'http://localhost:3000/api/payment/linepay/checkout';
+    ? `${API_BASE_URL}/api/payment/oen/checkout`
+    : `${API_BASE_URL}/api/payment/linepay/checkout`;
 
   const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
