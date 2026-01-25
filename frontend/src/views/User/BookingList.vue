@@ -5,7 +5,7 @@ const router = useRouter();
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f4f1eb] pt-[60px] sm:pt-[70px]">
+  <div class="min-h-screen bg-[#f4f1eb]">
     <header class="bg-[#f9f7f4] border-b border-[#e0dbd3]">
       <div class="max-w-5xl mx-auto px-6 py-5">
         <h1 class="text-[#4a4540] tracking-wide">預約紀錄</h1>
