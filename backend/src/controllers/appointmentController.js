@@ -1,4 +1,19 @@
 import supabase from '../configs/supabase.js';
+import { z } from 'zod';
+
+// Zod Schema 定義
+const appointmentSchema = z.object({
+  garage_id: z.number({ invalid_type_error: "garage_id 必須是數字" }),
+  customer_name: z.string().min(1, "請填寫客戶姓名"),
+  customer_phone: z.string().min(1, "請填寫客戶電話"),
+  car_model: z.string().optional(),
+  license_plate: z.string().optional(),
+  service_type: z.string().optional(),
+  scheduled_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，應為 YYYY-MM-DD"),
+  scheduled_time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "時間格式錯誤，應為 HH:mm:ss"),
+  notes: z.string().optional(),
+  quotation_image_url: z.string().optional()
+});
 
 /**
  * POST /api/appointments
@@ -19,42 +34,25 @@ import supabase from '../configs/supabase.js';
  */
 export const createAppointment = async (req, res) => {
   try {
-    const {
-      garage_id,
-      customer_name,
-      customer_phone,
-      car_model,
-      license_plate,
-      service_type,
-      scheduled_date,
-      scheduled_time,
-      notes,
-      quotation_image_url
-    } = req.body;
+    // 1. Zod 驗證
+    const validation = appointmentSchema.safeParse(req.body);
 
-    // 基本驗證
-    if (!garage_id || !customer_name || !customer_phone || !scheduled_date || !scheduled_time) {
+    if (!validation.success) {
       return res.status(400).json({
-        error: '欄位缺漏',
-        message: '請填寫所有必要欄位 (車廠、姓名、電話、預約日期、時間)'
+        error: '欄位驗證失敗',
+        details: validation.error.errors
       });
     }
 
+    const validData = validation.data;
+
+    // 2. 插入資料庫
     const { data, error } = await supabase
       .from('appointments')
       .insert([
         {
-          garage_id,
-          customer_name,
-          customer_phone,
-          car_model,
-          license_plate,
-          service_type,
-          scheduled_date,
-          scheduled_time,
-          status: 'pending',
-          notes,
-          quotation_image_url
+          ...validData,
+          status: 'pending' // 預設狀態
         }
       ])
       .select()
@@ -197,11 +195,27 @@ export const getAppointmentById = async (req, res) => {
 export const updateAppointment = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    
+    // 1. 白名單過濾
+    const allowedUpdates = [
+      'customer_name', 'customer_phone', 'car_model', 'license_plate',
+      'service_type', 'scheduled_date', 'scheduled_time', 'status',
+      'estimated_cost', 'notes', 'quotation_image_url'
+    ];
 
-    // 防止更新不可修改的欄位 (例如 id, created_at)
-    delete updates.id;
-    delete updates.created_at;
+    const updates = {};
+    for (const key of allowedUpdates) {
+      if (req.body[key] !== undefined) {
+        updates[key] = req.body[key];
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        message: '沒有提供有效的更新欄位'
+      });
+    }
+
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -235,7 +249,10 @@ export const updateAppointment = async (req, res) => {
 
 /**
  * DELETE /api/appointments/:id
- * 刪除預約 (或取消)
+ * 永久刪除預約
+ * 
+ * 注意：若只是要「取消」預約，請使用 PUT 更新 status 為 'cancelled'。
+ * 此 API 會將資料從資料庫中永久移除。
  */
 export const deleteAppointment = async (req, res) => {
   try {
