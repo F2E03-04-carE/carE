@@ -41,7 +41,7 @@ export function useAppointments(garageId: number) {
 
       // 更新本地資料，避免重新 fetch
       const index = appointments.value.findIndex(a => a.id === id);
-      if (index !== -1) {
+      if (index !== -1 && appointments.value[index]) {
         appointments.value[index].status = status;
       }
     } catch (e: any) {
@@ -61,8 +61,15 @@ export function useAppointments(garageId: number) {
       if (updateError) throw updateError;
 
       const index = appointments.value.findIndex(a => a.id === id);
-      if (index !== -1) {
-        appointments.value[index] = { ...appointments.value[index], ...updates };
+      if (index !== -1 && appointments.value[index]) {
+        const existing = appointments.value[index];
+        appointments.value[index] = {
+          ...existing,
+          ...updates,
+          id: existing.id,
+          garage_id: existing.garage_id,
+          created_at: existing.created_at,
+        };
       }
     } catch (e: any) {
       console.error('updateAppointment error:', e);
