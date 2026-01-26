@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
 import LoginMode from '@/views/Auth/LoginMode.vue'
-import JoinGarage from '../Garage/JoinGarage.vue'
 
 const router = useRouter()
 const isShowLoginModal = ref(false)

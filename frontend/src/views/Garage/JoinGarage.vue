@@ -1,8 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router';
 import PricingCard from '@/components/ui/PricingCard.vue';
+import LoginMode from '../Auth/LoginMode.vue';
+import { useAuthStore } from '@/stores/auth';
+import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
+const authStore = useAuthStore();
+const userStore = useUserStore();
+const isShowLoginModal = ref(false);
 
 const pricingPlans = [
   {
@@ -35,6 +42,22 @@ const pricingPlans = [
 const navigateToOnboarding = () => {
   router.push('/garage/onboarding');
 };
+const openLoginModal = () => {
+  localStorage.setItem('postLoginRedirect', '/member/post-garage');
+  isShowLoginModal.value = true
+}
+const closeLoginModal = () => {
+  localStorage.removeItem('postLoginRedirect');
+  isShowLoginModal.value = false
+}
+const handleJoinClick = () => {
+  if (authStore.isAuthenticated && userStore.userRole === 'member') {
+    navigateToOnboarding();
+    return;
+  }
+  openLoginModal();
+}
+
 </script>
 
 <template>
@@ -55,7 +78,7 @@ const navigateToOnboarding = () => {
           加入 carE 平台，接觸更多潛在客戶，建立專業形象，輕鬆管理預約與評價
         </p>
         <button
-          @click="navigateToOnboarding"
+          @click="handleJoinClick"
           class="px-8 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即加入
@@ -134,7 +157,7 @@ const navigateToOnboarding = () => {
           :button-text="plan.buttonText"
           :color="plan.color"
           :is-recommended="plan.isRecommended"
-          @button-click="navigateToOnboarding"
+          @button-click="handleJoinClick"
         />
       </div>
     </section>
@@ -148,7 +171,7 @@ const navigateToOnboarding = () => {
           立即註冊，三分鐘完成設定，開始接收預約
         </p>
         <button
-          @click="navigateToOnboarding"
+          @click="handleJoinClick"
           class="inline-block px-10 py-4 text-[18px] text-white font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg transition-colors cursor-pointer"
         >
           立即開始
@@ -159,6 +182,9 @@ const navigateToOnboarding = () => {
         </p>
       </div>
     </section>
+    <LoginMode
+      v-if="isShowLoginModal"
+      @close="closeLoginModal"
+    />
   </div>
 </template>
-
