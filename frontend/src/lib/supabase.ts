@@ -11,6 +11,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    // DEV MODE: 暫時關閉 session 持久化以避免初始化問題
+    // TODO: 生產環境應啟用以下設定以改善使用者體驗：
+    // autoRefreshToken: true,
+    // persistSession: true,
+    // detectSessionInUrl: true,
     autoRefreshToken: false,
     persistSession: false,
     detectSessionInUrl: false,

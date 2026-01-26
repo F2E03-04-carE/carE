@@ -16,7 +16,8 @@ export function useAppointments(garageId: number) {
         .from('appointments')
         .select('*')
         .eq('garage_id', garageId)
-        .order('scheduled_date', { ascending: true });
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_time', { ascending: true });
 
       if (fetchError) throw fetchError;
       appointments.value = (data as Appointment[]) || [];
