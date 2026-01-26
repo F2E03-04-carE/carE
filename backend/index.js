@@ -4,6 +4,7 @@ import taxIdRoutes from './src/routes/taxId.js';
 import searchRoutes from './src/routes/search.js';
 import paymentRoutes from './src/routes/payment.js';
 import subscriptionRoutes from './src/routes/subscription.js';
+import appointmentRoutes from './src/routes/appointment.js';
 import 'dotenv/config'
 
 
@@ -55,6 +56,7 @@ app.use('/api', taxIdRoutes);
 app.use('/api', searchRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api', subscriptionRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
