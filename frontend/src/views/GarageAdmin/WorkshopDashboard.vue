@@ -1,50 +1,109 @@
 <script setup lang="ts">
-import { computed, ref, reactive } from 'vue';
+import { computed, ref, reactive, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/auth';
 
+// Composables
+import { useAppointments } from '@/composables/garage/useAppointments';
+import { useMaintenanceRecords } from '@/composables/garage/useMaintenanceRecords';
+import { useGarageProfile } from '@/composables/garage/useGarageProfile';
+import { useImageUpload } from '@/composables/garage/useImageUpload';
+import type { ApptStatus, Appointment } from '@/composables/garage/types';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+// UI 狀態
 type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings';
-
-type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'cancelled';
-
-type Appointment = {
-	id: string;
-	customerName: string;
-	phone: string;
-	carModel: string;
-	licensePlate: string;
-	serviceType: string;
-	date: string;
-	time: string;
-	status: ApptStatus;
-	notes?: string;
-	estimatedCost: number;
-	quotationImage?: string;
-};
-
-type RecordItem = {
-	id: string;
-	customerName: string;
-	carModel: string;
-	licensePlate: string;
-	date: string;
-	items: Array<{ name: string; price: number; type: 'base' | 'addon' }>;
-	total: number;
-	tech: string;
-	notes: string;
-};
-
-type GarageName = {
-	name: string;
-	ownerName: string;
-	address: string;
-	phone: string;
-	taxId: string;
-	description: string;
-	coverImage: string;
-	environmentImages: string[];
-};
-
 const activeNav = ref<NavKey>('dashboard');
 const sidebarOpen = ref(false);
+
+// 車廠 ID
+const garageId = ref<number | null>(null);
+const isLoadingGarage = ref(true);
+
+// Composables 實例 (先宣告，等到有 garageId 再初始化)
+let appointmentsApi: ReturnType<typeof useAppointments>;
+let recordsApi: ReturnType<typeof useMaintenanceRecords>;
+let profileApi: ReturnType<typeof useGarageProfile>;
+const uploadApi = useImageUpload();
+
+// 綁定到 Template 的資料
+const appointments = ref<Appointment[]>([]);
+const records = ref<any[]>([]); // 根據 API 回傳型別調整
+const garageProfile = reactive<any>({}); // 根據 API 回傳型別調整
+const dashboardStats = ref({ todayCount: 0, pendingCount: 0, servicingCount: 0 });
+
+// 載入資料
+async function fetchAllData() {
+  if (!garageId.value) return;
+
+  // 初始化 API
+  appointmentsApi = useAppointments(garageId.value);
+  recordsApi = useMaintenanceRecords(garageId.value);
+  profileApi = useGarageProfile(garageId.value);
+
+  // 載入各區塊資料
+  await Promise.all([
+    appointmentsApi.fetchAppointments(),
+    recordsApi.fetchRecords(),
+    profileApi.fetchProfile(),
+  ]);
+
+  // 綁定資料
+  appointments.value = appointmentsApi.appointments.value;
+  records.value = recordsApi.records.value;
+  Object.assign(garageProfile, profileApi.profile);
+
+  // 綁定統計數據 (使用 watchEffect 或 computed 自動更新)
+  // 這裡簡單用 watch 監聽 appointments 變化來更新統計
+  watch(appointmentsApi.appointments, () => {
+    appointments.value = appointmentsApi.appointments.value;
+    dashboardStats.value = appointmentsApi.dashboardStats.value;
+  }, { deep: true, immediate: true });
+  
+  watch(recordsApi.records, () => {
+    records.value = recordsApi.records.value;
+  });
+}
+
+onMounted(async () => {
+  try {
+    // 1. 確認是否登入
+    // const { data: { user } } = await supabase.auth.getUser(); // authStore 可能還沒 init
+    // 這裡依賴 authStore 狀態，假設已在 App 層級處理好
+    const user = authStore.user;
+
+    if (!user) {
+      alert('請先登入');
+      router.push('/login');
+      return;
+    }
+
+    // 2. 取得 Garage ID
+    const { data: garage, error } = await supabase
+      .from('garages')
+      .select('id')
+      .eq('owner_user_id', user.id)
+      .single();
+
+    if (error || !garage) {
+      console.error('Garage not found:', error);
+      alert('您尚未註冊為維修廠，或權限不足。');
+      router.push('/');
+      return;
+    }
+
+    garageId.value = garage.id;
+    await fetchAllData();
+
+  } catch (e) {
+    console.error('Error init dashboard:', e);
+  } finally {
+    isLoadingGarage.value = false;
+  }
+});
 
 function toggleSidebar() {
 	sidebarOpen.value = !sidebarOpen.value;
@@ -59,134 +118,68 @@ function handleNavClick(key: NavKey) {
 	closeSidebar();
 }
 
-const garageName = reactive<GarageName>({
-	name: '晴天自動車',
-	ownerName: '店長 Admin',
-	address: '台北市中山區職人路 100 號',
-	phone: '02-1234-5678',
-	taxId: '12345678',
-	description: '我們專注於提供最優質的日系車維修服務，擁有超過 10 年的專業經驗。',
-	coverImage: '',
-	environmentImages: [],
-});
-
-function onCoverFileChange(event: Event) {
-	const input = event.target as HTMLInputElement;
-	if (input.files && input.files[0]) {
-		const file = input.files[0];
-		garageName.coverImage = URL.createObjectURL(file);
-	}
+// Settings: 圖片上傳
+async function onCoverFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || !input.files[0]) return;
+  
+  const file = input.files[0];
+  const url = await uploadApi.uploadImage(
+    file, 
+    'garage-covers', 
+    `${garageId.value}/${Date.now()}-${file.name}`
+  );
+  
+  if (url) {
+    garageProfile.cover_image_url = url;
+    // 自動儲存
+    await profileApi.updateProfile({ cover_image_url: url });
+  } else {
+    alert('上傳失敗: ' + uploadApi.error.value);
+  }
 }
 
-function onEnvFileChange(event: Event) {
-	const input = event.target as HTMLInputElement;
-	if (input.files) {
-		for (const file of input.files) {
-			garageName.environmentImages.push(URL.createObjectURL(file));
-		}
-	}
+async function onEnvFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files) return;
+
+  for (const file of input.files) {
+    const url = await uploadApi.uploadImage(
+      file,
+      'garage-environments',
+      `${garageId.value}/${Date.now()}-${file.name}`
+    );
+    
+    if (url) {
+      await profileApi.addEnvironmentImage(url);
+    }
+  }
 }
 
-function removeEnvImage(index: number) {
-	garageName.environmentImages.splice(index, 1);
+async function removeEnvImage(imageUrl: string) {
+  if(confirm('確定要移除這張照片嗎？')) {
+    await profileApi.removeEnvironmentImage(imageUrl);
+    // 選擇性：也可以從 Storage 刪除檔案，這裡先只刪 DB 記錄
+  }
 }
 
-const appointments = ref<Appointment[]>([
-	{
-		id: 'APT-2026-001',
-		customerName: '王貓貓',
-		phone: '0912-345-678',
-		carModel: 'Toyota Camry',
-		licensePlate: 'ABC-1234',
-		serviceType: '定期保養',
-		date: '2026-01-18',
-		time: '09:30',
-		status: 'servicing',
-		estimatedCost: 3500,
-		notes: '自備機油',
-	},
-	{
-		id: 'APT-2026-002',
-		customerName: '李貓貓',
-		phone: '0923-456-789',
-		carModel: 'Honda CR-V',
-		licensePlate: 'KLM-7788',
-		serviceType: '煞車異音檢查',
-		date: '2026-01-18',
-		time: '10:30',
-		status: 'confirmed',
-		estimatedCost: 1200,
-		notes: '右前輪有異音',
-	},
-	{
-		id: 'APT-2026-003',
-		customerName: '陳貓貓',
-		phone: '0988-112-233',
-		carModel: 'Tesla Model 3',
-		licensePlate: 'EAA-9999',
-		serviceType: '輪胎更換',
-		date: '2026-01-18',
-		time: '14:00',
-		status: 'pending',
-		estimatedCost: 18000,
-	},
-	{
-		id: 'APT-2026-004',
-		customerName: '林貓貓',
-		phone: '0955-666-777',
-		carModel: 'Mini Cooper',
-		licensePlate: 'MIN-5678',
-		serviceType: '冷氣健檢',
-		date: '2026-01-19',
-		time: '11:00',
-		status: 'pending',
-		estimatedCost: 800,
-	},
-]);
+async function saveSettings() {
+  try {
+    await profileApi.updateProfile({
+      name: garageProfile.name,
+      owner_name: garageProfile.owner_name,
+      tax_id: garageProfile.tax_id,
+      phone: garageProfile.phone,
+      address: garageProfile.address,
+      description: garageProfile.description
+    });
+    alert('儲存成功');
+  } catch (e) {
+    alert('儲存失敗');
+  }
+}
 
-const records = ref<RecordItem[]>([
-	{
-		id: 'REC-2025-888',
-		customerName: '張貓貓',
-		carModel: 'Mazda 3',
-		licensePlate: 'QWE-5566',
-		date: '2025-12-20',
-		tech: '阿哲',
-		items: [
-			{ name: '四輪定位', price: 2000, type: 'base' },
-			{ name: '雨刷更換', price: 800, type: 'addon' },
-		],
-		total: 2800,
-		notes: '建議下次更換電瓶',
-	},
-	{
-		id: 'REC-2025-887',
-		customerName: '王貓貓',
-		carModel: 'Toyota Camry',
-		licensePlate: 'ABC-1234',
-		date: '2025-11-15',
-		tech: '小安',
-		items: [
-			{ name: '小保養套餐', price: 3000, type: 'base' },
-		],
-		total: 3000,
-		notes: '',
-	},
-]);
-
-const dashboardStats = computed(() => {
-	const today = '2026-01-18'; 
-	const todayAppts = appointments.value.filter(a => a.date === today);
-	const pending = appointments.value.filter(a => a.status === 'pending');
-	const servicing = appointments.value.filter(a => a.status === 'servicing');
-	
-	return {
-		todayCount: todayAppts.length,
-		pendingCount: pending.length,
-		servicingCount: servicing.length,
-	};
-});
-
+// Filters & Search
 const apptFilterStatuses = ref<Set<ApptStatus>>(new Set(['pending', 'confirmed', 'servicing']));
 const apptSearch = ref('');
 
@@ -207,7 +200,7 @@ function toggleStatusFilter(status: ApptStatus) {
 }
 
 const filteredAppointments = computed(() => {
-	let list = appointments.value;
+	let list = appointments.value || [];
 
 	if (apptFilterStatuses.value.size > 0) {
 		list = list.filter(a => apptFilterStatuses.value.has(a.status));
@@ -216,29 +209,32 @@ const filteredAppointments = computed(() => {
 	const q = apptSearch.value.trim().toLowerCase();
 	if (q) {
 		list = list.filter(a =>
-			a.customerName.toLowerCase().includes(q) ||
-			a.licensePlate.toLowerCase().includes(q) ||
-			a.phone.includes(q)
+			(a.customer_name || '').toLowerCase().includes(q) ||
+			(a.license_plate || '').toLowerCase().includes(q) ||
+			(a.customer_phone || '').includes(q)
 		);
 	}
 
 	return list.sort((a, b) => {
-		return new Date(`${a.date} ${a.time}`).getTime() - new Date(`${b.date} ${b.time}`).getTime();
+    // 簡單排序：日期+時間
+    const tA = new Date(`${a.scheduled_date}T${a.scheduled_time || '00:00'}`).getTime();
+    const tB = new Date(`${b.scheduled_date}T${b.scheduled_time || '00:00'}`).getTime();
+		return tA - tB;
 	});
 });
 
 const recordSearch = ref('');
 const filteredRecords = computed(() => {
 	const q = recordSearch.value.trim().toLowerCase();
-	if (!q) return records.value;
-	return records.value.filter(r => 
-		r.customerName.toLowerCase().includes(q) || 
-		r.licensePlate.toLowerCase().includes(q)
+	if (!q) return records.value || [];
+	return records.value.filter((r: any) => 
+		(r.customer_name || '').toLowerCase().includes(q) || 
+		(r.license_plate || '').toLowerCase().includes(q)
 	);
 });
 
-function formatCurrency(n: number) {
-	return `NT$${n.toLocaleString('zh-Hant-TW')}`;
+function formatCurrency(n?: number) {
+	return `NT$${(n || 0).toLocaleString('zh-Hant-TW')}`;
 }
 
 function getStatusLabel(s: ApptStatus) {
@@ -247,8 +243,9 @@ function getStatusLabel(s: ApptStatus) {
 		confirmed: '已排程',
 		servicing: '作業中',
 		cancelled: '已取消',
+    completed: '已完成'
 	};
-	return map[s];
+	return map[s] || s;
 }
 
 function getStatusClass(s: ApptStatus) {
@@ -257,6 +254,7 @@ function getStatusClass(s: ApptStatus) {
 		case 'confirmed': return 'bg-[#D6DCD9] text-[#5C6B66]';
 		case 'servicing': return 'bg-[#C2CCB8] text-[#5A6650]';
 		case 'cancelled': return 'bg-[#E8C2C2] text-[#8C5D5D]';
+    case 'completed': return 'bg-stone-200 text-stone-500';
 		default: return '';
 	}
 }
@@ -271,6 +269,7 @@ const pageHeader = computed(() => {
 	}
 });
 
+// Edit Modal
 const showEditModal = ref(false);
 const editingForm = reactive<{
 	id: string;
@@ -294,13 +293,13 @@ const editingForm = reactive<{
 
 function openEditModal(apt: Appointment) {
 	editingForm.id = apt.id;
-	editingForm.customerName = apt.customerName;
-	editingForm.carModel = apt.carModel;
-	editingForm.serviceType = apt.serviceType;
+	editingForm.customerName = apt.customer_name || '';
+	editingForm.carModel = apt.car_model || '';
+	editingForm.serviceType = apt.service_type || '';
 	editingForm.status = apt.status;
 	editingForm.notes = apt.notes || '';
-	editingForm.estimatedCost = apt.estimatedCost;
-	editingForm.quotationImage = apt.quotationImage || '';
+	editingForm.estimatedCost = apt.estimated_cost || 0;
+	editingForm.quotationImage = apt.quotation_image_url || '';
 	showEditModal.value = true;
 }
 
@@ -308,21 +307,27 @@ function closeEditModal() {
 	showEditModal.value = false;
 }
 
-function saveEdit() {
-	const index = appointments.value.findIndex(a => a.id === editingForm.id);
-	if (index !== -1) {
-		const apt = appointments.value[index]!;
-		apt.status = editingForm.status;
-		apt.notes = editingForm.notes;
-		apt.estimatedCost = editingForm.estimatedCost;
-		apt.quotationImage = editingForm.quotationImage;
-	}
-	closeEditModal();
+async function saveEdit() {
+  try {
+    await appointmentsApi.updateAppointment(editingForm.id, {
+      status: editingForm.status,
+      notes: editingForm.notes,
+      estimated_cost: editingForm.estimatedCost,
+      quotation_image_url: editingForm.quotationImage
+    });
+    // customer_name 等欄位暫不開放編輯，或視需求增加
+    closeEditModal();
+  } catch (e) {
+    alert('更新失敗');
+  }
 }
 
+// Remove Appointment
 const showRemoveConfirm = ref(false);
+const pendingRemoveId = ref('');
 
 function confirmRemove() {
+  pendingRemoveId.value = editingForm.id;
 	showRemoveConfirm.value = true;
 }
 
@@ -330,20 +335,31 @@ function cancelRemove() {
 	showRemoveConfirm.value = false;
 }
 
-function removeAppointment() {
-	const index = appointments.value.findIndex(a => a.id === editingForm.id);
-	if (index !== -1) {
-		appointments.value.splice(index, 1);
-	}
-	showRemoveConfirm.value = false;
-	closeEditModal();
+async function removeAppointment() {
+  try {
+    await appointmentsApi.deleteAppointment(pendingRemoveId.value);
+    showRemoveConfirm.value = false;
+    closeEditModal();
+  } catch (e) {
+    alert('刪除失敗');
+  }
 }
 
-function onQuotationImageChange(event: Event) {
+// Quotation Image
+async function onQuotationImageChange(event: Event) {
 	const input = event.target as HTMLInputElement;
 	if (input.files && input.files[0]) {
 		const file = input.files[0];
-		editingForm.quotationImage = URL.createObjectURL(file);
+    const url = await uploadApi.uploadImage(
+      file, 
+      'appointment-quotations', 
+      `${garageId.value}/${editingForm.id}/${Date.now()}-${file.name}`
+    );
+    if (url) {
+      editingForm.quotationImage = url;
+    } else {
+      alert('上傳失敗');
+    }
 	}
 }
 
@@ -351,6 +367,7 @@ function removeQuotationImage() {
 	editingForm.quotationImage = '';
 }
 
+// Status Confirmations
 const showCompleteConfirm = ref(false);
 const pendingCompleteApt = ref<Appointment | null>(null);
 
@@ -390,55 +407,41 @@ function cancelServicingDialog() {
 	pendingServicingApt.value = null;
 }
 
-function confirmComplete() {
+async function confirmComplete() {
 	if (!pendingCompleteApt.value) return;
-
-	const apt = pendingCompleteApt.value;
-
-	const newRecord: RecordItem = {
-		id: `REC-${apt.id.replace('APT-', '')}`,
-		customerName: apt.customerName,
-		carModel: apt.carModel,
-		licensePlate: apt.licensePlate,
-		date: apt.date,
-		items: [{ name: apt.serviceType, price: apt.estimatedCost, type: 'base' }],
-		total: apt.estimatedCost,
-		tech: '技師',
-		notes: apt.notes || '',
-	};
-	records.value.unshift(newRecord);
-
-	const index = appointments.value.findIndex(a => a.id === apt.id);
-	if (index !== -1) {
-		appointments.value.splice(index, 1);
-	}
-
-	showCompleteConfirm.value = false;
-	pendingCompleteApt.value = null;
+  try {
+    // 這裡需要技師名稱，目前先寫死或從 auth user 抓
+    const techName = garageProfile.owner_name || '技師';
+    await appointmentsApi.completeAppointment(pendingCompleteApt.value, techName);
+    // 重新整理 records
+    await recordsApi.fetchRecords();
+    showCompleteConfirm.value = false;
+    pendingCompleteApt.value = null;
+  } catch (e) {
+    alert('操作失敗');
+  }
 }
 
-function confirmAppointment() {
+async function confirmAppointment() {
 	if (!pendingConfirmApt.value) return;
-
-	const index = appointments.value.findIndex(a => a.id === pendingConfirmApt.value!.id);
-	if (index !== -1) {
-		appointments.value[index]!.status = 'confirmed';
-	}
-
-	showConfirmConfirm.value = false;
-	pendingConfirmApt.value = null;
+  try {
+    await appointmentsApi.updateStatus(pendingConfirmApt.value.id, 'confirmed');
+    showConfirmConfirm.value = false;
+    pendingConfirmApt.value = null;
+  } catch (e) {
+    alert('操作失敗');
+  }
 }
 
-function startServicing() {
+async function startServicing() {
 	if (!pendingServicingApt.value) return;
-
-	const index = appointments.value.findIndex(a => a.id === pendingServicingApt.value!.id);
-	if (index !== -1) {
-		appointments.value[index]!.status = 'servicing';
-	}
-
-	showServicingConfirm.value = false;
-	pendingServicingApt.value = null;
+  try {
+    await appointmentsApi.updateStatus(pendingServicingApt.value.id, 'servicing');
+    showServicingConfirm.value = false;
+    pendingServicingApt.value = null;
+  } catch (e) {
+    alert('操作失敗');
+  }
 }
 
 const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'settings'];
@@ -446,7 +449,12 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
-		<div class="flex h-screen overflow-hidden">
+    <!-- Loading State -->
+    <div v-if="isLoadingGarage" class="flex h-screen w-full items-center justify-center">
+      <div class="text-xl font-bold text-[#6B6B5C]">載入中...</div>
+    </div>
+
+		<div v-else class="flex h-screen overflow-hidden">
 		<div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 		<aside
 			class="fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3] transition-transform duration-300 lg:static lg:translate-x-0"
@@ -460,7 +468,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
 								</svg>
 							</div>
-							<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">晴天自動車</h1>
+							<h1 class="text-xl font-bold tracking-wider text-[#4A4A45]">{{ garageProfile.name || '維修廠後台' }}</h1>
 						</div>
 						<button @click="closeSidebar" class="flex h-8 w-8 items-center justify-center rounded-lg text-stone-400 transition hover:bg-[#DEDbd6] hover:text-stone-600 lg:hidden">
 							<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -492,7 +500,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div class="p-6">
 					<div class="rounded-lg bg-[#DEDbd6]/50 p-4 border border-[#DCD9D3]">
 						<div class="text-xs text-stone-500">目前登入</div>
-						<div class="font-bold text-[#4A4A45] tracking-wide">陳大貓</div>
+						<div class="font-bold text-[#4A4A45] tracking-wide">{{ authStore.user?.email || '使用者' }}</div>
 					</div>
 				</div>
 			</aside>
@@ -557,14 +565,14 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 							<div class="space-y-4">
 								<div v-for="apt in appointments.slice(0, 3)" :key="apt.id" class="flex items-center gap-4 rounded-lg bg-[#F8F7F5] p-4 border border-[#F0EEE9]">
 									<div class="w-16 text-center">
-										<div class="text-xs font-bold text-stone-400">{{ apt.time }}</div>
+										<div class="text-xs font-bold text-stone-400">{{ apt.scheduled_time?.slice(0, 5) }}</div>
 									</div>
 									<div class="flex-1">
 										<div class="flex items-center gap-2">
-											<span class="font-bold text-[#4A4A45]">{{ apt.customerName }}</span>
-											<span class="text-xs text-stone-400">{{ apt.carModel }}</span>
+											<span class="font-bold text-[#4A4A45]">{{ apt.customer_name }}</span>
+											<span class="text-xs text-stone-400">{{ apt.car_model }}</span>
 										</div>
-										<div class="text-sm text-stone-500">{{ apt.serviceType }}</div>
+										<div class="text-sm text-stone-500">{{ apt.service_type }}</div>
 									</div>
 									<div>
 										<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium" :class="getStatusClass(apt.status)">
@@ -572,6 +580,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 										</span>
 									</div>
 								</div>
+                <div v-if="appointments.length === 0" class="text-center text-stone-400 text-sm py-4">目前沒有預約資料</div>
 							</div>
 						</div>
 					</div>
@@ -618,31 +627,31 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="(getStatusClass(apt.status).split(' ')[0] || '')"></div>
 								<div class="flex-1 pl-4">
 									<div class="flex flex-wrap items-center gap-3">
-										<span class="font-mono text-xs text-stone-400">{{ apt.id }}</span>
+										<span class="font-mono text-xs text-stone-400">#{{ apt.id.slice(0, 8) }}...</span>
 										<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" :class="getStatusClass(apt.status)">
 											{{ getStatusLabel(apt.status) }}
 										</span>
 									</div>
 									<div class="mt-2 flex items-baseline gap-3">
-										<h3 class="text-lg font-bold text-[#4A4A45]">{{ apt.customerName }}</h3>
-										<span class="text-sm text-stone-500">{{ apt.carModel }} <span class="text-stone-300">|</span> {{ apt.licensePlate }}</span>
+										<h3 class="text-lg font-bold text-[#4A4A45]">{{ apt.customer_name }}</h3>
+										<span class="text-sm text-stone-500">{{ apt.car_model }} <span class="text-stone-300">|</span> {{ apt.license_plate }}</span>
 									</div>
-									<div class="mt-1 text-sm text-stone-500">{{ apt.serviceType }} <span v-if="apt.notes" class="ml-2 text-[#8C7B5D]">★ {{ apt.notes }}</span></div>
+									<div class="mt-1 text-sm text-stone-500">{{ apt.service_type }} <span v-if="apt.notes" class="ml-2 text-[#8C7B5D]">★ {{ apt.notes }}</span></div>
 								</div>
 								<div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
 									<div class="flex items-center gap-2 text-sm text-stone-600">
 										<svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-										{{ apt.date }}
+										{{ apt.scheduled_date }}
 									</div>
 									<div class="flex items-center gap-2 text-sm text-stone-600">
 										<svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-										{{ apt.time }}
+										{{ apt.scheduled_time?.slice(0, 5) }}
 									</div>
 								</div>
 								<div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
 									<div class="text-right">
 										<div class="text-xs text-stone-400">預估費用</div>
-										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimatedCost) }}</div>
+										<div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimated_cost) }}</div>
 									</div>
 								</div>
 								<div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:flex-col lg:border-0 lg:pt-0">
@@ -674,14 +683,14 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div class="flex flex-col justify-between gap-4 border-b border-[#F0EEE9] pb-4 md:flex-row md:items-center">
 									<div>
 										<div class="flex items-center gap-3">
-											<h3 class="text-lg font-bold text-[#4A4A45]">{{ rec.customerName }}</h3>
-											<span class="rounded bg-[#F0EEE9] px-2 py-0.5 text-xs text-stone-500">{{ rec.licensePlate }}</span>
+											<h3 class="text-lg font-bold text-[#4A4A45]">{{ rec.customer_name }}</h3>
+											<span class="rounded bg-[#F0EEE9] px-2 py-0.5 text-xs text-stone-500">{{ rec.license_plate }}</span>
 										</div>
-										<p class="text-sm text-stone-400">{{ rec.carModel }}</p>
+										<p class="text-sm text-stone-400">{{ rec.car_model }}</p>
 									</div>
 									<div class="text-right">
-										<p class="text-sm text-stone-400">{{ rec.date }}</p>
-										<p class="text-xs text-stone-400">技師: {{ rec.tech }}</p>
+										<p class="text-sm text-stone-400">{{ rec.service_date }}</p>
+										<p class="text-xs text-stone-400">技師: {{ rec.technician_name }}</p>
 									</div>
 								</div>
 								<div class="mt-4 space-y-2">
@@ -692,9 +701,10 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								</div>
 								<div class="mt-4 flex items-center justify-between border-t border-[#F0EEE9] pt-4">
 									<p class="text-sm text-stone-400 italic">{{ rec.notes || '無備註' }}</p>
-									<p class="text-lg font-bold text-[#4A4A45]">總計: {{ formatCurrency(rec.total) }}</p>
+									<p class="text-lg font-bold text-[#4A4A45]">總計: {{ formatCurrency(rec.total_amount) }}</p>
 								</div>
 							</div>
+              <div v-if="filteredRecords.length === 0" class="text-center text-stone-400 py-12">無維修紀錄</div>
 						</div>
 					</div>
 					<div v-else-if="activeNav === 'settings'" class="max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -705,13 +715,13 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									<label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
 									<div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
 										<input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onCoverFileChange">
-										<div v-if="!garageName.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
+										<div v-if="!garageProfile.cover_image_url" class="flex h-full flex-col items-center justify-center text-stone-400">
 											<svg class="mb-3 h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
 											<span class="font-medium">點擊上傳封面照片</span>
 											<span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
 										</div>
 										<div v-else class="relative h-full w-full">
-											<img :src="garageName.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
+											<img :src="garageProfile.cover_image_url" class="h-full w-full object-cover" alt="Shop Cover" />
 											<div class="absolute bottom-4 right-4 z-20">
 												<span class="rounded-lg bg-white/90 px-3 py-2 text-xs font-bold text-stone-600 shadow-sm backdrop-blur transition hover:bg-white">更換照片</span>
 											</div>
@@ -721,10 +731,10 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div>
 									<label class="mb-3 block text-sm font-medium text-stone-500">環境照片 <span class="text-xs text-stone-400 font-normal">(展示工位、休息區等)</span></label>
 									<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-										<div v-for="(img, idx) in garageName.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
+										<div v-for="(img, idx) in garageProfile.environment_images" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
 											<img :src="img" class="h-full w-full object-cover" alt="Environment" />
 											<button
-												@click="removeEnvImage(idx)"
+												@click="removeEnvImage(img)"
 												class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-stone-500 shadow-sm opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
 											>
 												<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -744,38 +754,38 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								<div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">維修廠名稱</label>
-										<input v-model="garageName.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+										<input v-model="garageProfile.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">店長名稱</label>
-										<input v-model="garageName.ownerName" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
+										<input v-model="garageProfile.owner_name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">統一編號</label>
-										<input v-model="garageName.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
+										<input v-model="garageProfile.tax_id" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">聯絡電話</label>
-										<input v-model="garageName.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
+										<input v-model="garageProfile.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">維修廠地址</label>
-										<input v-model="garageName.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
+										<input v-model="garageProfile.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
 									</div>
 									<div class="col-span-1 space-y-2 md:col-span-2">
 										<label class="text-sm font-medium text-stone-500">維修廠簡介</label>
 										<textarea
-											v-model="garageName.description"
+											v-model="garageProfile.description"
 											rows="4"
 											class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
 											placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
 										></textarea>
-										<p class="text-right text-xs text-stone-400">{{ garageName.description.length }} / 200</p>
+										<p class="text-right text-xs text-stone-400">{{ (garageProfile.description || '').length }} / 200</p>
 									</div>
 								</div>
 							</div>
 							<div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
-								<button class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
+								<button @click="saveSettings" class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95">
 									儲存變更
 								</button>
 							</div>
@@ -797,7 +807,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						<div class="grid grid-cols-2 gap-y-3">
 							<div>
 								<span class="block text-xs text-stone-400">預約編號</span>
-								<span class="font-mono font-medium text-[#4A4A45]">{{ editingForm.id }}</span>
+								<span class="font-mono font-medium text-[#4A4A45]">{{ editingForm.id.slice(0, 8) }}...</span>
 							</div>
 							<div>
 								<span class="block text-xs text-stone-400">客戶姓名</span>
@@ -904,11 +914,11 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div v-if="pendingCompleteApt" class="mt-4 rounded-lg bg-[#F8F7F5] p-3 text-sm">
 					<div class="flex justify-between">
 						<span class="text-stone-500">客戶</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.customerName }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.customer_name }}</span>
 					</div>
 					<div class="mt-1 flex justify-between">
 						<span class="text-stone-500">車牌</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.licensePlate }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingCompleteApt.license_plate }}</span>
 					</div>
 				</div>
 				<div class="mt-6 flex gap-3">
@@ -934,15 +944,15 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div v-if="pendingConfirmApt" class="mt-4 rounded-lg bg-[#F8F7F5] p-3 text-sm">
 					<div class="flex justify-between">
 						<span class="text-stone-500">客戶</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.customerName }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.customer_name }}</span>
 					</div>
 					<div class="mt-1 flex justify-between">
 						<span class="text-stone-500">車牌</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.licensePlate }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.license_plate }}</span>
 					</div>
 					<div class="mt-1 flex justify-between">
 						<span class="text-stone-500">預約時間</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.date }} {{ pendingConfirmApt.time }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingConfirmApt.scheduled_date }} {{ pendingConfirmApt.scheduled_time?.slice(0, 5) }}</span>
 					</div>
 				</div>
 				<div class="mt-6 flex gap-3">
@@ -967,15 +977,15 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				<div v-if="pendingServicingApt" class="mt-4 rounded-lg bg-[#F8F7F5] p-3 text-sm">
 					<div class="flex justify-between">
 						<span class="text-stone-500">客戶</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.customerName }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.customer_name }}</span>
 					</div>
 					<div class="mt-1 flex justify-between">
 						<span class="text-stone-500">車牌</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.licensePlate }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.license_plate }}</span>
 					</div>
 					<div class="mt-1 flex justify-between">
 						<span class="text-stone-500">維修項目</span>
-						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.serviceType }}</span>
+						<span class="font-medium text-[#4A4A45]">{{ pendingServicingApt.service_type }}</span>
 					</div>
 				</div>
 				<div class="mt-6 flex gap-3">
