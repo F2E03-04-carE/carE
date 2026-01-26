@@ -43,7 +43,7 @@ const navigateToOnboarding = () => {
   router.push('/garage/onboarding');
 };
 const openLoginModal = () => {
-  localStorage.setItem('postLoginRedirect', '/member/post-garage');
+  localStorage.setItem('postLoginRedirect', '/garage/onboarding');
   isShowLoginModal.value = true
 }
 const closeLoginModal = () => {
