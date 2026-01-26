@@ -55,6 +55,8 @@ const handleJoinClick = () => {
     navigateToOnboarding();
     return;
   }
+  console.log('isAuth', authStore.isAuthenticated, 'role', userStore.userRole);
+
   openLoginModal();
 }
 

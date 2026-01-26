@@ -8,49 +8,44 @@ const error = ref<string | null>(null);
 const loading = ref(true);
 
 onMounted(async () => {
+  const redirect = localStorage.getItem('postLoginRedirect') || '/';
+  const clearRedirect = () => localStorage.removeItem('postLoginRedirect');
+
   try {
     const { data: { session }, error: authError } = await supabase.auth.getSession();
 
     if (authError) {
       error.value = '登入驗證失敗，請重試';
       console.error('Auth callback error:', authError);
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
+      setTimeout(() => router.push('/'), 3000);
       return;
     }
 
     if (!session?.user) {
       error.value = '無法取得用戶資訊';
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
+      setTimeout(() => router.push('/'), 3000);
       return;
     }
 
-    // 檢查用戶資料完整度
     const userMetadata = session.user.user_metadata || {};
     const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
 
-    // 如果沒有手機號碼，導向個人資料頁面完善資料
     if (!hasPhone) {
-      router.push('/member/profile?firstLogin=true');
+      router.push(`/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`);
       return;
     }
-
-    // 資料完整，導向首頁
-    router.push('/');
+    clearRedirect();
+    router.push(redirect);
   } catch (err) {
     error.value = '發生未預期的錯誤';
     console.error('Unexpected error:', err);
-    setTimeout(() => {
-      router.push('/');
-    }, 3000);
+    setTimeout(() => router.push('/'), 3000);
   } finally {
     loading.value = false;
   }
 });
 </script>
+
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-[#FAF8F5] px-4">
