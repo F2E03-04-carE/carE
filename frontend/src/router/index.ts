@@ -70,7 +70,7 @@ const router = createRouter({
       name: 'member-profile',
       component: () => import('@/views/User/UserDashboard.vue'),
       meta: {
-        title: '會員基本資料 - carE',
+        title: '會員中心 - carE',
         requiresAuth: true,
       },
     },

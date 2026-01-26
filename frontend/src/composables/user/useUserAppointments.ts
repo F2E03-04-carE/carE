@@ -48,8 +48,8 @@ export function useUserAppointments() {
 
       // 更新本地狀態
       const index = appointments.value.findIndex((apt) => apt.id === id);
-      if (index !== -1) {
-        appointments.value[index].status = 'cancelled';
+      if (index !== -1 && appointments.value[index]) {
+        appointments.value[index]!.status = 'cancelled';
       }
 
       return true;
