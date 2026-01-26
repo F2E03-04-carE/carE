@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabase';
 
@@ -11,45 +11,69 @@ onMounted(async () => {
   const redirect = localStorage.getItem('postLoginRedirect') || '/';
   const clearRedirect = () => localStorage.removeItem('postLoginRedirect');
 
-  try {
-    // ✅ 1) 先嘗試直接拿 session
-    let { data: { session }, error: authError } = await supabase.auth.getSession();
+  // 先訂閱 auth state change（v2 推薦做法）
+  const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // event 可能是 SIGNED_IN / TOKEN_REFRESHED 等
+    if (session?.user) {
+      try {
+        const userMetadata = session.user.user_metadata || {};
+        const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
 
-    // ✅ 2) 如果 session 沒有、而且網址有 code（PKCE / magic link 常見），就交換成 session
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get('code');
+        // ✅ 清掉 hash（避免 router warning / selector 問題）
+        const url = new URL(window.location.href);
+        window.history.replaceState({}, document.title, url.origin + url.pathname);
 
-    if (!session && code) {
-      const exchanged = await supabase.auth.exchangeCodeForSession(code);
-      session = exchanged.data.session;
-      authError = exchanged.error;
-      // 清掉 code，避免重複交換
-      window.history.replaceState({}, document.title, url.origin + url.pathname);
+        if (!hasPhone) {
+          router.replace(
+            `/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`
+          );
+          return;
+        }
+
+        clearRedirect();
+        router.replace(redirect);
+      } finally {
+        loading.value = false;
+        sub.subscription.unsubscribe();
+      }
     }
+  });
 
-    if (authError) throw authError;
-    if (!session?.user) throw new Error('NO_SESSION_USER');
+  // 再補一個保險：如果 session 其實已經有了，就直接走
+  const { data } = await supabase.auth.getSession();
+  if (data.session?.user) {
+    const url = new URL(window.location.href);
+    window.history.replaceState({}, document.title, url.origin + url.pathname);
 
-    // ...下面保留你原本 hasPhone 邏輯
-    const userMetadata = session.user.user_metadata || {};
+    const userMetadata = data.session.user.user_metadata || {};
     const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
 
     if (!hasPhone) {
+      loading.value = false;
       router.replace(`/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`);
+      sub.subscription.unsubscribe();
       return;
     }
 
     clearRedirect();
-    router.replace(redirect);
-  } catch (e) {
-    console.error('Callback failed:', e, window.location.href);
-    error.value = '無法取得用戶資訊';
-    setTimeout(() => router.push('/'), 3000);
-  } finally {
     loading.value = false;
+    router.replace(redirect);
+    sub.subscription.unsubscribe();
+    return;
   }
-});
 
+  // 最後保險：等 10 秒還是沒 session 就顯示錯誤
+  setTimeout(async () => {
+    const again = await supabase.auth.getSession();
+    if (!again.data.session?.user) {
+      error.value = '無法取得用戶資訊';
+      loading.value = false;
+      sub.subscription.unsubscribe();
+      // 你要自動回首頁也可以：
+      // setTimeout(() => router.push('/'), 10000);
+    }
+  }, 10000);
+});
 </script>
 
 
