@@ -1,7 +1,7 @@
 export type ApptStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
 
 export interface Appointment {
-  id: string; // UUID
+  id: number; // BIGINT
   garage_id: number; // bigint
   customer_name?: string;
   customer_phone?: string;
@@ -19,9 +19,9 @@ export interface Appointment {
 }
 
 export interface MaintenanceRecord {
-  id: string; // UUID
+  id: number; // BIGINT
   garage_id: number; // bigint
-  original_appointment_id?: string;
+  original_appointment_id?: number; // BIGINT
   customer_name?: string;
   car_model?: string;
   license_plate?: string;
