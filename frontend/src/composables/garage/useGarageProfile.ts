@@ -6,7 +6,7 @@ export function useGarageProfile(garageId: number) {
   const profile = reactive<GarageProfile>({
     id: garageId,
     name: '',
-    owner_name: '',
+    garage_owner_name: '',
     address: '',
     phone: '',
     tax_id: '',
@@ -34,18 +34,13 @@ export function useGarageProfile(garageId: number) {
       // 更新 reactive 物件
       Object.assign(profile, {
         name: garageData.name || '',
-        owner_name: garageData.owner_name || '', // 這裡可能要對應 garage_owner_name 還是 owner_name，視實際 DB 欄位而定
+        garage_owner_name: garageData.garage_owner_name || '',
         address: garageData.address || '',
         phone: garageData.phone || '',
         tax_id: garageData.tax_id || '',
         description: garageData.description || '',
         cover_image_url: garageData.cover_image_url || '',
       });
-      
-      // 注意：garages 表可能有 garage_owner_name 欄位，需確認 SQL 結構
-      if (garageData.garage_owner_name) {
-         profile.owner_name = garageData.garage_owner_name;
-      }
 
       // 2. 載入環境照片
       const { data: envImages, error: envError } = await supabase
@@ -75,11 +70,7 @@ export function useGarageProfile(garageId: number) {
       if (updates.tax_id !== undefined) dbUpdates.tax_id = updates.tax_id;
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.cover_image_url !== undefined) dbUpdates.cover_image_url = updates.cover_image_url;
-      if (updates.owner_name !== undefined) {
-         // 兩個都更新以防萬一
-         dbUpdates.owner_name = updates.owner_name;
-         dbUpdates.garage_owner_name = updates.owner_name; 
-      }
+      if (updates.garage_owner_name !== undefined) dbUpdates.garage_owner_name = updates.garage_owner_name;
 
       const { error } = await supabase
         .from('garages')
