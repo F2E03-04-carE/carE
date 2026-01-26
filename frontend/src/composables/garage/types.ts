@@ -36,7 +36,7 @@ export interface MaintenanceRecord {
 export interface GarageProfile {
   id: number;
   name: string;
-  owner_name?: string;
+  garage_owner_name?: string;
   address?: string;
   phone?: string;
   tax_id?: string;
