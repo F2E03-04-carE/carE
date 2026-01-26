@@ -44,3 +44,5 @@ __screenshots__/
 *storybook.log
 storybook-static
 CLAUDE.md
+
+*.csv
