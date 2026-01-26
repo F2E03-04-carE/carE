@@ -29,7 +29,7 @@ export function useAppointments(garageId: number) {
   }
 
   // 更新預約狀態
-  async function updateStatus(id: string, status: ApptStatus) {
+  async function updateStatus(id: number, status: ApptStatus) {
     try {
       const { error: updateError } = await supabase
         .from('appointments')
@@ -50,7 +50,7 @@ export function useAppointments(garageId: number) {
   }
 
   // 更新預約詳細資訊
-  async function updateAppointment(id: string, updates: Partial<Appointment>) {
+  async function updateAppointment(id: number, updates: Partial<Appointment>) {
     try {
       const { error: updateError } = await supabase
         .from('appointments')
@@ -70,7 +70,7 @@ export function useAppointments(garageId: number) {
   }
 
   // 刪除預約
-  async function deleteAppointment(id: string) {
+  async function deleteAppointment(id: number) {
     try {
       const { error: deleteError } = await supabase
         .from('appointments')
