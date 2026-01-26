@@ -62,15 +62,16 @@ export function useGarageProfile(garageId: number) {
 
   async function updateProfile(updates: Partial<GarageProfile>) {
     try {
-      const dbUpdates: any = {};
-      // 只更新 garages 表有的欄位
-      if (updates.name !== undefined) dbUpdates.name = updates.name;
-      if (updates.address !== undefined) dbUpdates.address = updates.address;
-      if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
-      if (updates.tax_id !== undefined) dbUpdates.tax_id = updates.tax_id;
-      if (updates.description !== undefined) dbUpdates.description = updates.description;
-      if (updates.cover_image_url !== undefined) dbUpdates.cover_image_url = updates.cover_image_url;
-      if (updates.garage_owner_name !== undefined) dbUpdates.garage_owner_name = updates.garage_owner_name;
+      // 定義 garages 表可更新的欄位
+      const allowedFields = ['name', 'address', 'phone', 'tax_id', 'description', 'cover_image_url', 'garage_owner_name'] as const;
+
+      // 只保留允許更新的欄位
+      const dbUpdates: Record<string, any> = {};
+      for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+          dbUpdates[field] = updates[field];
+        }
+      }
 
       const { error } = await supabase
         .from('garages')
@@ -78,10 +79,10 @@ export function useGarageProfile(garageId: number) {
         .eq('id', garageId);
 
       if (error) throw error;
-      
+
       // 更新本地狀態
       Object.assign(profile, updates);
-      
+
     } catch (e: any) {
       console.error('updateProfile error:', e);
       throw e;
@@ -91,14 +92,25 @@ export function useGarageProfile(garageId: number) {
   // 新增環境照片 (僅寫入 DB，檔案上傳由 useImageUpload 處理)
   async function addEnvironmentImage(imageUrl: string) {
      try {
+       // 查詢當前最大的 display_order
+       const { data: maxOrderData } = await supabase
+         .from('garage_environment_images')
+         .select('display_order')
+         .eq('garage_id', garageId)
+         .order('display_order', { ascending: false })
+         .limit(1)
+         .single();
+
+       const nextOrder = (maxOrderData?.display_order ?? -1) + 1;
+
        const { error } = await supabase
          .from('garage_environment_images')
          .insert({
            garage_id: garageId,
            image_url: imageUrl,
-           display_order: profile.environment_images.length
+           display_order: nextOrder
          });
-         
+
        if (error) throw error;
        profile.environment_images.push(imageUrl);
      } catch (e: any) {
