@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useUserAppointments } from '@/composables/user/useUserAppointments';
+import type { Appointment as ApiAppointment } from '@/composables/garage/types';
 
 type AppointmentStatus = `in_progress` | `completed`;
 type FilterType = `all` | AppointmentStatus;
@@ -57,80 +59,59 @@ const StatusMap: Record<AppointmentStatus, { label: string; color: string }> = {
 	completed: { label: `已取車`, color: `text-[#6B705C] border-[#E2DED6] bg-[#EFECE6]` },
 };
 
-const MockAppointments: Appointment[] = [
-	{
-		id: `1`,
-		carModel: `Toyota Altis 2020`,
-		licensePlate: `ABC-1234`,
-		serviceType: `定期保養・引擎機油更換`,
-		appointmentDate: `2026/01/12`,
-		appointmentTime: `10:30`,
-		status: `in_progress`,
-		shopName: `XX 保修中心`,
-		shopAddress: `台北市中山區 XX 路 100 號`,
-		shopManagerName: `張店長`,
-		shopTel: `02-2345-6789`,
-		shopMobile: `0912-000-111`,
-		notes: `希望能順便檢查煞車異音。`,
-		additionalServices: [`輪胎定位`, `雨刷更換`],
-		isReadyForPickup: true,
-		quoteItems: [
-			{ name: `機油更換`, price: 1200, isAddon: false },
-			{ name: `機油濾芯`, price: 350, isAddon: false },
-			{ name: `工資`, price: 800, isAddon: false },
-			{ name: `輪胎定位`, price: 600, isAddon: true },
-			{ name: `雨刷更換`, price: null, isAddon: true },
-		],
-	},
-	{
-		id: `2`,
-		carModel: `Honda CR-V 2019`,
-		licensePlate: `XYZ-5678`,
-		serviceType: `煞車系統檢修`,
-		appointmentDate: `2026/01/08`,
-		appointmentTime: `14:00`,
-		status: `completed`,
-		shopName: `OO 維修站`,
-		shopAddress: `新北市板橋區 OO 路 88 號`,
-		shopManagerName: `林店長`,
-		shopTel: `02-2988-1122`,
-		shopMobile: `0988-765-432`,
-		notes: `煞車踏板偏軟，請協助檢查。`,
-		additionalServices: [`冷氣濾網更換`],
-		hasRated: false,
-		quoteItems: [
-			{ name: `煞車油更換`, price: 900, isAddon: false },
-			{ name: `煞車皮（前）`, price: 2600, isAddon: false },
-			{ name: `工資`, price: 1200, isAddon: false },
-			{ name: `冷氣濾網更換`, price: 450, isAddon: true },
-		],
-	},
-	{
-		id: `3`,
-		carModel: `Tesla Model 3 2022`,
-		licensePlate: `EV-8888`,
-		serviceType: `輪胎更換・四輪定位`,
-		appointmentDate: `2026/01/15`,
-		appointmentTime: `09:00`,
-		status: `in_progress`,
-		shopName: `ZZ 輪胎中心`,
-		shopAddress: `台北市內湖區 ZZ 路 66 號`,
-		shopManagerName: `陳店長`,
-		shopTel: `02-2655-0099`,
-		shopMobile: `0900-111-222`,
-		notes: `希望使用原廠胎壓設定。`,
-		additionalServices: [`氮氣充填`],
-		isReadyForPickup: false,
-		quoteItems: [
-			{ name: `輪胎（四條）`, price: 16800, isAddon: false },
-			{ name: `四輪定位`, price: 1200, isAddon: false },
-			{ name: `工資`, price: 800, isAddon: false },
-			{ name: `氮氣充填`, price: null, isAddon: true },
-		],
-	},
-];
+// 使用真實 API
+const { appointments: apiAppointments, loading, error, fetchAppointmentsByPhone } = useUserAppointments();
 
-const Appointments = ref<Appointment[]>([...MockAppointments]);
+const phoneNumber = ref('');
+const hasSearched = ref(false);
+const isPhoneValid = computed(() => phoneNumber.value.trim().length >= 10);
+
+const handleSearch = async () => {
+	if (!isPhoneValid.value) return;
+	hasSearched.value = true;
+	await fetchAppointmentsByPhone(phoneNumber.value.trim());
+};
+
+// 將 API 數據轉換為組件需要的格式
+const convertApiStatus = (status: string): AppointmentStatus => {
+	if (status === 'completed') return 'completed';
+	return 'in_progress'; // pending, confirmed, servicing 都視為 in_progress
+};
+
+const formatApiDate = (dateStr?: string) => {
+	if (!dateStr) return '';
+	const date = new Date(dateStr);
+	return date.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+};
+
+const formatApiTime = (timeStr?: string) => {
+	if (!timeStr) return '';
+	return timeStr.substring(0, 5); // HH:mm
+};
+
+const Appointments = computed<Appointment[]>(() => {
+	return apiAppointments.value.map((apt: ApiAppointment) => ({
+		id: String(apt.id),
+		carModel: apt.car_model || '未提供車型',
+		licensePlate: apt.license_plate || '未提供車牌',
+		serviceType: apt.service_type || '未指定服務',
+		appointmentDate: formatApiDate(apt.scheduled_date),
+		appointmentTime: formatApiTime(apt.scheduled_time),
+		status: convertApiStatus(apt.status),
+		shopName: '維修廠', // 暫時使用預設值，未來可從 garages table join
+		shopAddress: '請聯絡維修廠確認地址',
+		shopManagerName: '店長',
+		shopTel: '請聯絡維修廠',
+		shopMobile: apt.customer_phone || '',
+		notes: apt.notes || '無備註',
+		additionalServices: [],
+		isReadyForPickup: apt.status === 'completed',
+		quoteItems: apt.estimated_cost ? [
+			{ name: '服務費用', price: apt.estimated_cost, isAddon: false }
+		] : [],
+		hasRated: false,
+	}));
+});
 
 const FilteredGroups = computed(() => {
 	let List = Appointments.value;
@@ -226,23 +207,72 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 <template>
 	<div class="min-h-screen bg-[#EBE8E3] text-[#2F2E2A]">
 		<main class="container mx-auto max-w-6xl px-4 py-8">
-			<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div class="flex flex-wrap gap-3">
-					<button v-for="Tab in Tabs" :key="Tab.value" @click="ActiveFilter = Tab.value" :class="[`inline-flex items-center justify-center rounded-xl border px-6 py-3 text-sm font-medium transition-colors duration-200`, ActiveFilter === Tab.value ? `border-[#6B6B5C] bg-[#6B6B5C] text-white` : `border-[#E2DED6] bg-[#F7F5F0] text-[#2F2E2A] hover:border-[#6B6B5C] hover:text-[#6B6B5C]`]">
-						{{ Tab.label }}
+			<!-- 搜尋區塊 -->
+			<div v-if="!hasSearched" class="mb-8 rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] p-8">
+				<h2 class="mb-4 text-xl font-bold">查詢維修紀錄</h2>
+				<p class="mb-6 text-sm text-[#6B705C]">請輸入預約時使用的電話號碼來查詢您的維修紀錄</p>
+				<div class="flex gap-4">
+					<input
+						v-model="phoneNumber"
+						type="tel"
+						placeholder="請輸入電話號碼（例：0912345678）"
+						class="flex-1 h-12 px-4 rounded-xl bg-white border border-[#E2DED6] outline-none focus:border-[#6B6B5C] transition"
+						@keyup.enter="handleSearch"
+					/>
+					<button
+						@click="handleSearch"
+						:disabled="!isPhoneValid || loading"
+						class="px-8 py-3 bg-[#6B6B5C] text-white rounded-xl font-semibold transition hover:bg-[#57574A] disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{{ loading ? '查詢中...' : '查詢' }}
 					</button>
 				</div>
-				<div class="relative w-full sm:w-72">
-					<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#6B705C] select-none">search</span>
-					<input 
-						v-model="SearchQuery" 
-						type="text" 
-						placeholder="搜尋車型、車牌或店家..." 
-						class="w-full rounded-xl border border-[#E2DED6] bg-[#F7F5F0] py-3 pl-10 pr-4 text-sm text-[#2F2E2A] placeholder-[#6B705C] transition-colors focus:border-[#6B6B5C] focus:outline-none"
-					/>
+				<div v-if="error" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+					<p class="text-sm text-red-600">{{ error }}</p>
 				</div>
 			</div>
-			<div v-if="FilteredGroups.length > 0" class="space-y-10">
+
+			<!-- 結果區塊 -->
+			<div v-if="hasSearched" class="mb-8">
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-xl font-bold">維修紀錄</h2>
+					<button
+						@click="hasSearched = false; phoneNumber = ''"
+						class="px-4 py-2 text-sm border border-[#E2DED6] bg-[#F7F5F0] text-[#2F2E2A] rounded-xl hover:bg-[#EFECE6] transition"
+					>
+						重新搜尋
+					</button>
+				</div>
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div class="flex flex-wrap gap-3">
+						<button v-for="Tab in Tabs" :key="Tab.value" @click="ActiveFilter = Tab.value" :class="[`inline-flex items-center justify-center rounded-xl border px-6 py-3 text-sm font-medium transition-colors duration-200`, ActiveFilter === Tab.value ? `border-[#6B6B5C] bg-[#6B6B5C] text-white` : `border-[#E2DED6] bg-[#F7F5F0] text-[#2F2E2A] hover:border-[#6B6B5C] hover:text-[#6B6B5C]`]">
+							{{ Tab.label }}
+						</button>
+					</div>
+					<div class="relative w-full sm:w-72">
+						<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#6B705C] select-none">search</span>
+						<input
+							v-model="SearchQuery"
+							type="text"
+							placeholder="搜尋車型、車牌或店家..."
+							class="w-full rounded-xl border border-[#E2DED6] bg-[#F7F5F0] py-3 pl-10 pr-4 text-sm text-[#2F2E2A] placeholder-[#6B705C] transition-colors focus:border-[#6B6B5C] focus:outline-none"
+						/>
+					</div>
+				</div>
+			</div>
+			<!-- Loading 狀態 -->
+			<div v-if="hasSearched && loading" class="rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] p-10 text-center">
+				<div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#6B6B5C] border-t-transparent mb-4"></div>
+				<p class="text-sm font-medium text-[#6B705C]">載入中...</p>
+			</div>
+
+			<!-- 錯誤訊息 -->
+			<div v-else-if="hasSearched && error" class="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+				<p class="text-red-600">{{ error }}</p>
+			</div>
+
+			<!-- 結果列表 -->
+			<div v-else-if="hasSearched && !loading && FilteredGroups.length > 0" class="space-y-10">
 				<section v-for="Group in FilteredGroups" :key="Group.title">
 					<h2 class="mb-6 text-xl font-bold">{{ Group.title }}</h2>
 					<div class="grid grid-cols-1 gap-6">
@@ -295,8 +325,12 @@ onBeforeUnmount(() => window.removeEventListener(`keydown`, HandleKeydown));
 					</div>
 				</section>
 			</div>
-			<div v-else class="rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] p-10 text-center text-sm font-medium text-[#6B705C]">
-				目前沒有符合條件的預約紀錄。
+			<!-- 無結果 -->
+			<div v-else-if="hasSearched && !loading && FilteredGroups.length === 0" class="rounded-2xl border border-[#E2DED6] bg-[#F7F5F0] p-10 text-center">
+				<div class="inline-flex items-center justify-center w-16 h-16 bg-[#EFECE6] rounded-full mb-4">
+					<span class="material-symbols-outlined text-[#6B705C] text-3xl">event_busy</span>
+				</div>
+				<p class="text-sm font-medium text-[#6B705C]">目前沒有符合條件的維修紀錄。</p>
 			</div>
 		</main>
 		<teleport to="body">
