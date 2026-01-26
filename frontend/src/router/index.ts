@@ -2,18 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-scrollBehavior(to, from, savedPosition) {
-  if (savedPosition) return savedPosition;
-
-  // 只允許像 #section1 這種錨點，拒絕 #access_token=...
-  const okAnchor = /^#[A-Za-z][\w\-:.]*$/.test(to.hash);
-
-  if (to.hash && okAnchor) {
-    return { el: to.hash, behavior: 'smooth' };
-  }
-
-  return { top: 0, behavior: 'smooth' };
-},
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    }
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      };
+    }
+    return { top: 0, behavior: 'smooth' };
+  },
   routes: [
     {
       path: '/',
@@ -61,10 +61,17 @@ scrollBehavior(to, from, savedPosition) {
       },
     },
     {
+      path: '/booking/:garageId',
+      name: 'BookingFlow',
+      component: () => import('@/components/service-search/ServiceSearchFlow.vue'),
+      meta: {
+        title: '立即預約 - carE',
+      },
+    },
+    {
       path: '/auth/callback',
       name: 'auth-callback',
       component: () => import('@/views/Auth/AuthCallback.vue'),
-      meta: { public: true },
     },
     {
       path: '/member/profile',

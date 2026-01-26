@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabase';
 
@@ -8,74 +8,49 @@ const error = ref<string | null>(null);
 const loading = ref(true);
 
 onMounted(async () => {
-  const redirect = localStorage.getItem('postLoginRedirect') || '/';
-  const clearRedirect = () => localStorage.removeItem('postLoginRedirect');
+  try {
+    const { data: { session }, error: authError } = await supabase.auth.getSession();
 
-  // 先訂閱 auth state change（v2 推薦做法）
-  const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-    // event 可能是 SIGNED_IN / TOKEN_REFRESHED 等
-    if (session?.user) {
-      try {
-        const userMetadata = session.user.user_metadata || {};
-        const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
-
-        // ✅ 清掉 hash（避免 router warning / selector 問題）
-        const url = new URL(window.location.href);
-        window.history.replaceState({}, document.title, url.origin + url.pathname);
-
-        if (!hasPhone) {
-          router.replace(
-            `/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`
-          );
-          return;
-        }
-
-        clearRedirect();
-        router.replace(redirect);
-      } finally {
-        loading.value = false;
-        sub.subscription.unsubscribe();
-      }
-    }
-  });
-
-  // 再補一個保險：如果 session 其實已經有了，就直接走
-  const { data } = await supabase.auth.getSession();
-  if (data.session?.user) {
-    const url = new URL(window.location.href);
-    window.history.replaceState({}, document.title, url.origin + url.pathname);
-
-    const userMetadata = data.session.user.user_metadata || {};
-    const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
-
-    if (!hasPhone) {
-      loading.value = false;
-      router.replace(`/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`);
-      sub.subscription.unsubscribe();
+    if (authError) {
+      error.value = '登入驗證失敗，請重試';
+      console.error('Auth callback error:', authError);
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
       return;
     }
 
-    clearRedirect();
-    loading.value = false;
-    router.replace(redirect);
-    sub.subscription.unsubscribe();
-    return;
-  }
-
-  // 最後保險：等 10 秒還是沒 session 就顯示錯誤
-  setTimeout(async () => {
-    const again = await supabase.auth.getSession();
-    if (!again.data.session?.user) {
+    if (!session?.user) {
       error.value = '無法取得用戶資訊';
-      loading.value = false;
-      sub.subscription.unsubscribe();
-      // 你要自動回首頁也可以：
-      // setTimeout(() => router.push('/'), 10000);
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
+      return;
     }
-  }, 10000);
+
+    // 檢查用戶資料完整度
+    const userMetadata = session.user.user_metadata || {};
+    const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
+
+    // 如果沒有手機號碼，導向個人資料頁面完善資料
+    if (!hasPhone) {
+      router.push('/member/profile?firstLogin=true');
+      return;
+    }
+
+    // 資料完整，導向首頁
+    router.push('/');
+  } catch (err) {
+    error.value = '發生未預期的錯誤';
+    console.error('Unexpected error:', err);
+    setTimeout(() => {
+      router.push('/');
+    }, 3000);
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
-
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-[#FAF8F5] px-4">
@@ -112,3 +87,5 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+
