@@ -26,8 +26,7 @@ export interface MaintenanceRecord {
   car_model?: string;
   license_plate?: string;
   service_date?: string;
-  technician_name?: string;
-  items: Array<{ name: string; price: number; type: 'base' | 'addon' }>;
+  items: Array<{ name: string; price: number }>;
   total_amount?: number;
   notes?: string;
   created_at: string;

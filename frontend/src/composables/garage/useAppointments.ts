@@ -87,7 +87,7 @@ export function useAppointments(garageId: number) {
   }
 
   // 完成訂單（轉為維修紀錄）
-  async function completeAppointment(apt: Appointment, techName: string) {
+  async function completeAppointment(apt: Appointment) {
     try {
       // 1. 建立維修紀錄
       const recordData = {
@@ -97,8 +97,7 @@ export function useAppointments(garageId: number) {
         car_model: apt.car_model,
         license_plate: apt.license_plate,
         service_date: apt.scheduled_date, // 預設使用預約日期，也可改為當天
-        technician_name: techName,
-        items: [{ name: apt.service_type || '一般維修', price: apt.estimated_cost || 0, type: 'base' }],
+        items: [{ name: apt.service_type || '一般維修', price: apt.estimated_cost || 0 }],
         total_amount: apt.estimated_cost || 0,
         notes: apt.notes || '',
       };

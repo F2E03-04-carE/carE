@@ -407,8 +407,7 @@ function cancelServicingDialog() {
 async function confirmComplete() {
 	if (!pendingCompleteApt.value) return;
   try {
-    const techName = garageProfile.garage_owner_name || '技師';
-    await appointmentsApi.completeAppointment(pendingCompleteApt.value, techName);
+    await appointmentsApi.completeAppointment(pendingCompleteApt.value);
     await recordsApi.fetchRecords();
     showCompleteConfirm.value = false;
     pendingCompleteApt.value = null;
@@ -698,12 +697,11 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 									<div class="text-right">
 										<p class="text-sm text-stone-400">{{ rec.service_date }}</p>
-										<p class="text-xs text-stone-400">技師: {{ rec.technician_name }}</p>
 									</div>
 								</div>
 								<div class="mt-4 space-y-2">
 									<div v-for="(item, idx) in rec.items" :key="idx" class="flex justify-between text-sm">
-										<span class="text-stone-600">{{ item.name }} <span v-if="item.type === 'addon'" class="ml-1 text-[10px] text-[#8C7B5D] border border-[#8C7B5D] px-1 rounded">加購</span></span>
+										<span class="text-stone-600">{{ item.name }}</span>
 										<span class="font-medium text-[#4A4A45]">{{ formatCurrency(item.price) }}</span>
 									</div>
 								</div>
