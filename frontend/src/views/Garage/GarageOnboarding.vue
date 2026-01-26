@@ -187,7 +187,7 @@ onUnmounted(() => {
           請填寫您的維修廠基本資訊，我們將驗證公司統編
         </p>
 
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+        <form @submit.prevent="handleSubmit" class="flex flex-col space-y-4">
           <FormInput
             v-model="formData.garageName"
             label="店名"
@@ -250,6 +250,7 @@ onUnmounted(() => {
           >
             {{ isSubmitting ? '驗證中...' : '送出驗證' }}
           </button>
+          <p class="text-[10px] sm:text-[10px] mt-2">資料來源：<a href="https://data.gcis.nat.gov.tw/od/rule" class="hover:text-[#e9c667]">經濟部商工行政資料開放平臺 [統編查是否為公司、分公司及商業] API</a></p>
         </form>
       </div>
 
