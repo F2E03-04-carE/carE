@@ -44,7 +44,7 @@ const trialExpiryInfo = computed(() => {
   return `試用期限至 ${formatted}`;
 });
 
-const countdown = ref(10);
+const countdown = ref(5);
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
 const startCountdown = () => {
@@ -53,9 +53,9 @@ const startCountdown = () => {
 
     if (countdown.value <= 0) {
       clearInterval(countdownTimer!);
-      router.push('/');
+      router.push('/garage/admin/dashboard');
     }
-  }, 1000);
+  }, 5000);
 };
 
 onMounted(() => {
@@ -73,7 +73,7 @@ const goToDashboard = () => {
   if (countdownTimer) {
     clearInterval(countdownTimer);
   }
-  router.push('/');
+  router.push('/garage/admin/dashboard');
 };
 </script>
 
