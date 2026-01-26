@@ -214,11 +214,11 @@ const handleSave = async () => {
 </script>
 
 <template>
-	<div class="min-h-screen bg-[#f4f1eb]">
+	<div class="min-h-screen bg-[#EBE8E3]">
 		<header class="bg-[#f9f7f4] border-b border-[#e0dbd3]">
 			<div class="max-w-5xl mx-auto px-6 py-5">
 				<h1 class="text-[#4a4540] tracking-wide">會員中心</h1>
-				<p v-if="isFirstLogin" class="text-sm text-[#8b7f6f] mt-2">
+				<p v-if="isFirstLogin" class="text-sm text-[#6B6B5C] mt-2">
 					歡迎加入！請完善您的個人資訊以繼續使用
 				</p>
 			</div>
@@ -238,7 +238,7 @@ const handleSave = async () => {
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
-						<div v-if="isLoadingProfile" class="flex items-center gap-2 text-[#8b7f6f]">
+						<div v-if="isLoadingProfile" class="flex items-center gap-2 text-[#6B6B5C]">
 							<span class="material-symbols-outlined text-[18px] leading-none animate-spin">progress_activity</span>
 							<span class="text-sm">載入中...</span>
 						</div>
@@ -250,7 +250,7 @@ const handleSave = async () => {
 							:class="[
 								'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer',
 								IsEditing
-									? 'bg-[#8b7f6f] text-[#f9f7f4] hover:bg-[#7a6f5f]'
+									? 'bg-[#6B6B5C] text-[#f9f7f4] hover:bg-[#5a5a4d]'
 									: 'bg-[#e8e4dc] text-[#6b6460] hover:bg-[#d9d3c9]',
 								isSaving ? 'opacity-60 cursor-not-allowed' : ''
 							]"
@@ -275,7 +275,7 @@ const handleSave = async () => {
 									type="text"
 									v-model="Nickname"
 									maxlength="8"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#6B6B5C]/30"
 									placeholder="請輸入暱稱"
 								/>
 								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
@@ -292,7 +292,7 @@ const handleSave = async () => {
 									type="text"
 									v-model="Name"
 									maxlength="10"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#6B6B5C]/30"
 									placeholder="請輸入姓名"
 								/>
 								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
@@ -302,7 +302,7 @@ const handleSave = async () => {
 							<div class="space-y-2">
 								<label class="block text-sm text-[#6b6460]">
 									電子郵件
-									<span v-if="IsEditing" class="text-xs text-[#8b7f6f]">（不可變更）</span>
+									<span v-if="IsEditing" class="text-xs text-[#6B6B5C]">（不可變更）</span>
 								</label>
 								<p class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
 									{{ Email }}
@@ -320,7 +320,7 @@ const handleSave = async () => {
 										@input="handlePhoneInput"
 										:class="[
 											'w-full border rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 transition-colors',
-											phoneError ? 'border-red-500 focus:ring-red-500/30' : 'border-[#e0dbd3] focus:ring-[#8b7f6f]/30'
+											phoneError ? 'border-red-500 focus:ring-red-500/30' : 'border-[#e0dbd3] focus:ring-[#6B6B5C]/30'
 										]"
 										placeholder="請輸入手機號碼（例：0912345678）"
 										maxlength="10"
@@ -340,7 +340,7 @@ const handleSave = async () => {
 									v-if="IsEditing"
 									type="text"
 									v-model="LicensePlate"
-									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#8b7f6f]/30"
+									class="w-full border border-[#e0dbd3] rounded-lg bg-[#f9f7f4] px-4 py-3 text-[#4a4540] focus:outline-none focus:ring-2 focus:ring-[#6B6B5C]/30"
 									placeholder="請輸入車牌號碼（例：ABC-1234）"
 								/>
 								<p v-else class="px-4 py-3 text-[#4a4540] bg-[#f9f7f4] rounded-lg border border-[#e0dbd3]">
@@ -350,20 +350,47 @@ const handleSave = async () => {
 						</div>
 					</div>
 				</section>
-				<section class="space-y-4">
-					<button type="button" class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
+
+				<!-- 快速跳轉按鈕 -->
+				<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<button
+						@click="router.push('/member/bookings')"
+						type="button"
+						class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer"
+					>
 						<div class="flex items-center gap-4">
 							<div class="rounded-xl bg-[#f9f7f4] p-3">
-								<span class="material-symbols-outlined text-[24px] leading-none text-[#8b7f6f]">
-									handyman
+								<span class="material-symbols-outlined text-[24px] leading-none text-[#6B6B5C]">
+									event_note
 								</span>
 							</div>
 							<div class="text-left">
-								<h3 class="mb-1 text-[#4a4540]">送修記錄</h3>
+								<h3 class="mb-1 text-[#4a4540] font-semibold">預約記錄</h3>
+								<p class="text-sm text-[#6b6460]">查看所有預約與狀態</p>
+							</div>
+						</div>
+						<span class="material-symbols-outlined text-[20px] leading-none text-[#6B6B5C] transition-transform duration-200 group-hover:translate-x-1">
+							chevron_right
+						</span>
+					</button>
+
+					<button
+						@click="router.push('/member/history')"
+						type="button"
+						class="group flex w-full items-center justify-between border border-[#e8e4dc] rounded-2xl bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer"
+					>
+						<div class="flex items-center gap-4">
+							<div class="rounded-xl bg-[#f9f7f4] p-3">
+								<span class="material-symbols-outlined text-[24px] leading-none text-[#6B6B5C]">
+									history
+								</span>
+							</div>
+							<div class="text-left">
+								<h3 class="mb-1 text-[#4a4540] font-semibold">維修歷史</h3>
 								<p class="text-sm text-[#6b6460]">查看所有送修紀錄與維修進度</p>
 							</div>
 						</div>
-						<span class="material-symbols-outlined text-[20px] leading-none text-[#8b7f6f] transition-transform duration-200 group-hover:translate-x-1">
+						<span class="material-symbols-outlined text-[20px] leading-none text-[#6B6B5C] transition-transform duration-200 group-hover:translate-x-1">
 							chevron_right
 						</span>
 					</button>

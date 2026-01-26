@@ -122,7 +122,7 @@ const menuConfig = {
   member: {
     title: '會員管理',
     items: [
-      { label: '會員基本資料', href: '/member/profile' },
+      { label: '會員中心', href: '/member/profile' },
       { label: '預約紀錄', href: '/member/bookings' },
       { label: '維修歷史', href: '/member/history' },
       { label: '刊登維修廠', href: '/member/post-garage' },
