@@ -4,11 +4,13 @@ import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 import { calculateDistance, DEFAULT_LOCATION } from '@/utils/distance'
 import type { GarageDetail } from '@/types/database'
+import ServiceSearchFlow from '@/components/service-search/ServiceSearchFlow.vue'
 
 const router = useRouter()
 const route = useRoute()
 const isOpenMap = ref(false)
 const isOpenSurroundings = ref(false)
+const showBookingFlow = ref(false)
 
 // 資料狀態
 const garage = ref<GarageDetail | null>(null)
@@ -225,7 +227,12 @@ onMounted(() => {
                 </ul>
               </div>
             </div>
-            <button class="w-full mt-8 py-3 text-white bg-[#6B6B5C] rounded-xl transition hover:opacity-90">立即預約</button>
+            <button
+              @click="showBookingFlow = true"
+              class="w-full mt-8 py-3 text-white bg-[#6B6B5C] rounded-xl transition hover:opacity-90"
+            >
+              立即預約
+            </button>
             <div class="mt-6 space-y-4 lg:hidden">
               <div class="border border-gray-200 rounded-xl overflow-hidden">
                 <button
@@ -323,6 +330,16 @@ onMounted(() => {
       </div>
       </div>
       <!-- End of v-else garage data -->
+    </div>
+
+    <!-- 預約流程 -->
+    <div v-if="showBookingFlow && garage" class="fixed inset-0 z-50 overflow-y-auto">
+      <ServiceSearchFlow
+        :garage-id="garage.id"
+        :garage-name="garage.name"
+        :garage-address="`${garage.city}${garage.district} ${garage.address}`"
+        @back="showBookingFlow = false"
+      />
     </div>
   </div>
 </template>
