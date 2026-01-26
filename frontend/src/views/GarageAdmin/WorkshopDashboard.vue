@@ -8,7 +8,7 @@ import { useAppointments } from '@/composables/garage/useAppointments';
 import { useMaintenanceRecords } from '@/composables/garage/useMaintenanceRecords';
 import { useGarageProfile } from '@/composables/garage/useGarageProfile';
 import { useImageUpload } from '@/composables/garage/useImageUpload';
-import type { ApptStatus, Appointment } from '@/composables/garage/types';
+import type { ApptStatus, Appointment, MaintenanceRecord, GarageProfile } from '@/composables/garage/types';
 
 const router = useRouter();
 
@@ -30,8 +30,8 @@ const uploadApi = useImageUpload();
 
 // 綁定到 Template 的資料
 const appointments = ref<Appointment[]>([]);
-const records = ref<any[]>([]);
-const garageProfile = reactive<any>({});
+const records = ref<MaintenanceRecord[]>([]);
+const garageProfile = reactive<Partial<GarageProfile>>({});
 const dashboardStats = ref({ todayCount: 0, pendingCount: 0, servicingCount: 0 });
 
 // 載入資料
@@ -67,25 +67,21 @@ onMounted(async () => {
   try {
     isLoadingGarage.value = true;
 
-    // 等待一下讓 supabase client 初始化完成
-    await new Promise(resolve => setTimeout(resolve, 500));
-
     // DEV MODE: 不檢查 user，直接抓 DB 裡的第一筆車廠
     const { data: garages, error } = await supabase
       .from('garages')
       .select('id')
-      .limit(1);
-
-    console.log('Query result:', { garages, error });
+      .limit(1)
+      .single();
 
     if (error) {
       console.error('Supabase query error:', error);
       noGarageError.value = true;
-    } else if (!garages || garages.length === 0) {
+    } else if (!garages) {
       console.error('Garage not found or DB empty');
       noGarageError.value = true;
     } else {
-      garageId.value = garages[0].id;
+      garageId.value = garages.id;
       console.log('DEV MODE: 使用車廠 ID =', garageId.value);
       await fetchAllData();
     }

@@ -39,19 +39,18 @@ export function useImageUpload() {
       // 取得公開連結 (Public URL)
       // 注意：如果是 private bucket (如 appointment-quotations)，這裡要改用 createSignedUrl
       if (bucket === 'appointment-quotations') {
-         // 私密檔案不直接回傳 public URL，視需求而定，這裡先回傳 path 讓後端存
-         // 或者回傳一個短期有效的 signed URL
+         // 私密檔案：回傳短期有效的 signed URL (7天)
          const { data: signedData, error: signedError } = await supabase.storage
             .from(bucket)
-            .createSignedUrl(path, 60 * 60 * 24 * 365); // 1年有效，或是只存 path
-            
+            .createSignedUrl(path, 60 * 60 * 24 * 7); // 7天有效
+
          if (signedError) throw signedError;
          return signedData.signedUrl;
       } else {
          const { data: urlData } = supabase.storage
            .from(bucket)
            .getPublicUrl(data.path);
-           
+
          return urlData.publicUrl;
       }
 
