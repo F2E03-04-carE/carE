@@ -2,7 +2,6 @@
 import { computed, ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/stores/auth';
 
 // Composables
 import { useAppointments } from '@/composables/garage/useAppointments';
@@ -12,18 +11,18 @@ import { useImageUpload } from '@/composables/garage/useImageUpload';
 import type { ApptStatus, Appointment } from '@/composables/garage/types';
 
 const router = useRouter();
-const authStore = useAuthStore();
 
 // UI 狀態
 type NavKey = 'dashboard' | 'appointments' | 'records' | 'settings';
 const activeNav = ref<NavKey>('dashboard');
 const sidebarOpen = ref(false);
+const noGarageError = ref(false);
 
 // 車廠 ID
 const garageId = ref<number | null>(null);
 const isLoadingGarage = ref(true);
 
-// Composables 實例 (先宣告，等到有 garageId 再初始化)
+// Composables 實例
 let appointmentsApi: ReturnType<typeof useAppointments>;
 let recordsApi: ReturnType<typeof useMaintenanceRecords>;
 let profileApi: ReturnType<typeof useGarageProfile>;
@@ -31,33 +30,28 @@ const uploadApi = useImageUpload();
 
 // 綁定到 Template 的資料
 const appointments = ref<Appointment[]>([]);
-const records = ref<any[]>([]); // 根據 API 回傳型別調整
-const garageProfile = reactive<any>({}); // 根據 API 回傳型別調整
+const records = ref<any[]>([]);
+const garageProfile = reactive<any>({});
 const dashboardStats = ref({ todayCount: 0, pendingCount: 0, servicingCount: 0 });
 
 // 載入資料
 async function fetchAllData() {
   if (!garageId.value) return;
 
-  // 初始化 API
   appointmentsApi = useAppointments(garageId.value);
   recordsApi = useMaintenanceRecords(garageId.value);
   profileApi = useGarageProfile(garageId.value);
 
-  // 載入各區塊資料
   await Promise.all([
     appointmentsApi.fetchAppointments(),
     recordsApi.fetchRecords(),
     profileApi.fetchProfile(),
   ]);
 
-  // 綁定資料
   appointments.value = appointmentsApi.appointments.value;
   records.value = recordsApi.records.value;
   Object.assign(garageProfile, profileApi.profile);
 
-  // 綁定統計數據 (使用 watchEffect 或 computed 自動更新)
-  // 這裡簡單用 watch 監聽 appointments 變化來更新統計
   watch(appointmentsApi.appointments, () => {
     appointments.value = appointmentsApi.appointments.value;
     dashboardStats.value = appointmentsApi.dashboardStats.value;
@@ -68,42 +62,42 @@ async function fetchAllData() {
   });
 }
 
+// 初始化：開發模式 (直接抓第一筆車廠)
 onMounted(async () => {
   try {
-    // 1. 確認是否登入
-    // const { data: { user } } = await supabase.auth.getUser(); // authStore 可能還沒 init
-    // 這裡依賴 authStore 狀態，假設已在 App 層級處理好
-    const user = authStore.user;
+    isLoadingGarage.value = true;
 
-    if (!user) {
-      alert('請先登入');
-      router.push('/login');
-      return;
-    }
+    // 等待一下讓 supabase client 初始化完成
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // 2. 取得 Garage ID
-    const { data: garage, error } = await supabase
+    // DEV MODE: 不檢查 user，直接抓 DB 裡的第一筆車廠
+    const { data: garages, error } = await supabase
       .from('garages')
       .select('id')
-      .eq('owner_user_id', user.id)
-      .single();
+      .limit(1);
 
-    if (error || !garage) {
-      console.error('Garage not found:', error);
-      alert('您尚未註冊為維修廠，或權限不足。');
-      router.push('/');
-      return;
+    console.log('Query result:', { garages, error });
+
+    if (error) {
+      console.error('Supabase query error:', error);
+      noGarageError.value = true;
+    } else if (!garages || garages.length === 0) {
+      console.error('Garage not found or DB empty');
+      noGarageError.value = true;
+    } else {
+      garageId.value = garages[0].id;
+      console.log('DEV MODE: 使用車廠 ID =', garageId.value);
+      await fetchAllData();
     }
-
-    garageId.value = garage.id;
-    await fetchAllData();
-
   } catch (e) {
     console.error('Error init dashboard:', e);
+    noGarageError.value = true;
   } finally {
     isLoadingGarage.value = false;
   }
 });
+
+// ... (其餘 function 保持不變)
 
 function toggleSidebar() {
 	sidebarOpen.value = !sidebarOpen.value;
@@ -132,7 +126,6 @@ async function onCoverFileChange(event: Event) {
   
   if (url) {
     garageProfile.cover_image_url = url;
-    // 自動儲存
     await profileApi.updateProfile({ cover_image_url: url });
   } else {
     alert('上傳失敗: ' + uploadApi.error.value);
@@ -159,7 +152,6 @@ async function onEnvFileChange(event: Event) {
 async function removeEnvImage(imageUrl: string) {
   if(confirm('確定要移除這張照片嗎？')) {
     await profileApi.removeEnvironmentImage(imageUrl);
-    // 選擇性：也可以從 Storage 刪除檔案，這裡先只刪 DB 記錄
   }
 }
 
@@ -167,7 +159,7 @@ async function saveSettings() {
   try {
     await profileApi.updateProfile({
       name: garageProfile.name,
-      owner_name: garageProfile.owner_name,
+      garage_owner_name: garageProfile.garage_owner_name,
       tax_id: garageProfile.tax_id,
       phone: garageProfile.phone,
       address: garageProfile.address,
@@ -216,7 +208,6 @@ const filteredAppointments = computed(() => {
 	}
 
 	return list.sort((a, b) => {
-    // 簡單排序：日期+時間
     const tA = new Date(`${a.scheduled_date}T${a.scheduled_time || '00:00'}`).getTime();
     const tB = new Date(`${b.scheduled_date}T${b.scheduled_time || '00:00'}`).getTime();
 		return tA - tB;
@@ -315,7 +306,6 @@ async function saveEdit() {
       estimated_cost: editingForm.estimatedCost,
       quotation_image_url: editingForm.quotationImage
     });
-    // customer_name 等欄位暫不開放編輯，或視需求增加
     closeEditModal();
   } catch (e) {
     alert('更新失敗');
@@ -410,10 +400,8 @@ function cancelServicingDialog() {
 async function confirmComplete() {
 	if (!pendingCompleteApt.value) return;
   try {
-    // 這裡需要技師名稱，目前先寫死或從 auth user 抓
-    const techName = garageProfile.owner_name || '技師';
+    const techName = garageProfile.garage_owner_name || '技師';
     await appointmentsApi.completeAppointment(pendingCompleteApt.value, techName);
-    // 重新整理 records
     await recordsApi.fetchRecords();
     showCompleteConfirm.value = false;
     pendingCompleteApt.value = null;
@@ -451,10 +439,23 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 	<div class="min-h-screen bg-[#EBE8E3] font-sans text-stone-600">
     <!-- Loading State -->
     <div v-if="isLoadingGarage" class="flex h-screen w-full items-center justify-center">
-      <div class="text-xl font-bold text-[#6B6B5C]">載入中...</div>
+      <div class="flex flex-col items-center gap-4">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#6B6B5C] border-t-transparent"></div>
+        <div class="text-xl font-bold text-[#6B6B5C]">系統載入中...</div>
+      </div>
+    </div>
+
+    <div v-else-if="noGarageError" class="flex h-screen w-full items-center justify-center p-6">
+      <div class="max-w-md text-center">
+        <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">找不到任何車廠資料</h2>
+        <p class="mb-6 text-stone-500">
+          資料庫可能是空的，請先在資料庫建立至少一筆車廠資料。
+        </p>
+      </div>
     </div>
 
 		<div v-else class="flex h-screen overflow-hidden">
+      <!-- Main Content (only shown when garageId is present) -->
 		<div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 		<aside
 			class="fixed inset-y-0 left-0 z-50 w-[280px] flex flex-col border-r border-[#DCD9D3] bg-[#EBE8E3] transition-transform duration-300 lg:static lg:translate-x-0"
@@ -499,8 +500,8 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 				</nav>
 				<div class="p-6">
 					<div class="rounded-lg bg-[#DEDbd6]/50 p-4 border border-[#DCD9D3]">
-						<div class="text-xs text-stone-500">目前登入</div>
-						<div class="font-bold text-[#4A4A45] tracking-wide">{{ authStore.user?.email || '使用者' }}</div>
+						<div class="text-xs text-stone-500">目前模式</div>
+						<div class="font-bold text-[#4A4A45] tracking-wide">開發預覽 (Admin)</div>
 					</div>
 				</div>
 			</aside>
@@ -758,7 +759,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">店長名稱</label>
-										<input v-model="garageProfile.owner_name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
+										<input v-model="garageProfile.garage_owner_name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
 									</div>
 									<div class="space-y-2">
 										<label class="text-sm font-medium text-stone-500">統一編號</label>
