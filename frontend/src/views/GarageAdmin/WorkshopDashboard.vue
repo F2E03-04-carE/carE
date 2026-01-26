@@ -250,6 +250,17 @@ function getStatusClass(s: ApptStatus) {
 	}
 }
 
+function getStatusBorderClass(s: ApptStatus) {
+	switch (s) {
+		case 'pending': return 'bg-[#E8DCC2]';
+		case 'confirmed': return 'bg-[#D6DCD9]';
+		case 'servicing': return 'bg-[#C2CCB8]';
+		case 'cancelled': return 'bg-[#E8C2C2]';
+    case 'completed': return 'bg-stone-200';
+		default: return '';
+	}
+}
+
 const pageHeader = computed(() => {
 	switch (activeNav.value) {
 		case 'dashboard': return { title: '總覽', sub: '今日維修廠營運概況' };
@@ -263,7 +274,7 @@ const pageHeader = computed(() => {
 // Edit Modal
 const showEditModal = ref(false);
 const editingForm = reactive<{
-	id: string;
+	id: number;
 	customerName: string;
 	carModel: string;
 	serviceType: string;
@@ -272,7 +283,7 @@ const editingForm = reactive<{
 	estimatedCost: number;
 	quotationImage: string;
 }>({
-	id: '',
+	id: 0,
 	customerName: '',
 	carModel: '',
 	serviceType: '',
@@ -314,7 +325,7 @@ async function saveEdit() {
 
 // Remove Appointment
 const showRemoveConfirm = ref(false);
-const pendingRemoveId = ref('');
+const pendingRemoveId = ref(0);
 
 function confirmRemove() {
   pendingRemoveId.value = editingForm.id;
@@ -625,10 +636,10 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 								:key="apt.id"
 								class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
 							>
-								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="(getStatusClass(apt.status).split(' ')[0] || '')"></div>
+								<div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusBorderClass(apt.status)"></div>
 								<div class="flex-1 pl-4">
 									<div class="flex flex-wrap items-center gap-3">
-										<span class="font-mono text-xs text-stone-400">#{{ apt.id.slice(0, 8) }}...</span>
+										<span class="font-mono text-xs text-stone-400">#{{ apt.id }}</span>
 										<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" :class="getStatusClass(apt.status)">
 											{{ getStatusLabel(apt.status) }}
 										</span>
@@ -808,7 +819,7 @@ const navGroupMain: NavKey[] = ['dashboard', 'appointments', 'records', 'setting
 						<div class="grid grid-cols-2 gap-y-3">
 							<div>
 								<span class="block text-xs text-stone-400">預約編號</span>
-								<span class="font-mono font-medium text-[#4A4A45]">{{ editingForm.id.slice(0, 8) }}...</span>
+								<span class="font-mono font-medium text-[#4A4A45]">#{{ editingForm.id }}</span>
 							</div>
 							<div>
 								<span class="block text-xs text-stone-400">客戶姓名</span>
