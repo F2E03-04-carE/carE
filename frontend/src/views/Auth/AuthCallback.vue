@@ -12,38 +12,44 @@ onMounted(async () => {
   const clearRedirect = () => localStorage.removeItem('postLoginRedirect');
 
   try {
-    const { data: { session }, error: authError } = await supabase.auth.getSession();
+    // ✅ 1) 先嘗試直接拿 session
+    let { data: { session }, error: authError } = await supabase.auth.getSession();
 
-    if (authError) {
-      error.value = '登入驗證失敗，請重試';
-      console.error('Auth callback error:', authError);
-      setTimeout(() => router.push('/'), 3000);
-      return;
+    // ✅ 2) 如果 session 沒有、而且網址有 code（PKCE / magic link 常見），就交換成 session
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('code');
+
+    if (!session && code) {
+      const exchanged = await supabase.auth.exchangeCodeForSession(code);
+      session = exchanged.data.session;
+      authError = exchanged.error;
+      // 清掉 code，避免重複交換
+      window.history.replaceState({}, document.title, url.origin + url.pathname);
     }
 
-    if (!session?.user) {
-      error.value = '無法取得用戶資訊';
-      setTimeout(() => router.push('/'), 3000);
-      return;
-    }
+    if (authError) throw authError;
+    if (!session?.user) throw new Error('NO_SESSION_USER');
 
+    // ...下面保留你原本 hasPhone 邏輯
     const userMetadata = session.user.user_metadata || {};
     const hasPhone = userMetadata.phone && userMetadata.phone.trim() !== '';
 
     if (!hasPhone) {
-      router.push(`/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`);
+      router.replace(`/member/profile?firstLogin=true&redirect=${encodeURIComponent(redirect)}`);
       return;
     }
+
     clearRedirect();
-    router.push(redirect);
-  } catch (err) {
-    error.value = '發生未預期的錯誤';
-    console.error('Unexpected error:', err);
+    router.replace(redirect);
+  } catch (e) {
+    console.error('Callback failed:', e, window.location.href);
+    error.value = '無法取得用戶資訊';
     setTimeout(() => router.push('/'), 3000);
   } finally {
     loading.value = false;
   }
 });
+
 </script>
 
 
