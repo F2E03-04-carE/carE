@@ -1,14 +1,30 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import HomeSearchBar from '@/components/Home/HomeSearchBar.vue'
+import LoginMode from '@/views/Auth/LoginMode.vue'
+import JoinGarage from '../Garage/JoinGarage.vue'
 
 const router = useRouter()
+const isShowLoginModal = ref(false)
 
 const handleCategorySearch = (category: string) => {
   router.push({
     path: '/search',
     query: { category }
   })
+}
+
+const openLoginModal = () => {
+  isShowLoginModal.value = true
+}
+
+const closeLoginModal = () => {
+  isShowLoginModal.value = false
+}
+
+const openJoinGarage = () => {
+  router.push('/join-garage');
 }
 </script>
 
@@ -25,8 +41,7 @@ const handleCategorySearch = (category: string) => {
         </h3>
 
         <HomeSearchBar />
-        <!-- 六大常見搜尋主題 -->
-        <h3 class="mt-[50px] text-[24px] text-[#4a4a43] pb-5 font-bold">六大熱門搜尋主題</h3>
+        <h3 class="mt-[30px] text-[24px] text-[#4a4a43] pb-5 font-bold">六大熱門搜尋主題</h3>
         <div
           class="flex flex-row flex-wrap lg:flex-nowrap justify-evenly items-center w-full mt-[5%] lg:mt-[0%]"
         >
@@ -85,114 +100,98 @@ const handleCategorySearch = (category: string) => {
             </p>
           </button>
         </div>
-        <!-- 信任背書 -->
-        <div class="flex flex-row justify-around items-center w-[80%] my-[5%] lg:my-[3%]">
+        <div class="flex flex-row justify-around items-center w-[80%] my-[5%] lg:my-[4%]">
           <div class="text-center">
-            <p class="text-[28px] text-[#4A4A43]">500+</p>
+            <p class="font-bold text-[32px] text-[#4A4A43]">60+</p>
             <h3 class="text-[#8F8F84]">合作廠商</h3>
           </div>
           <div class="text-center">
-            <p class="text-[28px] text-[#4A4A43]">5000+</p>
+            <p class="font-bold  text-[32px] text-[#4A4A43]">3000+</p>
             <h3 class="text-[#8F8F84]">服務次數</h3>
           </div>
           <div class="text-center">
-            <p class="text-[28px] text-[#4A4A43]">4.8 ★</p>
+            <p class="font-bold text-[32px] text-[#4A4A43]">4.8 ★</p>
             <h3 class="text-[#8F8F84]">平均評分</h3>
           </div>
         </div>
       </div>
     </section>
     <section class="max-w-[1440px] mx-auto my-[3%] text-[#4a4a43]">
-      <h4 class="text-[26px] font-bold text-center my-[3%]">您是否也有這些困擾？</h4>
-      <!-- 車主角度痛點 -->
-      <div class="flex flex-col lg:flex-row justify-evenly items-center">
-        <div class=""><img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位</div>
-        <div class="w-[80%] lg:w-[30%]">
-          <ul>
+      <h4 class="text-[32px] font-bold text-center my-[3%]">您是否也有這些困擾？</h4>
+      <div class="flex flex-col lg:flex-row justify-evenly items-center my-[5%] mb-[8%]">
+        <div class=""><img src="@/assets/images/main_hero_customer.png" alt="車主困擾" /></div>
+        <div class="flex flex-col items-center text-center w-[80%] lg:w-[40%]">
+          <ul class="w-full">
             <li>
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  emoji_food_beverage
-                </span>
-                <span class="inline-block ml-7 font-bold">等待維修，只能乾等</span>
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">emoji_food_beverage</span>
+                <span class="font-bold">等待維修，只能乾等</span>
               </p>
-              <p class="ml-7">送修後只能在附近耗時間，不知道要去哪裡，等待本身就成了一種壓力。</p>
+              <p>送修後只能在附近耗時間，不知道要去哪裡，等待本身就成了一種壓力。</p>
             </li>
-            <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  handyman
-                </span>
-                <span class="inline-block ml-7 font-bold">找維修廠，全靠運氣</span>
+            <li class="mt-[14px]">
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">handyman</span>
+                <span class="font-bold">找維修廠，全靠運氣</span>
               </p>
-              <p class="ml-7">不清楚每間維修廠擅長的品牌，只能碰運氣選一家，修得好不好心裡沒底。</p>
+              <p>不清楚每間維修廠擅長的品牌，只能碰運氣選一家，修得好不好心裡沒底。</p>
             </li>
-            <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  cached
-                </span>
-                <span class="inline-block ml-7 font-bold">維修進度不明，只能一直問</span>
+            <li class="mt-[14px]">
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">cached</span>
+                <span class="font-bold">維修進度不明，只能一直問</span>
               </p>
-              <p class="ml-7">不知道現在修到哪、什麼時候能取車，只能反覆詢問，卻始終無法安心。</p>
+              <p>不知道現在修到哪、什麼時候能取車，只能反覆詢問，卻始終無法安心。</p>
             </li>
           </ul>
-          <!-- TODO: click 事件要到註冊頁面，並預設為車主身分 -->
           <button
+            @click="openLoginModal"
             class="w-full mt-[5%] px-[5%] py-[3%] text-[#fff] text-center font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
           >
-            立即體驗
+            立即加入會員
           </button>
         </div>
       </div>
-      <!-- 維修廠角度痛點 -->
-      <div class="flex flex-col lg:flex-row justify-evenly items-center mt-[2%] lg:mt-0">
+      <div class="flex flex-col lg:flex-row justify-evenly items-center mt-[2%] my-[5%] mb-[8%]">
         <div class="lg:order-1 order-0">
-          <img src="https://picsum.photos/500/400?random=1" alt="" />假圖占位
+          <img src="@/assets/images/car_repair_service.jpg" alt="維修廠困擾" />
         </div>
-        <div class="w-[80%] lg:w-[30%]">
-          <ul>
+        <div class="flex flex-col items-center text-center w-[80%] lg:w-[40%] ">
+          <ul class="w-full">
             <li>
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  editor_choice
-                </span>
-                <span class="inline-block ml-7 font-bold">明明有專長，卻要重說</span>
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">editor_choice</span>
+                <span class="font-bold">明明有專長，卻要重說</span>
               </p>
-              <p class="ml-7">熟悉的項目與車型，每次都得從頭解釋，時間被一點一滴消耗。</p>
+              <p>熟悉的項目與車型，每次都得從頭解釋，時間被一點一滴消耗。</p>
             </li>
             <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  schedule
-                </span>
-                <span class="inline-block ml-7 font-bold">客人一來，先算時間</span>
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">schedule</span>
+                <span class="font-bold">客人一來，先算時間</span>
               </p>
-              <p class="ml-7">臨時詢問不斷，卻不清楚空檔，只能邊算邊回，流程卡住。</p>
+              <p>臨時詢問不斷，卻不清楚空檔，只能邊算邊回，流程卡住。</p>
             </li>
             <li class="mt-[10px]">
-              <p class="relative text-[20px]">
-                <span class="material-symbols-outlined absolute top-1 left-0 issue-icon">
-                  cognition
-                </span>
-                <span class="inline-block ml-7 font-bold">行程一多，腦袋不夠用</span>
+              <p class="flex items-center justify-center gap-2 text-[20px]">
+                <span class="material-symbols-outlined issue-icon">cognition</span>
+                <span class="font-bold">行程一多，腦袋不夠用</span>
               </p>
-              <p class="ml-7">維修與交件時間零散，一忙起來，全靠人工排程撐著。</p>
+              <p>維修與交件時間零散，一忙起來，全靠人工排程撐著。</p>
             </li>
           </ul>
-          <!-- TODO: click 事件要到註冊頁面，並預設為維修廠身分 -->
           <button
+            @click="openJoinGarage"
             class="w-full mt-[5%] px-[5%] py-[3%] text-[#fff] text-center font-bold bg-[#6b6b5a] hover:bg-[#5a5a4a] rounded-lg sm:rounded-xl cursor-pointer"
           >
-            立即體驗
+            立即刊登維修廠
           </button>
         </div>
       </div>
     </section>
-    <!-- 平台特色與簡易使用說明 -->
     <section class="py-[3%] bg-[#f5f4f0] text-[#4a4a43]">
       <div class="max-w-[1440px] mx-auto">
-        <h4 class="text-[26px] font-bold text-center my-[1%]">carE 帶給您的改變</h4>
+        <h4 class="text-[32px] font-bold text-center my-[1%]">carE 帶給您的改變</h4>
         <h5 class="text-[22px] font-bold text-center">操作只要三步驟</h5>
         <div class="flex flex-col lg:flex-row justify-around items-center my-[3%]">
           <div class="w-full lg:w-[35%] px-3 text-center">
@@ -239,5 +238,9 @@ const handleCategorySearch = (category: string) => {
         </button>
       </a>
     </section>
+    <LoginMode
+      v-if="isShowLoginModal"
+      @close="closeLoginModal"
+    />
   </div>
 </template>

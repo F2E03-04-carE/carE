@@ -85,7 +85,7 @@ const handleSubmit = (e: Event) => {
   <form
     ref="formRef"
     @submit="handleSubmit"
-    class="city-selector-container flex flex-col xl:flex-row xl:items-end gap-4 xl:gap-3 w-full max-w-[1400px] mx-auto p-5 bg-[#fff] shadow-md rounded-[8px] font-bold"
+    class="city-selector-container flex flex-col xl:flex-row xl:items-end gap-4 xl:gap-3 w-full max-w-[1400px] mx-auto p-4 bg-[#fff] shadow-md rounded-[8px] font-bold"
   >
     <input type="hidden" name="cityValue" :value="selectedCity" />
     <input type="hidden" name="districtValue" :value="selectedDistrict" />
