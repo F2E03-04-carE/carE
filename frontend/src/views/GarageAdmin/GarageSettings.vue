@@ -1,8 +1,9 @@
 <template>
   <div class="garage-settings">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">編輯維修廠</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">編輯維修廠(編輯中)
+    </h1>
     <p class="text-gray-600">Step 5 會在這裡實作編輯維修廠頁面內容</p>
-    
+
     <!-- 暫時的表單框架 -->
     <div class="mt-8 bg-white p-6 rounded-lg shadow">
       <form @submit.prevent="saveSettings">
@@ -20,7 +21,7 @@
             <input type="text" class="w-full px-4 py-2 border rounded-lg" placeholder="請輸入地址" />
           </div>
         </div>
-        
+
         <div class="mt-6">
           <button type="submit" class="px-6 py-2 bg-[#6b6b5a] text-white rounded-lg hover:bg-[#5a5a4a]">
             儲存變更
