@@ -16,7 +16,6 @@ let appointmentsComposable: ReturnType<typeof useAppointments> | null = null;
 const appointments = ref<any[]>([]);
 const dashboardStats = ref({ todayCount: 0, pendingCount: 0, servicingCount: 0 });
 
-// 今日預約（前3筆）
 const todayAppointments = computed(() => {
   const today = new Date().toISOString().split('T')[0];
   return appointments.value
@@ -137,13 +136,11 @@ onMounted(() => {
 <template>
   <div class="min-h-[calc(100vh-140px)] bg-[#f5f4f0] py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-      <!-- Page Title -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-[#4a4a43]">總覽</h1>
         <p class="mt-2 text-stone-500">今日維修廠營運概況</p>
       </div>
 
-      <!-- Loading State -->
       <div v-if="isLoadingGarage" class="flex h-[50vh] w-full items-center justify-center">
         <div class="flex flex-col items-center gap-4">
           <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#6B6B5C] border-t-transparent"></div>
@@ -151,7 +148,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="noGarageError" class="flex h-[50vh] w-full items-center justify-center p-6">
       <div class="max-w-md text-center">
         <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">找不到任何車廠資料</h2>
@@ -183,7 +179,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 待確認訂單 -->
         <div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
           <div class="flex items-start justify-between">
             <div>
@@ -199,7 +194,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 正在作業中 -->
         <div class="rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm hover:shadow-md transition duration-300">
           <div class="flex items-start justify-between">
             <div>
@@ -256,7 +250,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      </div>
     </div>
+  </div>
   </div>
 </template>
