@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import Toast from '@/components/Admin/Toast.vue';
 
 const router = useRouter();
 
@@ -14,6 +13,12 @@ const form = reactive({
 const toast = reactive({
   show: false,
   message: '',
+  type: 'error' as 'success' | 'error',
+});
+
+// Toast 樣式
+const toastTypeClass = computed(() => {
+  return toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white';
 });
 
 // 顯示錯誤提示 (不自動關閉)
@@ -40,8 +45,35 @@ const handleLogin = () => {
 </script>
 
 <template>
-  <!-- 浮窗提示組件 -->
-  <Toast :show="toast.show" :message="toast.message" type="error" @close="closeToast" />
+  <!-- 浮窗提示 -->
+  <Transition
+    enter-active-class="transition ease-out duration-300"
+    enter-from-class="transform -translate-y-5 opacity-0"
+    enter-to-class="transform translate-y-0 opacity-100"
+    leave-active-class="transition ease-in duration-200"
+    leave-from-class="transform translate-y-0 opacity-100"
+    leave-to-class="transform -translate-y-5 opacity-0"
+  >
+    <div
+      v-if="toast.show"
+      class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] justify-between"
+      :class="toastTypeClass"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-2xl">
+          {{ toast.type === 'error' ? 'report' : 'check_circle' }}
+        </span>
+        <span class="font-medium">{{ toast.message }}</span>
+      </div>
+      <button
+        @click="closeToast"
+        class="text-white/80 hover:text-white transition-colors focus:outline-none flex items-center"
+        aria-label="關閉"
+      >
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+  </Transition>
 
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">

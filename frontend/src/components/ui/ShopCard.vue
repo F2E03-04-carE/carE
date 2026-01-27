@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import Tag from './Tag.vue';
 import emptyStar from '@/assets/icons/emptyStar.svg';
 import filledStar from '@/assets/icons/fillStar.svg';
 
@@ -33,6 +32,16 @@ const displayedServices = computed(() => props.shop.services.slice(0, 3));
 
 const handleViewDetail = () => {
   emit('viewDetail', props.shop.id);
+};
+
+// Tag 樣式
+const getTagClass = (variant: 'filled' | 'outlined') => {
+  const baseClass = 'inline-block px-3 py-1 text-[14px] rounded-full';
+  if (variant === 'filled') {
+    return `${baseClass} bg-[#6B6B5C] text-white`;
+  } else {
+    return `${baseClass} bg-[#F5F2EE] text-[#6B6B5C] border border-[#6B6B5C]`;
+  }
 };
 </script>
 
@@ -76,18 +85,13 @@ const handleViewDetail = () => {
       </div>
       <!-- 品牌標籤（最多3個） -->
       <div v-if="displayedBrands.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 mt-3 mb-2">
-        <Tag v-for="brand in displayedBrands" :key="brand" :label="brand" variant="filled" />
+        <span v-for="brand in displayedBrands" :key="brand" :class="getTagClass('filled')">{{ brand }}</span>
         <span v-if="shop.brands.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.brands.length - 3 }}</span>
       </div>
 
       <!-- 服務標籤（最多3個） -->
       <div v-if="displayedServices.length > 0" class="flex flex-row flex-wrap justify-start items-center gap-2 my-2">
-        <Tag
-          v-for="service in displayedServices"
-          :key="service"
-          :label="service"
-          variant="outlined"
-        />
+        <span v-for="service in displayedServices" :key="service" :class="getTagClass('outlined')">{{ service }}</span>
         <span v-if="shop.services.length > 3" class="text-xs text-[#8a8a7d]">+{{ shop.services.length - 3 }}</span>
       </div>
 
