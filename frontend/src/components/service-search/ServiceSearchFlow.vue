@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import ServiceModal from './ServiceModal.vue';
 import BookingTimeSelectorView from '@/components/Search/BookingTimeSelectorView.vue';
 
@@ -250,6 +250,12 @@ const finish = async () => {
 const handleCheckStatus = () => {
   router.push('/member/bookings');
 };
+
+onBeforeRouteLeave(() => {
+  if (showSuccess.value) {
+    resetAll();
+  }
+});
 
 const resetAll = () => {
   showSuccess.value = false;
@@ -576,6 +582,6 @@ const resetAll = () => {
       </div>
     </div>
 
-    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="handleCheckStatus" />
+    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="resetAll" @again="handleCheckStatus" />
   </div>
 </template>
