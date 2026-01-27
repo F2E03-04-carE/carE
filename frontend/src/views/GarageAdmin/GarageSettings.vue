@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { supabase } from '@/lib/supabase';
 import { useGarageProfile } from '@/composables/garage/useGarageProfile';
 import { useImageUpload } from '@/composables/garage/useImageUpload';
 import type { GarageProfile } from '@/composables/garage/types';
+
+const router = useRouter();
 
 // Garage ID
 const garageId = ref<number | null>(null);
@@ -125,6 +128,15 @@ async function saveSettings() {
 onMounted(() => {
   initGarageData();
 });
+
+async function handleSelectionPlan() {
+  try{
+ router.push('/garage/subscription');
+  } catch (e) {
+    console.error('導航到方案選擇頁面失敗:', e);
+  }
+
+}
 </script>
 
 <template>
@@ -272,13 +284,20 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
+        <div class="mt-8 flex items-center justify-end gap-3 border-t border-[#F0EEE9] pt-6">
           <button
             @click="saveSettings"
             type="button"
-            class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95"
+            class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95 cursor-pointer"
           >
             儲存變更
+          </button>
+          <button
+            @click="handleSelectionPlan"
+            type="button"
+            class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95 cursor-pointer "
+          >
+            選擇方案
           </button>
         </div>
       </div>

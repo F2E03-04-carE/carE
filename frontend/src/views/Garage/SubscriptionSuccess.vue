@@ -55,7 +55,7 @@ const startCountdown = () => {
       clearInterval(countdownTimer!);
       router.push('/garage/admin/dashboard');
     }
-  }, 5000);
+  }, 1000);
 };
 
 onMounted(() => {
