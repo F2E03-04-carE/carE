@@ -44,7 +44,6 @@ const licensePlate = ref<string>('');
 const carBrand = ref<string>('');
 const carModel = ref<string>('');
 const carYear = ref<string>('');
-const engineSize = ref<string>('');
 const vin = ref<string>('');
 
 // 預約資訊
@@ -141,11 +140,6 @@ const summaryItems = computed<SummaryItem[]>(() => [
     hide: !carYear.value,
   },
   {
-    label: '排氣量',
-    value: engineSize.value || '—',
-    hide: !engineSize.value,
-  },
-  {
     label: '車身碼/VIN',
     value: vin.value || '—',
     hide: !vin.value,
@@ -212,7 +206,6 @@ const finish = async () => {
       scheduled_time: formatTime(selectedTime.value!),
       notes: [
         `問題描述：${serviceDescription.value.trim()}`,
-        engineSize.value ? `排氣量：${engineSize.value}` : '',
         vin.value ? `車身碼：${vin.value}` : '',
         contactEmail.value ? `Email：${contactEmail.value}` : '',
       ]
@@ -254,7 +247,6 @@ const resetAll = () => {
   carBrand.value = '';
   carModel.value = '';
   carYear.value = '';
-  engineSize.value = '';
   vin.value = '';
   selectedDate.value = null;
   selectedTime.value = null;
@@ -404,17 +396,6 @@ const resetAll = () => {
                       type="text"
                       class="h-11 w-full rounded-xl border border-[#E6E6DF] bg-[#F5F4EF] px-4 text-sm outline-none transition focus:border-[#6B6B5C] placeholder:text-[#B5B5AD]"
                       placeholder="例：2020"
-                    />
-                  </div>
-
-                  <!-- 排氣量 -->
-                  <div>
-                    <label class="mb-2 block text-sm font-semibold text-[#6B6B5C]">排氣量（選填）</label>
-                    <input
-                      v-model.trim="engineSize"
-                      type="text"
-                      class="h-11 w-full rounded-xl border border-[#E6E6DF] bg-[#F5F4EF] px-4 text-sm outline-none transition focus:border-[#6B6B5C] placeholder:text-[#B5B5AD]"
-                      placeholder="例：1600 cc"
                     />
                   </div>
 
