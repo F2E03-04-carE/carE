@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ServiceModal from './ServiceModal.vue';
 import BookingTimeSelectorView from '@/components/Search/BookingTimeSelectorView.vue';
 
@@ -12,6 +13,8 @@ const props = defineProps<{
 defineEmits<{
   (e: 'back'): void;
 }>();
+
+const router = useRouter();
 
 // 2 步驟流程
 const step = ref<number>(1);
@@ -242,6 +245,10 @@ const finish = async () => {
   } finally {
     isSubmitting.value = false;
   }
+};
+
+const handleCheckStatus = () => {
+  router.push('/member/bookings');
 };
 
 const resetAll = () => {
@@ -569,6 +576,6 @@ const resetAll = () => {
       </div>
     </div>
 
-    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="resetAll" />
+    <ServiceModal v-if="showSuccess" :bookingCode="bookingCode" @close="showSuccess = false" @again="handleCheckStatus" />
   </div>
 </template>
