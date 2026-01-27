@@ -102,17 +102,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#EBE8E3]">
-    <!-- Loading State -->
-    <div v-if="isLoadingGarage" class="flex h-screen w-full items-center justify-center">
-      <div class="flex flex-col items-center gap-4">
-        <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#6B6B5C] border-t-transparent"></div>
-        <div class="text-xl font-bold text-[#6B6B5C]">系統載入中...</div>
+  <div class="min-h-[calc(100vh-140px)] bg-[#f5f4f0] py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <!-- Page Title -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-[#4a4a43]">總覽</h1>
+        <p class="mt-2 text-stone-500">今日維修廠營運概況</p>
       </div>
-    </div>
 
-    <!-- Error State -->
-    <div v-else-if="noGarageError" class="flex h-screen w-full items-center justify-center p-6">
+      <!-- Loading State -->
+      <div v-if="isLoadingGarage" class="flex h-[50vh] w-full items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+          <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#6B6B5C] border-t-transparent"></div>
+          <div class="text-xl font-bold text-[#6B6B5C]">系統載入中...</div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="noGarageError" class="flex h-[50vh] w-full items-center justify-center p-6">
       <div class="max-w-md text-center">
         <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">找不到任何車廠資料</h2>
         <p class="mb-6 text-stone-500">
@@ -215,6 +222,7 @@ onMounted(() => {
             目前沒有今日預約資料
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
