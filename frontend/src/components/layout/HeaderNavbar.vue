@@ -129,12 +129,12 @@ const menuConfig = {
     ],
   },
   garage: {
-    title: '商家管理',
+    title: '維修廠管理',
     items: [
-      { label: '今日總覽', href: '/garage/dashboard' },
-      { label: '商家基本資料', href: '/garage/profile' },
-      { label: '預約排程', href: '/garage/schedule' },
-      { label: '歷史訂單', href: '/garage/orders' },
+      { label: '今日總覽', href: '/garage/admin/dashboard' },
+      { label: '預約排程', href: '/garage/admin/appointments' },
+      { label: '完工維修紀錄', href: '/garage/admin/records' },
+      { label: '編輯維修廠', href: '/garage/admin/settings' },
     ],
   },
 };

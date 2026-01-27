@@ -137,52 +137,42 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
-    // 維修廠後台（包含四個子頁面：總覽、預約排程、完工紀錄、編輯維修廠）
+    // 維修廠後台頁面（直接路由，透過 navbar 切換）
     {
-      path: '/garage/admin',
-      redirect: '/garage/admin/dashboard',
-      component: () => import('@/layouts/GarageAdminLayout.vue'),
+      path: '/garage/admin/dashboard',
+      name: 'garage-admin-dashboard',
+      component: () => import('@/views/GarageAdmin/GarageDashboard.vue'),
       meta: {
+        title: '總覽 - 維修廠後台 - carE',
         requiresAuth: true,
       },
-      children: [
-        {
-          path: 'dashboard',
-          name: 'garage-admin-dashboard',
-          component: () => import('@/views/GarageAdmin/GarageDashboard.vue'),
-          meta: {
-            title: '總覽 - 維修廠後台 - carE',
-            requiresAuth: true,
-          },
-        },
-        {
-          path: 'appointments',
-          name: 'garage-admin-appointments',
-          component: () => import('@/views/GarageAdmin/GarageAppointments.vue'),
-          meta: {
-            title: '預約排程 - 維修廠後台 - carE',
-            requiresAuth: true,
-          },
-        },
-        {
-          path: 'records',
-          name: 'garage-admin-records',
-          component: () => import('@/views/GarageAdmin/GarageRecords.vue'),
-          meta: {
-            title: '完工維修紀錄 - 維修廠後台 - carE',
-            requiresAuth: true,
-          },
-        },
-        {
-          path: 'settings',
-          name: 'garage-admin-settings',
-          component: () => import('@/views/GarageAdmin/GarageSettings.vue'),
-          meta: {
-            title: '編輯維修廠 - 維修廠後台 - carE',
-            requiresAuth: true,
-          },
-        },
-      ],
+    },
+    {
+      path: '/garage/admin/appointments',
+      name: 'garage-admin-appointments',
+      component: () => import('@/views/GarageAdmin/GarageAppointments.vue'),
+      meta: {
+        title: '預約排程 - 維修廠後台 - carE',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/garage/admin/records',
+      name: 'garage-admin-records',
+      component: () => import('@/views/GarageAdmin/GarageRecords.vue'),
+      meta: {
+        title: '完工維修紀錄 - 維修廠後台 - carE',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/garage/admin/settings',
+      name: 'garage-admin-settings',
+      component: () => import('@/views/GarageAdmin/GarageSettings.vue'),
+      meta: {
+        title: '編輯維修廠 - 維修廠後台 - carE',
+        requiresAuth: true,
+      },
     },
   ],
 });
