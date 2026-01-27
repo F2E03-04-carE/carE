@@ -176,10 +176,17 @@ const formatDate = (date: Date): string => {
 };
 
 const formatTime = (time: string): string => {
-  if (time.split(':').length === 2) {
-    return `${time}:00`;
+  // 提取 HH:mm 格式的時間（忽略後面的文字如 "早上"、"下午"）
+  const timeMatch = time.match(/^(\d{2}:\d{2})/);
+  if (timeMatch) {
+    return `${timeMatch[1]}:00`;
   }
-  return time;
+  // 如果已經是 HH:mm:ss 格式，直接返回
+  if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+    return time;
+  }
+  // 其他情況，嘗試添加 :00
+  return `${time}:00`;
 };
 
 const finish = async () => {
