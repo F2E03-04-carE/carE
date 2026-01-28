@@ -1,7 +1,13 @@
 export async function uploadToCloudinary(file: File) {
-  if (!file.type.startsWith("image/")) throw new Error("只能上傳圖片");
-  if (file.size > 5 * 1024 * 1024) throw new Error("圖片不能超過 5MB");
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("只能上傳 JPG、PNG 或 WebP 格式的圖片");
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("圖片大小不能超過 5MB");
+  }
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
@@ -9,7 +15,7 @@ export async function uploadToCloudinary(file: File) {
 
   const form = new FormData();
   form.append("file", file);
-  form.append("upload_preset", uploadPreset); // garages_unsigned
+  form.append("upload_preset", uploadPreset);
   form.append("folder", "garages");
 
   const res = await fetch(endpoint, { method: "POST", body: form });
