@@ -3,6 +3,12 @@
 ![TypeScript](https://img.shields.io/badge/%20-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/%20-TailwindCSS-06B6D4?logo=tailwindcss&logoColor=white)
 ![Node](https://img.shields.io/badge/%20-Node.js-339933?logo=node.js&logoColor=white)
+<a href="https://supabase.com"><img
+    width="112"
+    height="20"
+    src="https://supabase.com/badge-made-with-supabase-dark.svg"
+    alt="Made with Supabase"
+  /><a/>
 
 <h3>
 一個以 Vue 3 打造的汽車維修媒合平台。<br><br>
