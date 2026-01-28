@@ -31,7 +31,8 @@ carE 是一個汽車維修服務媒合平台，提供搜尋、篩選、預約維
 
 <details>
   <summary>首頁 / 搜尋</summary>
-  <img src="" alt="首頁搜尋畫面" width="100%"/>
+  <!-- <img src="" alt="首頁搜尋畫面" width="100%"/> -->
+  <img width="1952" height="1072" alt="image" src="https://github.com/user-attachments/assets/d5f8d418-ecef-4c6f-a56a-30d00b58b266" />
 </details>
 
 <details>
