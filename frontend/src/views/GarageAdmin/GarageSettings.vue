@@ -1,154 +1,63 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { supabase } from '@/lib/supabase';
-import { useGarageProfile } from '@/composables/garage/useGarageProfile';
-import { useImageUpload } from '@/composables/garage/useImageUpload';
-import type { GarageProfile } from '@/composables/garage/types';
+import { reactive } from 'vue';
 
-const router = useRouter();
+// 類型定義
+type GarageInfo = {
+  name: string;
+  ownerName: string;
+  address: string;
+  phone: string;
+  taxId: string;
+  description: string;
+  coverImage: string;
+  environmentImages: string[];
+};
 
-// Garage ID
-const garageId = ref<number | null>(null);
-const isLoadingGarage = ref(true);
-const noGarageError = ref(false);
+// 假資料 - 車廠基本資料
+const garageName = reactive<GarageInfo>({
+  name: '晴天自動車',
+  ownerName: '店長 Admin',
+  address: '台北市中山區職人路 100 號',
+  phone: '02-1234-5678',
+  taxId: '12345678',
+  description: '我們專注於提供最優質的日系車維修服務，擁有超過 10 年的專業經驗。',
+  coverImage: '',
+  environmentImages: [],
+});
 
-// Composables
-let profileApi: ReturnType<typeof useGarageProfile>;
-const uploadApi = useImageUpload();
-
-// 車廠資料
-const garageProfile = reactive<Partial<GarageProfile>>({});
-
-// 初始化資料
-async function initGarageData() {
-  try {
-    isLoadingGarage.value = true;
-
-    // 取得當前用戶
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      console.error('未登入');
-      noGarageError.value = true;
-      isLoadingGarage.value = false;
-      return;
-    }
-
-    // 根據當前用戶查詢 garage
-    const { data: garages, error } = await supabase
-      .from('garages')
-      .select('id')
-      .eq('owner_id', user.id)
-      .limit(1)
-      .maybeSingle();
-
-    console.log('查詢 garage 結果:', { garages, error });
-
-    if (error) {
-      console.error('查詢 garage 失敗:', error);
-      noGarageError.value = true;
-      isLoadingGarage.value = false;
-      return;
-    }
-
-    if (garages) {
-      garageId.value = garages.id;
-      console.log('使用車廠 ID:', garageId.value);
-
-      // 初始化 profile API
-      if (garageId.value !== null) {
-        profileApi = useGarageProfile(garageId.value);
-        await profileApi.fetchProfile();
-        Object.assign(garageProfile, profileApi.profile);
-
-        console.log('Profile loaded:', garageProfile);
-      }
-    } else {
-      console.log('找不到車廠資料，請先註冊車廠');
-      noGarageError.value = true;
-    }
-  } catch (e) {
-    console.error('初始化失敗:', e);
-    noGarageError.value = true;
-  } finally {
-    isLoadingGarage.value = false;
+// 封面照片上傳
+function onCoverFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    garageName.coverImage = URL.createObjectURL(file);
   }
 }
 
-// 封面照片上傳
-async function onCoverFileChange(event: Event) {
-  const input = event.target as HTMLInputElement;
-  if (!input.files || !input.files[0]) return;
-
-  const file = input.files[0];
-  const url = await uploadApi.uploadImage(
-    file,
-    'garage-covers',
-    `${garageId.value}/${Date.now()}-${file.name}`
-  );
-
-  if (url) {
-    garageProfile.cover_image_url = url;
-    await profileApi.updateProfile({ cover_image_url: url });
-  } else {
-    alert('上傳失敗: ' + uploadApi.error.value);
-  }
+// 移除封面照片
+function removeCoverImage() {
+  garageName.coverImage = '';
 }
 
 // 環境照片上傳
-async function onEnvFileChange(event: Event) {
+function onEnvFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
-  if (!input.files) return;
-
-  for (const file of input.files) {
-    const url = await uploadApi.uploadImage(
-      file,
-      'garage-environments',
-      `${garageId.value}/${Date.now()}-${file.name}`
-    );
-
-    if (url) {
-      await profileApi.addEnvironmentImage(url);
+  if (input.files) {
+    for (const file of input.files) {
+      garageName.environmentImages.push(URL.createObjectURL(file));
     }
   }
 }
 
 // 移除環境照片
-async function removeEnvImage(imageUrl: string) {
-  if(confirm('確定要移除這張照片嗎？')) {
-    await profileApi.removeEnvironmentImage(imageUrl);
-  }
+function removeEnvImage(index: number) {
+  garageName.environmentImages.splice(index, 1);
 }
 
 // 儲存設定
-async function saveSettings() {
-  try {
-    await profileApi.updateProfile({
-      name: garageProfile.name,
-      garage_owner_name: garageProfile.garage_owner_name,
-      tax_id: garageProfile.tax_id,
-      phone: garageProfile.phone,
-      address: garageProfile.address,
-      description: garageProfile.description
-    });
-    alert('儲存成功');
-  } catch (e) {
-    alert('儲存失敗');
-  }
-}
-
-onMounted(() => {
-  initGarageData();
-});
-
-async function handleSelectionPlan() {
-  try{
- router.push('/garage/subscription');
-  } catch (e) {
-    console.error('導航到方案選擇頁面失敗:', e);
-  }
-
+function saveSettings() {
+  // 假裝儲存成功
+  alert('儲存成功！（Demo 模式，資料僅存在記憶體中）');
 }
 </script>
 
@@ -161,172 +70,116 @@ async function handleSelectionPlan() {
         <p class="mt-2 text-stone-500">維護維修廠的基本資料與簡介</p>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoadingGarage" class="flex h-[50vh] w-full items-center justify-center">
-        <div class="flex flex-col items-center gap-4">
-          <div class="h-10 w-10 animate-spin rounded-full border-4 border-[#6B6B5C] border-t-transparent"></div>
-          <div class="text-xl font-bold text-[#6B6B5C]">系統載入中...</div>
-        </div>
-      </div>
+      <!-- Settings Content -->
+      <div class="max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
+          <!-- 維修廠照片 -->
+          <div class="space-y-6">
+            <h3 class="text-base font-bold text-[#4A4A45]">維修廠照片</h3>
 
-      <!-- Error State -->
-      <div v-else-if="noGarageError" class="flex h-[50vh] w-full items-center justify-center p-6">
-      <div class="max-w-md text-center">
-        <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">尚未註冊車廠</h2>
-        <p class="mb-6 text-stone-500">
-          您尚未註冊維修廠，請先完成商家資料填寫。
-        </p>
-        <button
-          @click="router.push('/garage/onboarding')"
-          class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-[#5a5a4d]"
-        >
-          前往註冊車廠
-        </button>
-      </div>
-    </div>
-
-    <!-- Settings Content -->
-    <div v-else class="mx-auto max-w-4xl px-4 py-6 animate-in fade-in slide-in-from-bottom-2 duration-500 sm:px-8 sm:py-10">
-      <div class="rounded-xl border border-[#DCD9D3] bg-white p-8 shadow-sm">
-        <div class="space-y-6">
-          <h3 class="text-base font-bold text-[#4A4A45]">維修廠照片</h3>
-          <div>
-            <label class="text-sm font-bold text-[#4A4A45]">封面照片 (建議尺寸 1200x600)</label>
-            <div v-if="!garageProfile.cover_image_url" class="relative mt-2 h-48 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
-              <input type="file" accept="image/jpeg,image/png,image/webp" @change="onCoverFileChange" class="absolute inset-0 cursor-pointer opacity-0" />
-              <div class="flex h-full items-center justify-center">
-                <div class="text-center">
-                  <svg class="mx-auto h-12 w-12 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- 封面照片 -->
+            <div>
+              <label class="mb-3 block text-sm font-medium text-stone-500">封面照片 <span class="text-xs text-stone-400 font-normal">(建議尺寸 1200x600)</span></label>
+              <div class="relative h-64 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
+                <input type="file" accept="image/*" class="absolute inset-0 z-10 cursor-pointer opacity-0" @change="onCoverFileChange">
+                <div v-if="!garageName.coverImage" class="flex h-full flex-col items-center justify-center text-stone-400">
+                  <svg class="mb-3 h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
-                  <p class="mt-2 text-sm text-stone-500">點擊上傳封面照片</p>
-                  <p class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</p>
+                  <span class="font-medium">點擊上傳封面照片</span>
+                  <span class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</span>
+                </div>
+                <div v-else class="relative h-full w-full">
+                  <img :src="garageName.coverImage" class="h-full w-full object-cover" alt="Shop Cover" />
+                  <button
+                    @click.stop="removeCoverImage"
+                    class="absolute top-4 right-4 z-20 rounded-lg bg-red-500 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-600"
+                  >
+                    移除照片
+                  </button>
                 </div>
               </div>
             </div>
-            <div v-else class="group relative mt-2 overflow-hidden rounded-xl border border-[#DCD9D3]">
-              <img :src="garageProfile.cover_image_url" alt="封面照片" class="h-48 w-full object-cover" />
-              <button type="button" @click="garageProfile.cover_image_url = ''; profileApi.updateProfile({ cover_image_url: '' })" class="absolute right-2 top-2 rounded-full bg-red-500 p-2 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-          </div>
 
-          <div>
-            <label class="text-sm font-bold text-[#4A4A45]">環境照片 (展示工位、休息區等)</label>
-            <div class="relative mt-2 h-32 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
-              <input type="file" accept="image/jpeg,image/png,image/webp" multiple @change="onEnvFileChange" class="absolute inset-0 cursor-pointer opacity-0" />
-              <div class="flex h-full items-center justify-center">
-                <div class="text-center">
-                  <svg class="mx-auto h-10 w-10 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
+            <!-- 環境照片 -->
+            <div>
+              <label class="mb-3 block text-sm font-medium text-stone-500">環境照片 <span class="text-xs text-stone-400 font-normal">(展示工位、休息區等)</span></label>
+              <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                <div v-for="(img, idx) in garageName.environmentImages" :key="idx" class="group relative aspect-square overflow-hidden rounded-xl border border-[#DCD9D3]">
+                  <img :src="img" class="h-full w-full object-cover" alt="Environment" />
+                  <button
+                    @click="removeEnvImage(idx)"
+                    class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-stone-500 shadow-sm opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] text-stone-400 transition-colors hover:border-[#6B6B5C] hover:text-[#6B6B5C]">
+                  <input type="file" accept="image/*" multiple class="absolute inset-0 cursor-pointer opacity-0" @change="onEnvFileChange">
+                  <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
                   </svg>
-                  <p class="mt-2 text-sm text-stone-500">點擊上傳環境照片 (可多選)</p>
+                  <span class="mt-2 text-xs font-medium">新增照片</span>
                 </div>
               </div>
             </div>
-            <div v-if="garageProfile.environment_images && garageProfile.environment_images.length > 0" class="mt-4 grid grid-cols-3 gap-4">
-              <div v-for="(img, idx) in garageProfile.environment_images" :key="idx" class="group relative overflow-hidden rounded-lg border border-[#DCD9D3]">
-                <img :src="img" alt="環境照片" class="h-32 w-full object-cover" />
-                <button type="button" @click="removeEnvImage(img)" class="absolute right-1 top-1 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100">
-                  <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
+          </div>
+
+          <div class="my-8 border-t border-[#F0EEE9]"></div>
+
+          <!-- 基本資料 -->
+          <div class="space-y-6">
+            <h3 class="text-base font-bold text-[#4A4A45]">基本資料</h3>
+            <div class="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-stone-500">維修廠名稱</label>
+                <input v-model="garageName.name" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="例如：晴天自動車">
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-stone-500">店長名稱</label>
+                <input v-model="garageName.ownerName" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入店長名稱">
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-stone-500">統一編號</label>
+                <input v-model="garageName.taxId" type="text" maxlength="8" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="8 位數統一編號">
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-stone-500">聯絡電話</label>
+                <input v-model="garageName.phone" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="02-1234-5678">
+              </div>
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-sm font-medium text-stone-500">維修廠地址</label>
+                <input v-model="garageName.address" type="text" class="w-full rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]" placeholder="請輸入完整地址">
+              </div>
+              <div class="col-span-1 space-y-2 md:col-span-2">
+                <label class="text-sm font-medium text-stone-500">維修廠簡介</label>
+                <textarea
+                  v-model="garageName.description"
+                  rows="4"
+                  class="w-full resize-none rounded-lg border border-[#DCD9D3] px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
+                  placeholder="請簡單介紹您的維修廠，例如專修車種、服務特色等..."
+                ></textarea>
+                <p class="text-right text-xs text-stone-400">{{ garageName.description.length }} / 200</p>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="my-8 border-t border-[#F0EEE9]"></div>
-
-        <div class="space-y-6">
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">維修廠名稱</label>
-            <input
-              v-model="garageProfile.name"
-              type="text"
-              class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入維修廠名稱"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">負責人姓名</label>
-            <input
-              v-model="garageProfile.garage_owner_name"
-              type="text"
-              class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入負責人姓名"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">統一編號</label>
-            <input
-              v-model="garageProfile.tax_id"
-              type="text"
-              class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入統一編號"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">聯絡電話</label>
-            <input
-              v-model="garageProfile.phone"
-              type="tel"
-              class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入聯絡電話"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">地址</label>
-            <input
-              v-model="garageProfile.address"
-              type="text"
-              class="w-full rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入地址"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-[#4A4A45]">維修廠簡介</label>
-            <textarea
-              v-model="garageProfile.description"
-              rows="4"
-              class="w-full resize-none rounded-lg border border-[#DCD9D3] bg-white px-4 py-2.5 text-sm text-[#4A4A45] outline-none focus:border-[#6B6B5C] focus:ring-1 focus:ring-[#6B6B5C]"
-              placeholder="請輸入維修廠簡介..."
-            ></textarea>
+          <!-- 儲存按鈕 -->
+          <div class="mt-8 flex justify-end border-t border-[#F0EEE9] pt-6">
+            <button
+              @click="saveSettings"
+              class="rounded-lg bg-[#6B6B5C] px-8 py-3 font-medium text-white shadow-lg shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] hover:shadow-xl active:scale-95"
+            >
+              儲存變更
+            </button>
           </div>
         </div>
-
-        <div class="mt-8 flex items-center justify-end gap-3 border-t border-[#F0EEE9] pt-6">
-          <button
-            @click="saveSettings"
-            type="button"
-            class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95 cursor-pointer"
-          >
-            儲存變更
-          </button>
-          <button
-            @click="handleSelectionPlan"
-            type="button"
-            class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95 cursor-pointer "
-          >
-            選擇方案
-          </button>
-        </div>
-      </div>
       </div>
     </div>
   </div>
