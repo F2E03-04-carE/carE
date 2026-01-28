@@ -11,6 +11,12 @@ const route = useRoute()
 const isOpenMap = ref(false)
 const isOpenSurroundings = ref(false)
 const showBookingFlow = ref(false)
+const envImages = ref<EnvImage[]>([])
+
+type EnvImage = {
+  image_url: string
+  display_order: number
+}
 
 // 資料狀態
 const garage = ref<GarageDetail | null>(null)
@@ -25,7 +31,6 @@ const ratingStars = computed(() => {
   return '★'.repeat(fullStars) + '☆'.repeat(emptyStars)
 })
 
-// 取得保養廠詳細資訊
 const fetchGarageDetail = async () => {
   loading.value = true
   error.value = null
@@ -37,7 +42,7 @@ const fetchGarageDetail = async () => {
       throw new Error('無效的保養廠 ID')
     }
 
-    // 查詢保養廠資料（包含關聯的品牌和服務）
+    // 查詢保養廠資料
     const { data, error: fetchError } = await supabase
       .from('garages')
       .select(`
@@ -72,17 +77,14 @@ const fetchGarageDetail = async () => {
       ? calculateDistance(userLocation.lat, userLocation.lng, data.lat, data.lng)
       : 0
 
-    // 提取品牌名稱 - 處理可能為 null 的情況
     const brands = (data.garage_brands || [])
       .map((gb: any) => gb.brands?.brand_zh)
-      .filter((brand: any): brand is string => brand !== null && brand !== undefined)
+      .filter((b: any): b is string => !!b)
 
-    // 提取服務項目名稱 - 處理可能為 null 的情況
     const services = (data.garage_services || [])
       .map((gs: any) => gs.services?.name)
-      .filter((service: any): service is string => service !== null && service !== undefined)
+      .filter((s: any): s is string => !!s)
 
-    // 轉換為前端格式
     garage.value = {
       id: data.id,
       name: data.name,
@@ -100,6 +102,18 @@ const fetchGarageDetail = async () => {
       phone: data.phone ?? undefined,
       ownerName: data.garage_owner_name ?? data.garage_owner ?? undefined,
       operatingHours: data.operating_hours ?? undefined,
+    }
+
+    const { data: images, error: imgError } = await supabase
+      .from('garage_environment_images')
+      .select('image_url, display_order')
+      .eq('garage_id', data.id)
+      .order('display_order', { ascending: true })
+
+    if (imgError) {
+      console.error('環境照片讀取失敗:', imgError)
+    } else {
+      envImages.value = images ?? []
     }
 
   } catch (err) {
@@ -183,22 +197,18 @@ onMounted(() => {
             <div class="mt-6">
               <h3 class="mb-2 font-medium text-gray-800">環境照片</h3>
               <div class="grid grid-cols-4 gap-2 h-32">
-                <div class="rounded-lg overflow-hidden bg-gray-100">
-                  <img src="https://picsum.photos/300/200?random=10" alt="環境照片1" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
-                </div>
-                <div class="rounded-lg overflow-hidden bg-gray-100">
-                  <img src="https://picsum.photos/300/200?random=11" alt="環境照片2" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
-                </div>
-                <div class="rounded-lg overflow-hidden bg-gray-100">
-                  <img src="https://picsum.photos/300/200?random=12" alt="環境照片3" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
-                </div>
-                <div class="relative rounded-lg overflow-hidden bg-gray-100 cursor-pointer group">
-                  <img src="https://picsum.photos/300/200?random=13" alt="環境照片4" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    +5 張
-                  </div>
-                </div>
+                <div
+                   v-for="(img, idx) in envImages.slice(0, 4)"
+                     :key="idx"
+                     class="rounded-lg overflow-hidden bg-gray-100"
+                     >
+                    <img
+                    :src="img.image_url"
+                    alt="環境照片"
+                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    />
               </div>
+            </div>
             </div>
             <div class="mt-6" v-if="garage.brands.length > 0">
               <h3 class="mb-2 font-medium text-gray-800">專修品牌</h3>
@@ -248,7 +258,7 @@ onMounted(() => {
                     <span class="text-sm">Google Map 載入中...</span>
                   </div>
                   <div class="mt-4 text-sm text-gray-500">
-                    <p>地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
+                    <p>地址：{{ garage.address }}</p>
                   </div>
                   <button
                     @click="openGoogleMaps"
@@ -283,7 +293,7 @@ onMounted(() => {
               </div>
             </div>
           </section>
-          
+
           <!-- 評價區塊 -->
           <section class="p-6 bg-white rounded-2xl shadow-sm">
             <div class="flex items-center gap-2 mb-6">
