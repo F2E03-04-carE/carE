@@ -184,9 +184,12 @@ async function createGarage(): Promise<boolean> {
       .maybeSingle();
 
     if (checkError) {
-      // 如果查詢失敗（例如 owner_id 欄位不存在），繼續建立新車廠
-      console.warn('檢查車廠時發生錯誤，繼續建立新車廠:', checkError.message);
-    } else if (existingGarage) {
+      console.error('檢查現有車廠時發生錯誤:', checkError);
+      createError.value = '無法驗證您的車廠資訊，請稍後再試。';
+      return false;
+    }
+    
+    if (existingGarage) {
       console.log('用戶已有車廠，直接跳轉');
       // 切換為維修廠角色
       userStore.switchRole('garage');
