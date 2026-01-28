@@ -1,14 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { supabase } from '@/lib/supabase';
 import PricingCard from '@/components/ui/PricingCard.vue';
 import PaymentDrawer from '@/components/payment/PaymentDrawer.vue';
 import { useSubscriptionStore } from '@/stores/subscription';
-import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
 const subscriptionStore = useSubscriptionStore();
-const userStore = useUserStore();
+
+// 儲存當前用戶的 garage id
+const currentGarageId = ref<number | null>(null);
+
+// 在頁面載入時查詢 garage id
+onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: garage } = await supabase
+      .from('garages')
+      .select('id')
+      .eq('owner_id', user.id)
+      .maybeSingle();
+
+    if (garage) {
+      currentGarageId.value = garage.id;
+      console.log('訂閱頁面取得 Garage ID:', currentGarageId.value);
+    } else {
+      console.error('找不到該用戶的維修廠');
+      alert('找不到維修廠資訊，請先完成維修廠註冊');
+    }
+  }
+});
 
 const pricingPlans = [
   {
@@ -75,6 +98,10 @@ async function handlePaymentMethodSelect(paymentMethod: 'oen' | 'linepay' | 'tri
 }
 
 async function activateFreeTrial() {
+  if (!currentGarageId.value) {
+    throw new Error('無法取得維修廠 ID');
+  }
+
   const result = await subscriptionStore.activateTrial();
 
   if (result.success) {
@@ -89,6 +116,10 @@ async function activateFreeTrial() {
 }
 
 async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' | 'linepay') {
+  if (!currentGarageId.value) {
+    throw new Error('無法取得維修廠 ID，請重新整理頁面');
+  }
+
   // 使用環境變數設定 API URL
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const endpoint = paymentMethod === 'oen'
@@ -97,22 +128,20 @@ async function createPayment(plan: typeof pricingPlans[0], paymentMethod: 'oen' 
 
   const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // 從登入狀態取得 garageId，未登入時使用測試 ID
-  const garageId = userStore.currentUser?.id
-    ? String(userStore.currentUser.id)
-    : (import.meta.env.DEV ? '1' : null); // 開發測試用 fallback
+  console.log('準備送出付款請求，Garage ID:', currentGarageId.value);
 
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(garageId ? { 'x-garage-id': String(garageId) } : {})
+      'x-garage-id': String(currentGarageId.value) // ← 使用正確的 garage id
     },
     body: JSON.stringify({
       amount: plan.price,
       currency: 'TWD',
       orderId: orderId,
       planType: plan.type,
+      garageId: currentGarageId.value, // ← 也在 body 中傳送
       successUrl: `${window.location.origin}/garage/subscription/success?type=${plan.type}`,
       failureUrl: `${window.location.origin}/garage/subscription/failure`,
       productDetail: `${plan.title} - carE 平台訂閱`,

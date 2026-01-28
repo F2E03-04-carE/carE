@@ -5,7 +5,10 @@ const getGarageId = (req) => req.headers['x-garage-id'] || req.headers['x-user-i
 const mapGarageToSubscription = (garage) => {
   if (!garage) return null;
 
-  const planType = garage.subscription_status === 'none' ? null : garage.subscription_status;
+  // null, 'none', 或空字串都視為沒有方案
+  const planType = (garage.subscription_status === 'none' || !garage.subscription_status)
+    ? null
+    : garage.subscription_status;
 
   return {
     id: garage.id,
@@ -80,7 +83,8 @@ export const activateTrial = async (req, res) => {
       return res.status(500).json({ success: false, message: 'failed to check garage' });
     }
 
-    if (garage.subscription_status !== 'none') {
+    // 允許 null 或 'none' 狀態啟動試用
+    if (garage.subscription_status && garage.subscription_status !== 'none') {
       return res.status(400).json({
         success: false,
         message: '您已經有訂閱方案'
