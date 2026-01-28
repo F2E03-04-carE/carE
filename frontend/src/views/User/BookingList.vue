@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import { useUserAppointments } from '@/composables/user/useUserAppointments';
-import type { Appointment as ApiAppointment } from '@/composables/garage/types';
-import { supabase } from '@/lib/supabase';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -13,35 +10,82 @@ if (!authStore.isAuthenticated) {
   router.push('/');
 }
 
-const { appointments, loading, error, fetchAppointmentsByPhone, cancelAppointment } = useUserAppointments();
-const showCancelModal = ref(false);
-const appointmentToCancel = ref<ApiAppointment | null>(null);
-const cancelling = ref(false);
-const userPhone = ref('');
+// ==================== 類型定義 ====================
+type BookingStatus = 'pending' | 'confirmed' | 'servicing' | 'completed' | 'cancelled';
 
-// 載入用戶電話
-const loadUserPhone = async () => {
-  if (!authStore.user?.id) return;
-
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('phone')
-      .eq('user_id', authStore.user.id)
-      .single();
-
-    if (profile?.phone) {
-      userPhone.value = profile.phone;
-      await fetchAppointmentsByPhone(profile.phone);
-    }
-  } catch (err) {
-    console.error('載入用戶電話失敗:', err);
-  }
+type Booking = {
+  id: number;
+  customer_name: string;
+  customer_phone: string;
+  car_model: string;
+  license_plate: string;
+  service_type: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  status: BookingStatus;
+  notes?: string;
+  estimated_cost?: number;
 };
 
-onMounted(() => {
-  loadUserPhone();
-});
+// ==================== 假資料 ====================
+const appointments = ref<Booking[]>([
+  {
+    id: 1,
+    customer_name: '王貓貓',
+    customer_phone: '0912-345-678',
+    car_model: 'Toyota Camry',
+    license_plate: 'ABC-1234',
+    service_type: '定期保養',
+    scheduled_date: '2026-01-18',
+    scheduled_time: '09:30',
+    status: 'servicing',
+    estimated_cost: 3500,
+    notes: '自備機油',
+  },
+  {
+    id: 2,
+    customer_name: '王貓貓',
+    customer_phone: '0912-345-678',
+    car_model: 'Honda CR-V',
+    license_plate: 'KLM-7788',
+    service_type: '煞車異音檢查',
+    scheduled_date: '2026-01-18',
+    scheduled_time: '10:30',
+    status: 'confirmed',
+    estimated_cost: 1200,
+    notes: '右前輪有異音',
+  },
+  {
+    id: 3,
+    customer_name: '王貓貓',
+    customer_phone: '0912-345-678',
+    car_model: 'Tesla Model 3',
+    license_plate: 'EAA-9999',
+    service_type: '輪胎更換',
+    scheduled_date: '2026-01-18',
+    scheduled_time: '14:00',
+    status: 'pending',
+    estimated_cost: 18000,
+  },
+  {
+    id: 4,
+    customer_name: '王貓貓',
+    customer_phone: '0912-345-678',
+    car_model: 'Mini Cooper',
+    license_plate: 'MIN-5678',
+    service_type: '冷氣健檢',
+    scheduled_date: '2026-01-19',
+    scheduled_time: '11:00',
+    status: 'pending',
+    estimated_cost: 800,
+  },
+]);
+
+const loading = ref(false);
+const error = ref('');
+const showCancelModal = ref(false);
+const appointmentToCancel = ref<Booking | null>(null);
+const cancelling = ref(false);
 
 const statusText = (status: string) => {
   const statusMap: Record<string, string> = {
@@ -56,20 +100,36 @@ const statusText = (status: string) => {
 
 const statusColor = (status: string) => {
   const colorMap: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    confirmed: 'bg-blue-100 text-blue-800',
-    servicing: 'bg-purple-100 text-purple-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-gray-100 text-gray-800',
+    pending: 'bg-[#E8DCC2] text-[#8C7B5D]',
+    confirmed: 'bg-[#D6DCD9] text-[#5C6B66]',
+    servicing: 'bg-[#C2CCB8] text-[#5A6650]',
+    completed: 'bg-[#D0E8D0] text-[#4A7A4A]',
+    cancelled: 'bg-[#E8C2C2] text-[#8C5D5D]',
   };
   return colorMap[status] || 'bg-gray-100 text-gray-800';
 };
 
-const canCancel = (apt: ApiAppointment) => {
+const getStatusBorderClass = (status: string) => {
+  const borderMap: Record<string, string> = {
+    pending: 'bg-[#D4C4A8]',
+    confirmed: 'bg-[#A8B8B2]',
+    servicing: 'bg-[#A8B89E]',
+    completed: 'bg-[#9EC09E]',
+    cancelled: 'bg-[#C4A8A8]',
+  };
+  return borderMap[status] || 'bg-gray-300';
+};
+
+const formatCurrency = (val?: number) => {
+  if (!val) return 'NT$0';
+  return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(val);
+};
+
+const canCancel = (apt: Booking) => {
   return apt.status === 'pending' || apt.status === 'confirmed';
 };
 
-const confirmCancel = (apt: ApiAppointment) => {
+const confirmCancel = (apt: Booking) => {
   appointmentToCancel.value = apt;
   showCancelModal.value = true;
 };
@@ -78,15 +138,19 @@ const handleCancel = async () => {
   if (!appointmentToCancel.value) return;
 
   cancelling.value = true;
-  try {
-    await cancelAppointment(appointmentToCancel.value.id);
-    showCancelModal.value = false;
-    appointmentToCancel.value = null;
-  } catch (err) {
-    alert('取消預約失敗，請稍後再試');
-  } finally {
-    cancelling.value = false;
+  
+  // 模擬取消延遲
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // 更新本地假資料
+  const index = appointments.value.findIndex(a => a.id === appointmentToCancel.value?.id);
+  if (index !== -1 && appointments.value[index]) {
+    appointments.value[index].status = 'cancelled';
   }
+  
+  showCancelModal.value = false;
+  appointmentToCancel.value = null;
+  cancelling.value = false;
 };
 
 const formatDate = (dateStr?: string) => {
@@ -139,65 +203,66 @@ const formatTime = (timeStr?: string) => {
         <div
           v-for="apt in appointments"
           :key="apt.id"
-          class="bg-white rounded-2xl border border-[#e8e4dc] p-6 hover:shadow-md transition"
+          class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
         >
-          <div class="flex items-start justify-between mb-4">
-            <div>
-              <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-semibold text-[#4a4540]">預約編號 #{{ apt.id }}</h3>
-                <span
-                  class="px-3 py-1 text-xs font-semibold rounded-full"
-                  :class="statusColor(apt.status)"
-                >
-                  {{ statusText(apt.status) }}
-                </span>
-              </div>
-              <p class="text-sm text-[#6b6460]">{{ apt.service_type || '服務項目未指定' }}</p>
+          <!-- 左側狀態邊條 -->
+          <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusBorderClass(apt.status)"></div>
+          
+          <!-- 主要資訊 -->
+          <div class="flex-1 pl-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="font-mono text-xs text-stone-400">APT-2026-00{{ apt.id }}</span>
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium" :class="statusColor(apt.status)">
+                {{ statusText(apt.status) }}
+              </span>
             </div>
+            <div class="mt-2 flex items-baseline gap-3">
+              <h3 class="text-lg font-bold text-[#4A4A45]">{{ apt.customer_name }}</h3>
+              <span class="text-sm text-stone-500">{{ apt.car_model }} <span class="text-stone-300">|</span> {{ apt.license_plate }}</span>
+            </div>
+            <div class="mt-1 text-sm text-stone-500">
+              {{ apt.service_type }}
+              <span v-if="apt.notes" class="ml-2 text-[#8C7B5D]">★ {{ apt.notes }}</span>
+            </div>
+          </div>
+
+          <!-- 日期時間 -->
+          <div class="flex flex-col gap-1 pl-4 lg:w-48 lg:border-l lg:border-[#F0EEE9] lg:pl-6">
+            <div class="flex items-center gap-2 text-sm text-stone-600">
+              <svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4"/>
+                <path d="M8 2v4"/>
+                <path d="M3 10h18"/>
+              </svg>
+              {{ apt.scheduled_date }}
+            </div>
+            <div class="flex items-center gap-2 text-sm text-stone-600">
+              <svg class="h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              {{ apt.scheduled_time }}
+            </div>
+          </div>
+
+          <!-- 預估費用 -->
+          <div class="flex items-center justify-end pl-4 lg:w-32 lg:pl-0">
+            <div class="text-right">
+              <div class="text-xs text-stone-400">預估費用</div>
+              <div class="font-bold text-[#4A4A45]">{{ formatCurrency(apt.estimated_cost) }}</div>
+            </div>
+          </div>
+
+          <!-- 操作按鈕 -->
+          <div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:border-0 lg:pt-0">
             <button
               v-if="canCancel(apt)"
               @click="confirmCancel(apt)"
-              class="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition"
+              class="flex-1 rounded border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 lg:w-28"
             >
               取消預約
             </button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-[#e8e4dc]">
-            <div>
-              <p class="text-xs text-[#6B6B5C] mb-1">預約日期</p>
-              <p class="text-sm font-medium text-[#4a4540]">
-                {{ formatDate(apt.scheduled_date) }}
-              </p>
-            </div>
-            <div>
-              <p class="text-xs text-[#6B6B5C] mb-1">預約時間</p>
-              <p class="text-sm font-medium text-[#4a4540]">
-                {{ formatTime(apt.scheduled_time) }}
-              </p>
-            </div>
-            <div>
-              <p class="text-xs text-[#6B6B5C] mb-1">聯絡人</p>
-              <p class="text-sm font-medium text-[#4a4540]">
-                {{ apt.customer_name || '—' }}
-              </p>
-            </div>
-            <div>
-              <p class="text-xs text-[#6B6B5C] mb-1">聯絡電話</p>
-              <p class="text-sm font-medium text-[#4a4540]">
-                {{ apt.customer_phone || '—' }}
-              </p>
-            </div>
-            <div v-if="apt.car_model" class="col-span-2">
-              <p class="text-xs text-[#6B6B5C] mb-1">車輛資訊</p>
-              <p class="text-sm font-medium text-[#4a4540]">
-                {{ apt.car_model }} {{ apt.license_plate ? `(${apt.license_plate})` : '' }}
-              </p>
-            </div>
-            <div v-if="apt.notes" class="col-span-2">
-              <p class="text-xs text-[#6B6B5C] mb-1">備註</p>
-              <p class="text-sm text-[#4a4540]">{{ apt.notes }}</p>
-            </div>
           </div>
         </div>
       </div>
