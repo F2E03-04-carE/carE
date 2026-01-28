@@ -18,10 +18,75 @@ type EnvImage = {
   display_order: number
 }
 
+// 評論（僅供維修廠詳細頁顯示假資料，唯讀）
+type ReviewRow = { id: number; user_name: string; content: string; rating: number; review_date: string }
+type ReviewStats = { totalReviews: number; averageRating: number }
+type ReviewPagination = { page: number; limit: number; total: number; totalPages: number }
+
 // 資料狀態
 const garage = ref<GarageDetail | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+const reviews = ref<ReviewRow[]>([])
+const reviewsLoading = ref(false)
+const reviewStats = ref<ReviewStats | null>(null)
+const reviewPagination = ref<ReviewPagination>({ page: 1, limit: 5, total: 0, totalPages: 0 })
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
+const hasMoreReviews = computed(() => reviewPagination.value.page < reviewPagination.value.totalPages)
+const totalReviews = computed(() => reviewStats.value?.totalReviews ?? reviewPagination.value.total ?? 0)
+
+const getReviewStars = (rating: number) => '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating))
+const getAvatarLetter = (name: string) => (name ? name.charAt(0).toUpperCase() : 'U')
+
+async function fetchReviews(page = 1) {
+  if (!garage.value) return
+  reviewsLoading.value = true
+  try {
+    const params = new URLSearchParams({ garage_id: String(garage.value.id), page: String(page), limit: String(reviewPagination.value.limit) })
+    const res = await fetch(`${apiUrl}/api/reviews?${params}`)
+    const result = await res.json()
+    if (res.ok) {
+      reviews.value = result.data ?? []
+      reviewPagination.value = result.pagination ?? reviewPagination.value
+    }
+  } catch (e) {
+    console.error('載入評論失敗:', e)
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+async function loadMoreReviews() {
+  if (!garage.value || !hasMoreReviews.value) return
+  reviewsLoading.value = true
+  try {
+    const next = reviewPagination.value.page + 1
+    const params = new URLSearchParams({ garage_id: String(garage.value.id), page: String(next), limit: String(reviewPagination.value.limit) })
+    const res = await fetch(`${apiUrl}/api/reviews?${params}`)
+    const result = await res.json()
+    if (res.ok) {
+      reviews.value = [...reviews.value, ...(result.data ?? [])]
+      reviewPagination.value = result.pagination
+    }
+  } catch (e) {
+    console.error('載入更多評論失敗:', e)
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+async function fetchReviewStats() {
+  if (!garage.value) return
+  try {
+    const res = await fetch(`${apiUrl}/api/reviews/stats/${garage.value.id}`)
+    const result = await res.json()
+    if (res.ok) reviewStats.value = result.data
+  } catch (e) {
+    console.error('載入評論統計失敗:', e)
+  }
+}
 
 // 評分星星顯示
 const ratingStars = computed(() => {
@@ -135,8 +200,11 @@ const openGoogleMaps = () => {
   window.open(url, '_blank')
 }
 
-onMounted(() => {
-  fetchGarageDetail()
+onMounted(async () => {
+  await fetchGarageDetail()
+  if (garage.value) {
+    await Promise.all([fetchReviews(), fetchReviewStats()])
+  }
 })
 </script>
 
@@ -294,25 +362,48 @@ onMounted(() => {
             </div>
           </section>
 
-          <!-- 評價區塊 -->
+          <!-- 評價區塊（假評論僅供顯示，唯讀） -->
           <section class="p-6 bg-white rounded-2xl shadow-sm">
-            <div class="flex items-center gap-2 mb-6">
-              <h3 class="font-medium text-gray-800">顧客評價</h3>
-              <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">3則評論</span>
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-2">
+                <h3 class="font-medium text-gray-800">顧客評價</h3>
+                <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ totalReviews }}則評論</span>
+              </div>
+              <div v-if="reviewStats" class="flex items-center gap-1 text-sm">
+                <span class="text-yellow-400">★</span>
+                <span class="font-medium text-gray-700">{{ reviewStats.averageRating.toFixed(1) }}</span>
+              </div>
             </div>
-            <div class="space-y-6">
-              <div class="flex gap-4">
-                <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 font-medium text-gray-600 bg-gray-200 rounded-full">U</div>
+            <div v-if="reviewsLoading && reviews.length === 0" class="text-center py-8">
+              <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-[#8b7d6b] border-t-transparent"></div>
+              <p class="text-gray-500 text-sm mt-2">載入評論中...</p>
+            </div>
+            <div v-else-if="reviews.length === 0" class="text-center py-8 text-gray-500">
+              <p>尚無評論</p>
+            </div>
+            <div v-else class="space-y-6">
+              <div v-for="review in reviews" :key="review.id" class="flex gap-4">
+                <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 font-medium text-gray-600 bg-gray-200 rounded-full">{{ getAvatarLetter(review.user_name) }}</div>
                 <div class="flex-1">
                   <div class="flex items-center justify-between">
                     <div class="flex gap-2 text-sm text-gray-700">
-                      <span class="font-medium">U貓貓</span>
-                      <span class="text-gray-400">2025-12-27</span>
+                      <span class="font-medium">{{ review.user_name }}</span>
+                      <span class="text-gray-400">{{ review.review_date }}</span>
                     </div>
-                    <div class="text-yellow-400">★★★★★</div>
+                    <div class="text-yellow-400 text-sm">{{ getReviewStars(review.rating) }}</div>
                   </div>
-                  <p class="mt-2 text-sm leading-relaxed text-gray-600">老闆技術很好，檢查很仔細！</p>
+                  <p class="mt-2 text-sm leading-relaxed text-gray-600">{{ review.content }}</p>
                 </div>
+              </div>
+              <div v-if="hasMoreReviews" class="text-center pt-4">
+                <button
+                  @click="loadMoreReviews"
+                  :disabled="reviewsLoading"
+                  class="px-6 py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition disabled:opacity-50"
+                >
+                  <span v-if="reviewsLoading">載入中...</span>
+                  <span v-else>載入更多評論</span>
+                </button>
               </div>
             </div>
           </section>
