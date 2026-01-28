@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { supabase } from '@/lib/supabase';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -12,68 +11,27 @@ if (!authStore.isAuthenticated) {
   router.push('/');
 }
 
+// ==================== 個人資料（使用假資料） ====================
 const user = computed(() => authStore.user);
-const Email = computed(() => user.value?.email || '');
-const Phone = ref('');
-const Name = ref('');
-const Nickname = ref('');
-const LicensePlate = ref('');
+const Email = computed(() => user.value?.email || 'cat@example.com');
+const Phone = ref('0912-345-678');
+const Name = ref('王貓貓');
+const Nickname = ref('貓貓');
+const LicensePlate = ref('ABC-1234');
 
 const IsEditing = ref(false);
 const isSaving = ref(false);
 const saveError = ref('');
 const saveSuccess = ref(false);
 const phoneError = ref('');
-const isLoadingProfile = ref(true);
+const isLoadingProfile = ref(false);
 
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
 
-const loadFallbackData = () => {
-  Phone.value = user.value?.user_metadata?.phone || '';
-  Name.value = user.value?.user_metadata?.name || Email.value.split('@')[0];
-  Nickname.value = user.value?.user_metadata?.nickname || '';
-  LicensePlate.value = user.value?.user_metadata?.licensePlate || '';
-};
-
-const loadUserProfile = async () => {
-  if (!user.value?.id) {
-    isLoadingProfile.value = false;
-    return;
-  }
-
-  try {
-    const profileQuery = supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.value.id)
-      .single();
-
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('載入超時')), 3000)
-    );
-
-    const { data: profile, error } = await Promise.race([profileQuery, timeout as any]);
-
-    if (error) {
-      console.error('載入用戶資料失敗:', error);
-      loadFallbackData();
-    } else if (profile) {
-      Phone.value = profile.phone || '';
-      Name.value = profile.name || Email.value.split('@')[0];
-      Nickname.value = profile.nickname || '';
-      LicensePlate.value = profile.license_plate || '';
-    }
-  } catch (error) {
-    console.warn('載入用戶資料超時:', error);
-    loadFallbackData();
-  } finally {
-    isLoadingProfile.value = false;
-  }
-};
-
-onMounted(async () => {
-  await loadUserProfile();
-
+onMounted(() => {
+  // 模擬載入完成
+  isLoadingProfile.value = false;
+  
   if (isFirstLogin.value && !Phone.value) {
     IsEditing.value = true;
   }
@@ -156,59 +114,18 @@ const handleSave = async () => {
 
   isSaving.value = true;
 
-  try {
-    const userId = authStore.user?.id;
-    if (!userId) {
-      throw new Error('未找到用戶 ID');
-    }
+  // 模擬儲存延遲
+  await new Promise(resolve => setTimeout(resolve, 500));
 
-    const userData = {
-      name: Name.value.trim(),
-      phone: Phone.value.trim(),
-      nickname: Nickname.value.trim(),
-    };
+  // 模擬儲存成功（目前不連接資料庫）
+  saveSuccess.value = true;
+  IsEditing.value = false;
+  isSaving.value = false;
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        ...userData,
-        license_plate: LicensePlate.value.trim(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', userId);
-
-    if (profileError) throw profileError;
-
-    const updateMetadata = supabase.auth.updateUser({
-      data: {
-        ...userData,
-        licensePlate: LicensePlate.value.trim(),
-      },
-    });
-
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    );
-
-    try {
-      await Promise.race([updateMetadata, timeout]);
-    } catch (metadataError) {
-      console.warn('user_metadata 更新失敗或超時，但 profiles 已更新:', metadataError);
-    }
-
-    saveSuccess.value = true;
-    IsEditing.value = false;
-
-    if (isFirstLogin.value) {
-      setTimeout(() => {
-        router.replace('/member/profile');
-      }, 2000);
-    }
-  } catch (error: any) {
-    saveError.value = error.message || '儲存失敗，請稍後再試';
-    console.error('更新用戶資料失敗:', error);
-  } finally {
-    isSaving.value = false;
+  if (isFirstLogin.value) {
+    setTimeout(() => {
+      router.replace('/member/profile');
+    }, 2000);
   }
 };
 </script>
@@ -225,6 +142,7 @@ const handleSave = async () => {
 		</header>
 		<main class="max-w-5xl mx-auto px-6 py-8 md:py-10">
 			<div class="space-y-8">
+				<!-- 提示訊息 -->
 				<div v-if="saveSuccess" class="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
 					<span class="material-symbols-outlined text-green-500">check_circle</span>
 					<p class="text-sm text-green-700 font-medium">
@@ -235,6 +153,8 @@ const handleSave = async () => {
 					<span class="material-symbols-outlined text-red-500">error</span>
 					<p class="text-sm text-red-700 font-medium">{{ saveError }}</p>
 				</div>
+
+				<!-- 個人資料區塊 -->
 				<section class="space-y-6">
 					<div class="flex items-center justify-between">
 						<h2 class="text-[#4a4540]">個人資料</h2>
