@@ -23,15 +23,25 @@ export const useAuthStore = defineStore('auth', () => {
         .eq('user_id', user.value.id)
         .single();
 
+      // 檢查用戶是否有車廠（有車廠則為 garage 角色）
+      const { data: garage } = await supabase
+        .from('garages')
+        .select('id')
+        .eq('owner_id', user.value.id)
+        .maybeSingle();
+      
+      const hasGarage = !!garage;
+      const effectiveRole = hasGarage ? 'garage' : 'member';
+
       if (error) {
         console.error('獲取用戶資料失敗:', error);
         // 如果 profiles table 查詢失敗，fallback 到 user_metadata
-        const { full_name, name, avatar_url, role } = user.value.user_metadata;
+        const { full_name, name, avatar_url } = user.value.user_metadata;
         userStore.login({
           id: user.value.id,
           name: full_name || name || user.value.user_metadata?.name || user.value.email?.split('@')[0] || 'User',
           email: user.value.email || '',
-          role: user.value.user_metadata?.role || 'member',
+          role: effectiveRole,
           avatar: avatar_url,
           nickname: user.value.user_metadata?.nickname,
         });
@@ -41,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
           id: profile.id,
           name: profile.name || user.value.email?.split('@')[0] || 'User',
           email: profile.email,
-          role: profile.role || 'member',
+          role: effectiveRole,
           avatar: user.value.user_metadata?.avatar_url || user.value.user_metadata?.picture,
           nickname: profile.nickname,
         });

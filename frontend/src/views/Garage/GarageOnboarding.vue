@@ -2,8 +2,12 @@
 import { ref, reactive, computed, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import FormInput from '@/components/ui/FormInput.vue';
+import { supabase } from '@/lib/supabase';
+import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
+const userStore = useUserStore();
+const createError = ref<string | null>(null);
 const currentStep = ref(1);
 const isSubmitting = ref(false);
 
@@ -155,10 +159,104 @@ const backToForm = () => {
   didSubmitAttempt.value = false;
 };
 
-// 啟動倒數計時
-const startCountdown = () => {
-  clearCountdownTimer();
+// 建立新車廠到資料庫
+async function createGarage(): Promise<boolean> {
+  console.log('createGarage 函數開始執行');
+  try {
+    // 取得當前登入用戶
+    console.log('取得當前登入用戶...');
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
+    console.log('用戶資訊:', user ? `ID: ${user.id}` : '未取得');
+    
+    if (authError || !user) {
+      console.error('未登入或取得用戶失敗:', authError);
+      createError.value = '請先登入再註冊車廠';
+      return false;
+    }
+
+    // 檢查用戶是否已有車廠
+    console.log('檢查用戶是否已有車廠...');
+    const { data: existingGarage, error: checkError } = await supabase
+      .from('garages')
+      .select('id')
+      .eq('owner_id', user.id)
+      .maybeSingle();
+
+    if (checkError) {
+      // 如果查詢失敗（例如 owner_id 欄位不存在），繼續建立新車廠
+      console.warn('檢查車廠時發生錯誤，繼續建立新車廠:', checkError.message);
+    } else if (existingGarage) {
+      console.log('用戶已有車廠，直接跳轉');
+      // 切換為維修廠角色
+      userStore.switchRole('garage');
+      return true; // 已有車廠，視為成功
+    }
+
+    // 從地址中提取城市和區域
+    const address = formData.address.trim();
+    let city = '';
+    let district = '';
+
+    // 嘗試解析台灣地址格式（例如：台北市內湖區...）
+    const cityMatch = address.match(/^(.{2,3}[市縣])/);
+    if (cityMatch && cityMatch[1]) {
+      city = cityMatch[1];
+      const districtMatch = address.substring(city.length).match(/^(.{2,3}[區鄉鎮市])/);
+      if (districtMatch && districtMatch[1]) {
+        district = districtMatch[1];
+      }
+    }
+
+    // 建立新車廠
+    const { data: newGarage, error: insertError } = await supabase
+      .from('garages')
+      .insert({
+        name: formData.garageName.trim(),
+        phone: formData.phone.trim(),
+        address: address,
+        city: city || '未設定',
+        district: district || '',
+        garage_owner_name: formData.ownerName.trim(),
+        tax_id: formData.taxId.trim(),
+        owner_id: user.id,
+      })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      console.error('建立車廠失敗:', insertError);
+      createError.value = '建立車廠失敗，請稍後再試';
+      return false;
+    }
+
+    console.log('車廠建立成功，ID:', newGarage.id);
+    // 切換為維修廠角色
+    userStore.switchRole('garage');
+    return true;
+  } catch (e) {
+    console.error('建立車廠時發生錯誤:', e);
+    createError.value = '系統錯誤，請稍後再試';
+    return false;
+  }
+}
+
+// 啟動倒數計時
+const startCountdown = async () => {
+  clearCountdownTimer();
+  console.log('開始建立車廠流程...');
+
+  // 先建立車廠
+  const success = await createGarage();
+  console.log('建立車廠結果:', success);
+  
+  if (!success) {
+    console.log('建立車廠失敗，顯示失敗畫面');
+    verificationResult.value = 'failure';
+    return;
+  }
+
+  console.log('建立車廠成功，開始倒數計時');
   countdown.value = 3;
 
   countdownTimer = setInterval(() => {

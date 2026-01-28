@@ -48,25 +48,13 @@ async function initGarageData() {
       return;
     }
 
-    // 嘗試根據當前用戶查詢 garage (如果有 owner_id 欄位)
-    let { data: garages, error } = await supabase
+    // 根據當前用戶查詢 garage
+    const { data: garages, error } = await supabase
       .from('garages')
       .select('id')
       .eq('owner_id', user.id)
       .limit(1)
       .maybeSingle();
-
-    // 如果 owner_id 欄位不存在，則查詢第一筆資料（開發測試用）
-    if (error && error.message.includes('owner_id')) {
-      console.log('DEV MODE: owner_id 欄位不存在，查詢第一筆資料');
-      const result = await supabase
-        .from('garages')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-      garages = result.data;
-      error = result.error;
-    }
 
     if (error) {
       console.error('查詢 garage 失敗:', error);
@@ -76,7 +64,7 @@ async function initGarageData() {
     }
 
     if (!garages) {
-      console.warn('找不到 garage 資料');
+      console.warn('找不到車廠資料，請先註冊車廠');
       noGarageError.value = true;
       isLoadingGarage.value = false;
       return;

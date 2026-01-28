@@ -35,25 +35,13 @@ async function initGarageData() {
       return;
     }
 
-    // 嘗試根據當前用戶查詢 garage (如果有 owner_id 欄位)
-    let { data: garages, error } = await supabase
+    // 根據當前用戶查詢 garage
+    const { data: garages, error } = await supabase
       .from('garages')
       .select('id')
       .eq('owner_id', user.id)
       .limit(1)
       .maybeSingle();
-
-    // 如果 owner_id 欄位不存在，則查詢第一筆資料（開發測試用）
-    if (error && error.message.includes('owner_id')) {
-      console.log('DEV MODE: owner_id 欄位不存在，查詢第一筆資料');
-      const result = await supabase
-        .from('garages')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-      garages = result.data;
-      error = result.error;
-    }
 
     console.log('查詢 garage 結果:', { garages, error });
 
@@ -66,7 +54,7 @@ async function initGarageData() {
 
     if (garages) {
       garageId.value = garages.id;
-      console.log('DEV MODE: 使用車廠 ID =', garageId.value);
+      console.log('使用車廠 ID:', garageId.value);
 
       // 初始化 profile API
       if (garageId.value !== null) {
@@ -77,7 +65,8 @@ async function initGarageData() {
         console.log('Profile loaded:', garageProfile);
       }
     } else {
-      console.log('No garage data found, showing empty form');
+      console.log('找不到車廠資料，請先註冊車廠');
+      noGarageError.value = true;
     }
   } catch (e) {
     console.error('初始化失敗:', e);
@@ -183,10 +172,16 @@ async function handleSelectionPlan() {
       <!-- Error State -->
       <div v-else-if="noGarageError" class="flex h-[50vh] w-full items-center justify-center p-6">
       <div class="max-w-md text-center">
-        <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">找不到任何車廠資料</h2>
+        <h2 class="mb-4 text-2xl font-bold text-[#4A4A45]">尚未註冊車廠</h2>
         <p class="mb-6 text-stone-500">
-          資料庫可能是空的，請先在資料庫建立至少一筆車廠資料。
+          您尚未註冊維修廠，請先完成商家資料填寫。
         </p>
+        <button
+          @click="router.push('/garage/onboarding')"
+          class="rounded-lg bg-[#6B6B5C] px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-[#5a5a4d]"
+        >
+          前往註冊車廠
+        </button>
       </div>
     </div>
 

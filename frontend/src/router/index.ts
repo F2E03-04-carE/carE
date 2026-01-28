@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -125,7 +126,7 @@ const router = createRouter({
       component: () => import('@/views/Garage/SubscriptionSuccess.vue'),
       meta: {
         title: '訂閱成功 - carE',
-        requiresAuth: true,
+        // 不需要 requiresAuth，因為從金流頁面跳回時認證狀態可能還沒恢復
       },
     },
     {
@@ -134,7 +135,7 @@ const router = createRouter({
       component: () => import('@/views/Garage/SubscriptionFailure.vue'),
       meta: {
         title: '訂閱失敗 - carE',
-        requiresAuth: true,
+        // 不需要 requiresAuth，因為從金流頁面跳回時認證狀態可能還沒恢復
       },
     },
     // 維修廠後台頁面（直接路由，透過 navbar 切換）
@@ -175,6 +176,20 @@ const router = createRouter({
       },
     },
   ],
+});
+
+// 路由守衛：檢查需要登入的頁面
+router.beforeEach((to, _from, next) => {
+  const authStore = useAuthStore();
+
+  // 檢查路由是否需要登入
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // 未登入，重定向到首頁
+    // 儲存原本要去的路由，登入後可跳回
+    next({ name: 'Home', query: { redirect: to.fullPath } });
+  } else {
+    next();
+  }
 });
 
 export default router;
