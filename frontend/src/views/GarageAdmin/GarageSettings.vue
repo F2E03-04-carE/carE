@@ -13,6 +13,7 @@ const garageId = ref<number | null>(null);
 const isLoadingGarage = ref(true);
 const noGarageError = ref(false);
 
+
 // Composables
 let profileApi: ReturnType<typeof useGarageProfile>;
 const uploadApi = useImageUpload();
@@ -22,19 +23,21 @@ const garageProfile = reactive<Partial<GarageProfile>>({});
 
   type EnvImageRow = {
   id: number
+  garage_id: number
   image_url: string
   display_order: number | null
 }
 
 const envImages = ref<EnvImageRow[]>([])
 const envUploading = ref(false)
+const coverUploading = ref(false)
 
 async function fetchEnvImages() {
   if (!garageId.value) return;
 
   const { data, error } = await supabase
     .from('garage_environment_images')
-    .select('id, image_url, display_order')
+    .select('id, garage_id, image_url, display_order')
     .eq('garage_id', garageId.value)
     .order('display_order', { ascending: true })
     .order('uploaded_at', { ascending: true });
@@ -105,50 +108,82 @@ async function initGarageData() {
   }
 }
 
-// 封面照片上傳
+// 封面照片上傳（寫入 garages.cover_image_url）
 async function onCoverFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
-  if (!input.files || !input.files[0]) return;
+  if (!input.files?.[0] || !garageId.value) return;
 
   const file = input.files[0];
-  const url = await uploadApi.uploadImage(
-    file,
-    'garage-covers',
-    `${garageId.value}/${Date.now()}-${file.name}`
-  );
+  const gid = String(garageId.value);
 
-  if (url) {
-    garageProfile.cover_image_url = url;
-    await profileApi.updateProfile({ cover_image_url: url });
-  } else {
+  // 避免中文檔名/空白造成 Invalid key：只用副檔名
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${gid}/${Date.now()}.${ext}`;
+
+  // 1) 上傳到 Storage
+  const url = await uploadApi.uploadImage(file, 'garage-covers', path);
+  if (!url) {
     alert('上傳失敗: ' + uploadApi.error.value);
+    return;
   }
+
+  // 2) 更新 garages.cover_image_url（⚠️ 跟你畫面綁定一致）
+ const { error } = await supabase
+  .from('garages')
+  .update({ cover_image_url: url })
+  .eq('id', garageId.value);
+
+  if (error) {
+    console.error('[update cover_image_url] failed:', error);
+    alert('寫入資料庫失敗: ' + error.message);
+    return;
+  }
+
+  // 3) 立刻更新畫面
+  garageProfile.cover_image_url = url;
+
+  input.value = '';
 }
 
-// 環境照片上傳
+
 async function onEnvFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
-  if (!input.files) return;
+  if (!input.files || !garageId.value) return;
 
-  for (const file of input.files) {
-    const url = await uploadApi.uploadImage(
-      file,
-      'garage-environments',
-      `${garageId.value}/${Date.now()}-${file.name}`
-    );
+  for (let i = 0; i < input.files.length; i++) {
+    const file = input.files[i];
+    if (!file) continue;
 
-    if (url) {
-      await profileApi.addEnvironmentImage(url);
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const path = `${garageId.value}/${Date.now()}_${i}.${ext}`;
+
+    // 1) 上傳到 bucket: garage-environments
+    const url = await uploadApi.uploadImage(file, 'garage-environments', path);
+    if (!url) {
+      alert('上傳失敗: ' + uploadApi.error.value);
+      continue;
+    }
+
+    // 2) 寫入 DB: garage_environment_images
+    const { error } = await supabase
+      .from('garage_environment_images')
+      .insert({
+        garage_id: garageId.value,
+        image_url: url,
+        display_order: null,
+      });
+
+    if (error) {
+      console.error('[insert env image] failed:', error);
+      alert('寫入資料庫失敗: ' + error.message);
+      continue;
     }
   }
+
+  await fetchEnvImages();
+  input.value = '';
 }
 
-// 移除環境照片
-async function removeEnvImage(imageUrl: string) {
-  if(confirm('確定要移除這張照片嗎？')) {
-    await profileApi.removeEnvironmentImage(imageUrl);
-  }
-}
 
 // 儲存設定
 async function saveSettings() {
@@ -178,6 +213,23 @@ async function handleSelectionPlan() {
     console.error('導航到方案選擇頁面失敗:', e);
   }
 
+}
+
+async function removeEnvImage(imageId: number) {
+  if (!confirm('確定要刪除此環境照片嗎?')) return;
+
+  const { error } = await supabase
+    .from('garage_environment_images')
+    .delete()
+    .eq('id', imageId);
+
+  if (error) {
+    console.error('刪除環境照片失敗:', error);
+    alert('刪除失敗: ' + error.message);
+    return;
+  }
+
+  await fetchEnvImages();
 }
 </script>
 
@@ -222,7 +274,7 @@ async function handleSelectionPlan() {
           <div>
             <label class="text-sm font-bold text-[#4A4A45]">封面照片 (建議尺寸 1200x600)</label>
             <div v-if="!garageProfile.cover_image_url" class="relative mt-2 h-48 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
-             <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="envUploading" @change="onEnvFileChange"class="absolute inset-0 cursor-pointer opacity-0" />
+            <input type="file" accept="image/jpeg,image/png,image/webp" @change="onCoverFileChange" class="absolute inset-0 cursor-pointer opacity-0"/>
               <div class="flex h-full items-center justify-center">
                 <div class="text-center">
                   <svg class="mx-auto h-12 w-12 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -231,7 +283,7 @@ async function handleSelectionPlan() {
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                   <p class="mt-2 text-sm text-stone-500">點擊上傳封面照片</p>
-                  <p v-if="envUploading" class="mt-1 text-xs text-[#6B6B5C]">照片上傳中，請稍候…</p>
+                  <p v-if="coverUploading" class="mt-1 text-xs text-[#6B6B5C]">照片上傳中，請稍候…</p>
                   <p class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</p>
                 </div>
               </div>
@@ -262,17 +314,25 @@ async function handleSelectionPlan() {
                 </div>
               </div>
             </div>
-            <div v-if="garageProfile.environment_images && garageProfile.environment_images.length > 0" class="mt-4 grid grid-cols-3 gap-4">
-              <div v-for="(img, idx) in garageProfile.environment_images" :key="idx" class="group relative overflow-hidden rounded-lg border border-[#DCD9D3]">
-                <img :src="img" alt="環境照片" class="h-32 w-full object-cover" />
-                <button type="button" @click="removeEnvImage(img)" class="absolute right-1 top-1 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100">
-                  <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
+              <div v-if="envImages.length > 0" class="mt-4 grid grid-cols-3 gap-4">
+                <div
+                  v-for="img in envImages"
+                  :key="img.id"
+                  class="group relative overflow-hidden rounded-lg border border-[#DCD9D3]"
+                >
+                  <img :src="img.image_url" alt="環境照片" class="h-32 w-full object-cover" />
+                  <button
+                    type="button"
+                    @click="removeEnvImage(img.id)"
+                    class="absolute right-1 top-1 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+                  >
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
           </div>
         </div>
 
