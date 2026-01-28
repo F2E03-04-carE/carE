@@ -20,6 +20,33 @@ const uploadApi = useImageUpload();
 // 車廠資料
 const garageProfile = reactive<Partial<GarageProfile>>({});
 
+  type EnvImageRow = {
+  id: number
+  image_url: string
+  display_order: number | null
+}
+
+const envImages = ref<EnvImageRow[]>([])
+const envUploading = ref(false)
+
+async function fetchEnvImages() {
+  if (!garageId.value) return;
+
+  const { data, error } = await supabase
+    .from('garage_environment_images')
+    .select('id, image_url, display_order')
+    .eq('garage_id', garageId.value)
+    .order('display_order', { ascending: true })
+    .order('uploaded_at', { ascending: true });
+
+  if (error) {
+    console.error('抓環境照片失敗:', error);
+    return;
+  }
+
+  envImages.value = data ?? [];
+}
+
 // 初始化資料
 async function initGarageData() {
   try {
@@ -53,21 +80,23 @@ async function initGarageData() {
     }
 
     if (garages) {
-      garageId.value = garages.id;
-      console.log('使用車廠 ID:', garageId.value);
+  garageId.value = garages.id;
+  console.log('使用車廠 ID:', garageId.value);
 
-      // 初始化 profile API
-      if (garageId.value !== null) {
-        profileApi = useGarageProfile(garageId.value);
-        await profileApi.fetchProfile();
-        Object.assign(garageProfile, profileApi.profile);
+  // 初始化 profile API
+  if (garageId.value !== null) {
+    profileApi = useGarageProfile(garageId.value);
+    await profileApi.fetchProfile();
+    Object.assign(garageProfile, profileApi.profile);
 
-        console.log('Profile loaded:', garageProfile);
-      }
-    } else {
-      console.log('找不到車廠資料，請先註冊車廠');
-      noGarageError.value = true;
-    }
+    console.log('Profile loaded:', garageProfile);
+    await fetchEnvImages();
+  }
+} else {
+  console.log('找不到車廠資料，請先註冊車廠');
+  noGarageError.value = true;
+}
+
   } catch (e) {
     console.error('初始化失敗:', e);
     noGarageError.value = true;
@@ -193,7 +222,7 @@ async function handleSelectionPlan() {
           <div>
             <label class="text-sm font-bold text-[#4A4A45]">封面照片 (建議尺寸 1200x600)</label>
             <div v-if="!garageProfile.cover_image_url" class="relative mt-2 h-48 w-full overflow-hidden rounded-xl border-2 border-dashed border-[#DCD9D3] bg-[#F8F7F5] transition-colors hover:border-[#6B6B5C]">
-              <input type="file" accept="image/jpeg,image/png,image/webp" @change="onCoverFileChange" class="absolute inset-0 cursor-pointer opacity-0" />
+             <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="envUploading" @change="onEnvFileChange"class="absolute inset-0 cursor-pointer opacity-0" />
               <div class="flex h-full items-center justify-center">
                 <div class="text-center">
                   <svg class="mx-auto h-12 w-12 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -202,6 +231,7 @@ async function handleSelectionPlan() {
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                   <p class="mt-2 text-sm text-stone-500">點擊上傳封面照片</p>
+                  <p v-if="envUploading" class="mt-1 text-xs text-[#6B6B5C]">照片上傳中，請稍候…</p>
                   <p class="mt-1 text-xs text-stone-400">支援 JPG, PNG, WebP</p>
                 </div>
               </div>
