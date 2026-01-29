@@ -8,6 +8,8 @@ import ServiceSearchFlow from '@/components/service-search/ServiceSearchFlow.vue
 
 const router = useRouter()
 const route = useRoute()
+const isOpenMap = ref(false)
+const isOpenSurroundings = ref(false)
 const showBookingFlow = ref(false)
 const envImages = ref<EnvImage[]>([])
 
@@ -192,6 +194,12 @@ const goBack = () => {
   router.back()
 }
 
+const openGoogleMaps = () => {
+  if (!garage.value) return
+  const url = `https://www.google.com/maps/search/?api=1&query=${garage.value.lat},${garage.value.lng}`
+  window.open(url, '_blank')
+}
+
 onMounted(async () => {
   await fetchGarageDetail()
   if (garage.value) {
@@ -234,12 +242,13 @@ onMounted(async () => {
 
       <!-- 保養廠詳細資料 -->
       <div v-else>
-      <div class="w-full max-w-3xl mx-auto space-y-6">
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <div class="flex-1 w-full min-w-0 space-y-6">
           <section class="p-6 bg-white rounded-2xl shadow-sm">
             <div class="flex items-start justify-between">
               <div class="flex items-end gap-3">
                 <h1 class="text-xl font-semibold text-gray-900">{{ garage.name }}</h1>
-                <span class="text-xs text-gray-500 mb-1">{{ garage.address }}</span>
+                <span class="text-xs text-gray-500 mb-1">{{ garage.city }}{{ garage.district }} {{ garage.address }}</span>
               </div>
               <div class="text-yellow-400">{{ ratingStars }}</div>
             </div>
@@ -302,6 +311,55 @@ onMounted(async () => {
             >
               立即預約
             </button>
+            <div class="mt-6 space-y-4 lg:hidden">
+              <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <button
+                  @click="isOpenMap = !isOpenMap"
+                  class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <span class="font-medium text-gray-800">維修廠地圖地點</span>
+                  <span class="transform transition-transform duration-200" :class="{ 'rotate-180': isOpenMap }">▼</span>
+                </button>
+                <div v-show="isOpenMap" class="p-4 bg-white border-t border-gray-200">
+                  <div class="w-full aspect-square bg-gray-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                    <span class="text-4xl mb-2">🗺️</span>
+                    <span class="text-sm">Google Map 載入中...</span>
+                  </div>
+                  <div class="mt-4 text-sm text-gray-500">
+                    <p>地址：{{ garage.address }}</p>
+                  </div>
+                  <button
+                    @click="openGoogleMaps"
+                    class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
+                  >
+                    開啟 Google Maps 導航
+                  </button>
+                </div>
+              </div>
+              <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <button
+                  @click="isOpenSurroundings = !isOpenSurroundings"
+                  class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <span class="font-medium text-gray-800">周邊休息地點</span>
+                  <span class="transform transition-transform duration-200" :class="{ 'rotate-180': isOpenSurroundings }">▼</span>
+                </button>
+                <div v-show="isOpenSurroundings" class="p-4 bg-white border-t border-gray-200">
+                  <div class="space-y-4">
+                    <div class="flex gap-3 p-3 border border-gray-100 rounded-xl transition hover:bg-gray-50">
+                      <div class="flex items-center justify-center flex-shrink-0 w-10 h-10 text-xl bg-[#FAF8F5] rounded-lg">☕</div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                          <h4 class="text-sm font-medium text-gray-900 truncate">路易莎咖啡 咪咪店</h4>
+                          <span class="px-1.5 py-0.5 text-[10px] text-[#6B6B5C] bg-[#E8E3DB] rounded">步行 3 分鐘</span>
+                        </div>
+                        <p class="text-xs text-gray-600 line-clamp-2">提供免費 WiFi 與插座，不限時。</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
 
           <!-- 評價區塊（假評論僅供顯示，唯讀） -->
@@ -349,6 +407,27 @@ onMounted(async () => {
               </div>
             </div>
           </section>
+        </div>
+
+        <!-- 側邊欄 (電腦版) -->
+        <div class="w-full lg:w-[320px] flex-shrink-0 hidden lg:block">
+          <div class="sticky top-8 space-y-6">
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+              <h3 class="mb-4 font-medium text-gray-800">維修廠地圖地點</h3>
+              <div class="w-full aspect-square bg-gray-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                <span class="text-4xl mb-2">🗺️</span>
+                <span class="text-sm">Google Map 載入中...</span>
+              </div>
+              <p class="mt-4 text-sm text-gray-500">地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
+              <button
+                @click="openGoogleMaps"
+                class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
+              >
+                開啟 Google Maps 導航
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       </div>
       <!-- End of v-else garage data -->
@@ -359,7 +438,7 @@ onMounted(async () => {
       <ServiceSearchFlow
         :garage-id="garage.id"
         :garage-name="garage.name"
-        :garage-address="garage.address"
+        :garage-address="`${garage.city}${garage.district} ${garage.address}`"
         @back="showBookingFlow = false"
       />
     </div>
