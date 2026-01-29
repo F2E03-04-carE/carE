@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useUserStore } from '@/stores/user';
 import { useRouter, useRoute } from 'vue-router';
 import { supabase } from '@/lib/supabase';
 
 const authStore = useAuthStore();
+const userStore = useUserStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -176,6 +178,21 @@ const handleSave = async () => {
 
   saveSuccess.value = true;
   IsEditing.value = false;
+
+  // 更新 userStore，讓 navbar 立刻顯示新姓名／暱稱
+  const name = Name.value.trim();
+  const nickname = Nickname.value?.trim() || undefined;
+  if (userStore.currentUser) {
+    userStore.updateProfile({ name, nickname });
+  } else if (authStore.user) {
+    userStore.login({
+      id: authStore.user.id,
+      name,
+      email: authStore.user.email ?? '',
+      role: userStore.userRole !== 'guest' ? userStore.userRole : 'member',
+      nickname,
+    });
+  }
 
   if (isFirstLogin.value) {
     setTimeout(() => {

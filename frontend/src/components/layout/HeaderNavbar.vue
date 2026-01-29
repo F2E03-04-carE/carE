@@ -27,20 +27,14 @@ const currentUserRole = computed(() => {
   return props.userRole;
 });
 
-// 取得用戶顯示名稱（優先顯示 nickname，否則顯示 "用戶"）
+// 取得用戶顯示名稱：userStore（profiles）優先，再 fallback 到 auth user_metadata，否則 "用戶"
 const userDisplayName = computed(() => {
+  const u = userStore.currentUser;
+  const fromProfile = (u?.nickname?.trim() || u?.name?.trim()) ?? '';
+  if (fromProfile) return fromProfile;
   if (authStore.user) {
-    const nickname = authStore.user.user_metadata?.nickname;
-    // 檢查 nickname 是否存在且不是空字串
-    if (nickname && nickname.trim() !== '') {
-      return nickname;
-    }
-    return '用戶';
-  }
-  // 對於 userStore.currentUser 也使用相同邏輯
-  const currentNickname = userStore.currentUser?.nickname;
-  if (currentNickname && currentNickname.trim() !== '') {
-    return currentNickname;
+    const meta = authStore.user.user_metadata?.nickname?.trim() || authStore.user.user_metadata?.name?.trim();
+    if (meta) return meta;
   }
   return '用戶';
 });
@@ -131,6 +125,7 @@ const menuConfig = {
   garage: {
     title: '維修廠管理',
     items: [
+      { label: '會員中心', href: '/member/profile' },
       { label: '今日總覽', href: '/garage/admin/dashboard' },
       { label: '預約排程', href: '/garage/admin/appointments' },
       { label: '完工維修紀錄', href: '/garage/admin/records' },
