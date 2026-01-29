@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
+import { supabase } from '@/lib/supabase';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -11,30 +12,57 @@ if (!authStore.isAuthenticated) {
   router.push('/');
 }
 
-// ==================== 個人資料（使用假資料） ====================
+// ==================== 個人資料（從 Supabase profiles 載入） ====================
 const user = computed(() => authStore.user);
-const Email = computed(() => user.value?.email || 'cat@example.com');
-const Phone = ref('0912-345-678');
-const Name = ref('王貓貓');
-const Nickname = ref('貓貓');
-const LicensePlate = ref('ABC-1234');
+const Email = computed(() => user.value?.email || '');
+const Phone = ref('');
+const Name = ref('');
+const Nickname = ref('');
+const LicensePlate = ref('');
 
 const IsEditing = ref(false);
 const isSaving = ref(false);
 const saveError = ref('');
 const saveSuccess = ref(false);
 const phoneError = ref('');
-const isLoadingProfile = ref(false);
+const isLoadingProfile = ref(true);
 
 const isFirstLogin = computed(() => route.query.firstLogin === 'true');
 
-onMounted(() => {
-  // 模擬載入完成
-  isLoadingProfile.value = false;
-  
-  if (isFirstLogin.value && !Phone.value) {
-    IsEditing.value = true;
+async function loadProfile() {
+  const uid = authStore.user?.id;
+  if (!uid) {
+    isLoadingProfile.value = false;
+    return;
   }
+  isLoadingProfile.value = true;
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', uid)
+      .maybeSingle();
+
+    if (error) {
+      console.error('載入個人資料失敗:', error);
+      return;
+    }
+    if (profile) {
+      Name.value = profile.name ?? '';
+      Nickname.value = profile.nickname ?? '';
+      Phone.value = profile.phone ?? '';
+      LicensePlate.value = profile.license_plate ?? '';
+    }
+    if (isFirstLogin.value && !Phone.value) {
+      IsEditing.value = true;
+    }
+  } finally {
+    isLoadingProfile.value = false;
+  }
+}
+
+onMounted(() => {
+  loadProfile();
 });
 
 const ToggleEditing = (): void => {
@@ -113,14 +141,41 @@ const handleSave = async () => {
   Phone.value = cleanPhone;
 
   isSaving.value = true;
+  saveError.value = '';
 
-  // 模擬儲存延遲
-  await new Promise(resolve => setTimeout(resolve, 500));
+  const uid = authStore.user?.id;
+  if (!uid) {
+    saveError.value = '尚未登入，無法儲存';
+    isSaving.value = false;
+    return;
+  }
 
-  // 模擬儲存成功（目前不連接資料庫）
+  const payload = {
+    name: Name.value.trim(),
+    nickname: Nickname.value?.trim() || null,
+    phone: Phone.value,
+    license_plate: LicensePlate.value?.trim() || null,
+  };
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('user_id')
+    .eq('user_id', uid)
+    .maybeSingle();
+
+  const { error } = existing
+    ? await supabase.from('profiles').update(payload).eq('user_id', uid)
+    : await supabase.from('profiles').insert({ user_id: uid, ...payload });
+
+  isSaving.value = false;
+
+  if (error) {
+    saveError.value = '儲存失敗，請稍後再試';
+    console.error('更新個人資料失敗:', error);
+    return;
+  }
+
   saveSuccess.value = true;
   IsEditing.value = false;
-  isSaving.value = false;
 
   if (isFirstLogin.value) {
     setTimeout(() => {
