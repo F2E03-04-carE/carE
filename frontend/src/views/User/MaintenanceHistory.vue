@@ -37,7 +37,7 @@ const mockHistoryAppointments = ref<Appointment[]>([
     serviceType: '定期保養',
     appointmentDate: '2026/01/18',
     appointmentTime: '09:30',
-    status: 'completed',
+    status: 'in_progress',
     shopName: '貓貓汽車保養廠',
     shopAddress: '台北市大安區忠孝東路四段100號',
     notes: '自備機油',
@@ -60,8 +60,8 @@ const mockHistoryAppointments = ref<Appointment[]>([
   },
   {
     id: 'APT-2026-003',
-    carModel: 'Tesla Model 3',
-    licensePlate: 'EAA-9999',
+    carModel: 'Toyota Camry',
+    licensePlate: 'ABC-1234',
     serviceType: '輪胎更換',
     appointmentDate: '2026/01/15',
     appointmentTime: '14:00',
@@ -214,7 +214,7 @@ const FormatCurrency = (val: number) =>
         >
           <!-- 左側狀態邊條 -->
           <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="StatusMap[apt.status].border"></div>
-          
+
           <!-- 主要資訊 -->
           <div class="flex-1 pl-4">
             <div class="flex flex-wrap items-center gap-3">
@@ -291,8 +291,8 @@ const FormatCurrency = (val: number) =>
     </main>
 
     <!-- 報價單彈窗 -->
-    <div 
-      v-if="showQuoteModal && selectedAppointment" 
+    <div
+      v-if="showQuoteModal && selectedAppointment"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       @click.self="closeQuoteModal"
     >
@@ -360,7 +360,7 @@ const FormatCurrency = (val: number) =>
         <!-- Footer -->
         <div class="flex shrink-0 items-center justify-between border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
           <!-- 左側：下載報價單連結 -->
-          <a 
+          <a
             :href="selectedAppointment.quotationImage || '#'"
             target="_blank"
             download
@@ -373,10 +373,10 @@ const FormatCurrency = (val: number) =>
             </svg>
             下載報價單
           </a>
-          
+
           <!-- 右側：關閉按鈕 -->
-          <button 
-            @click="closeQuoteModal" 
+          <button
+            @click="closeQuoteModal"
             class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95"
           >
             關閉

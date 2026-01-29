@@ -31,29 +31,27 @@ type Booking = {
 const appointments = ref<Booking[]>([
   {
     id: 1,
-    customer_name: '陳阿龍',
-    customer_phone: '0912-345-678',
-    car_model: 'Toyota Camry',
-    license_plate: 'ABC-1234',
+    customer_name: 'Wei Yun',
+    customer_phone: '0922-355-358',
+    car_model: 'BMW X2',
+    license_plate: 'NDT-199',
     service_type: '定期保養',
     scheduled_date: '2026-01-31',
     scheduled_time: '10:00',
     status: 'servicing',
-    estimated_cost: 3500,
     notes: '自備機油',
   },
   {
     id: 2,
-    customer_name: '陳阿龍',
-    customer_phone: '0912-345-678',
-    car_model: 'Honda CR-V',
-    license_plate: 'KLM-7788',
-    service_type: '煞車異音檢查',
+    customer_name: 'Wei Yun',
+    customer_phone: '0922-355-358',
+    car_model: 'BMW X2',
+    license_plate: 'NDT-199',
+    service_type: '引擎異音檢查',
     scheduled_date: '2026-01-31',
     scheduled_time: '10:00',
     status: 'confirmed',
-    estimated_cost: 1200,
-    notes: '右前輪有異音',
+    notes: '右前輪也有異音',
   },
   {
     id: 3,
@@ -195,7 +193,7 @@ const formatTime = (timeStr?: string) => {
         >
           <!-- 左側狀態邊條 -->
           <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="getStatusBorderClass(apt.status)"></div>
-          
+
           <!-- 主要資訊 -->
           <div class="flex-1 pl-4">
             <div class="flex flex-wrap items-center gap-3">
