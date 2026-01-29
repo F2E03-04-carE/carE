@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
@@ -81,11 +81,30 @@ const appointments = ref<Booking[]>([
   },
 ]);
 
+// 只顯示已確認的預約
+const confirmedAppointments = computed(() =>
+  appointments.value.filter((apt) => apt.status === 'confirmed')
+);
+
 const loading = ref(false);
 const error = ref('');
 const showCancelModal = ref(false);
 const appointmentToCancel = ref<Booking | null>(null);
 const cancelling = ref(false);
+
+// 查看詳情彈窗（與維修歷史一致）
+const showDetailModal = ref(false);
+const selectedBooking = ref<Booking | null>(null);
+
+function openDetailModal(apt: Booking) {
+  selectedBooking.value = apt;
+  showDetailModal.value = true;
+}
+
+function closeDetailModal() {
+  showDetailModal.value = false;
+  selectedBooking.value = null;
+}
 
 const statusText = (status: string) => {
   const statusMap: Record<string, string> = {
@@ -190,7 +209,7 @@ const formatTime = (timeStr?: string) => {
       </div>
 
       <!-- 無預約 -->
-      <div v-else-if="appointments.length === 0" class="bg-white rounded-2xl border border-[#e8e4dc] p-12 text-center">
+      <div v-else-if="confirmedAppointments.length === 0" class="bg-white rounded-2xl border border-[#e8e4dc] p-12 text-center">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-[#f9f7f4] rounded-full mb-4">
           <span class="material-symbols-outlined text-[#6B6B5C] text-3xl">event_busy</span>
         </div>
@@ -201,7 +220,7 @@ const formatTime = (timeStr?: string) => {
       <!-- 預約列表 -->
       <div v-else class="space-y-4">
         <div
-          v-for="apt in appointments"
+          v-for="apt in confirmedAppointments"
           :key="apt.id"
           class="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-[#DCD9D3] bg-white p-6 shadow-sm transition hover:shadow-md lg:flex-row lg:items-center"
         >
@@ -254,8 +273,14 @@ const formatTime = (timeStr?: string) => {
             </div>
           </div>
 
-          <!-- 操作按鈕 -->
+          <!-- 操作按鈕：查看詳情 + 取消預約（與維修歷史一樣有查看詳情） -->
           <div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:border-0 lg:pt-0">
+            <button
+              @click="openDetailModal(apt)"
+              class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-28"
+            >
+              查看詳情
+            </button>
             <button
               v-if="canCancel(apt)"
               @click="confirmCancel(apt)"
@@ -267,6 +292,99 @@ const formatTime = (timeStr?: string) => {
         </div>
       </div>
     </main>
+
+    <!-- 預約詳情彈窗（與維修歷史詳情樣式一致） -->
+    <div
+      v-if="showDetailModal && selectedBooking"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      @click.self="closeDetailModal"
+    >
+      <div class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#FBFAF7] shadow-2xl">
+        <!-- Header -->
+        <div class="flex shrink-0 items-center justify-between border-b border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+          <h3 class="text-lg font-bold text-[#4A4A45]">預約詳情</h3>
+          <button @click="closeDetailModal" class="rounded-full p-1 text-stone-400 hover:bg-black/5 hover:text-stone-600">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 內容 -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          <!-- 預約資訊 -->
+          <div class="rounded-xl bg-[#F8F7F5] p-4 text-sm border border-[#E6E6DF]">
+            <div class="grid grid-cols-2 gap-y-3">
+              <div>
+                <span class="block text-xs text-stone-400">預約編號</span>
+                <span class="font-mono font-medium text-[#4A4A45]">APT-2026-00{{ selectedBooking.id }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-stone-400">預約狀態</span>
+                <span class="font-medium text-[#4A4A45]">{{ statusText(selectedBooking.status) }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-stone-400">車型</span>
+                <span class="text-stone-600">{{ selectedBooking.car_model }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-stone-400">車牌</span>
+                <span class="text-stone-600">{{ selectedBooking.license_plate }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-stone-400">服務類型</span>
+                <span class="text-stone-600">{{ selectedBooking.service_type }}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-stone-400">聯絡電話</span>
+                <span class="text-stone-600">{{ selectedBooking.customer_phone }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 預約日期時間 -->
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-[#4A4A45]">預約日期</label>
+            <div class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] px-4 py-2.5 text-sm text-[#4A4A45]">
+              {{ formatDate(selectedBooking.scheduled_date) }}
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-[#4A4A45]">預約時間</label>
+            <div class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] px-4 py-2.5 text-sm text-[#4A4A45]">
+              {{ formatTime(selectedBooking.scheduled_time) }}
+            </div>
+          </div>
+
+          <!-- 預估費用 -->
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-[#4A4A45]">預估費用</label>
+            <div class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] px-4 py-2.5 text-sm text-[#4A4A45]">
+              {{ formatCurrency(selectedBooking.estimated_cost) }}
+            </div>
+          </div>
+
+          <!-- 備註事項 -->
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-[#4A4A45]">備註事項</label>
+            <div class="w-full rounded-lg border border-[#DCD9D3] bg-[#F8F7F5] px-4 py-2.5 text-sm text-[#4A4A45] min-h-[60px]">
+              {{ selectedBooking.notes || '無' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex shrink-0 items-center justify-end border-t border-[#E6E6DF] bg-[#F2F1EC] px-6 py-4">
+          <button
+            @click="closeDetailModal"
+            class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95"
+          >
+            關閉
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- 取消預約確認 Modal -->
     <div
