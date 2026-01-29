@@ -132,6 +132,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     isAuthenticated,
     initialize,
+    syncUserStore,
     signInWithMagicLink,
     signInWithGoogle,
     signOut,
