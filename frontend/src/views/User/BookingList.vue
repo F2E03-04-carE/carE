@@ -31,51 +31,51 @@ type Booking = {
 const appointments = ref<Booking[]>([
   {
     id: 1,
-    customer_name: '王貓貓',
+    customer_name: '陳阿龍',
     customer_phone: '0912-345-678',
     car_model: 'Toyota Camry',
     license_plate: 'ABC-1234',
     service_type: '定期保養',
-    scheduled_date: '2026-01-18',
-    scheduled_time: '09:30',
+    scheduled_date: '2026-01-31',
+    scheduled_time: '10:00',
     status: 'servicing',
     estimated_cost: 3500,
     notes: '自備機油',
   },
   {
     id: 2,
-    customer_name: '王貓貓',
+    customer_name: '陳阿龍',
     customer_phone: '0912-345-678',
     car_model: 'Honda CR-V',
     license_plate: 'KLM-7788',
     service_type: '煞車異音檢查',
-    scheduled_date: '2026-01-18',
-    scheduled_time: '10:30',
+    scheduled_date: '2026-01-31',
+    scheduled_time: '10:00',
     status: 'confirmed',
     estimated_cost: 1200,
     notes: '右前輪有異音',
   },
   {
     id: 3,
-    customer_name: '王貓貓',
+    customer_name: '陳阿龍',
     customer_phone: '0912-345-678',
     car_model: 'Tesla Model 3',
     license_plate: 'EAA-9999',
     service_type: '輪胎更換',
-    scheduled_date: '2026-01-18',
-    scheduled_time: '14:00',
+    scheduled_date: '2026-01-31',
+    scheduled_time: '10:00',
     status: 'pending',
     estimated_cost: 18000,
   },
   {
     id: 4,
-    customer_name: '王貓貓',
+    customer_name: '陳阿龍',
     customer_phone: '0912-345-678',
     car_model: 'Mini Cooper',
     license_plate: 'MIN-5678',
     service_type: '冷氣健檢',
-    scheduled_date: '2026-01-19',
-    scheduled_time: '11:00',
+    scheduled_date: '2026-01-31',
+    scheduled_time: '10:00',
     status: 'pending',
     estimated_cost: 800,
   },
@@ -88,9 +88,6 @@ const confirmedAppointments = computed(() =>
 
 const loading = ref(false);
 const error = ref('');
-const showCancelModal = ref(false);
-const appointmentToCancel = ref<Booking | null>(null);
-const cancelling = ref(false);
 
 // 查看詳情彈窗（與維修歷史一致）
 const showDetailModal = ref(false);
@@ -142,34 +139,6 @@ const getStatusBorderClass = (status: string) => {
 const formatCurrency = (val?: number) => {
   if (!val) return 'NT$0';
   return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(val);
-};
-
-const canCancel = (apt: Booking) => {
-  return apt.status === 'pending' || apt.status === 'confirmed';
-};
-
-const confirmCancel = (apt: Booking) => {
-  appointmentToCancel.value = apt;
-  showCancelModal.value = true;
-};
-
-const handleCancel = async () => {
-  if (!appointmentToCancel.value) return;
-
-  cancelling.value = true;
-  
-  // 模擬取消延遲
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // 更新本地假資料
-  const index = appointments.value.findIndex(a => a.id === appointmentToCancel.value?.id);
-  if (index !== -1 && appointments.value[index]) {
-    appointments.value[index].status = 'cancelled';
-  }
-  
-  showCancelModal.value = false;
-  appointmentToCancel.value = null;
-  cancelling.value = false;
 };
 
 const formatDate = (dateStr?: string) => {
@@ -273,20 +242,13 @@ const formatTime = (timeStr?: string) => {
             </div>
           </div>
 
-          <!-- 操作按鈕：查看詳情 + 取消預約（與維修歷史一樣有查看詳情） -->
+          <!-- 操作按鈕：查看詳情 -->
           <div class="mt-4 flex w-full gap-2 border-t border-[#F0EEE9] pt-4 lg:mt-0 lg:w-auto lg:border-0 lg:pt-0">
             <button
               @click="openDetailModal(apt)"
               class="flex-1 rounded border border-[#DCD9D3] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-[#F8F7F5] lg:w-28"
             >
               查看詳情
-            </button>
-            <button
-              v-if="canCancel(apt)"
-              @click="confirmCancel(apt)"
-              class="flex-1 rounded border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 lg:w-28"
-            >
-              取消預約
             </button>
           </div>
         </div>
@@ -381,48 +343,6 @@ const formatTime = (timeStr?: string) => {
             class="rounded-lg bg-[#6B6B5C] px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-[#6B6B5C]/20 transition hover:bg-[#5a5a4d] active:scale-95"
           >
             關閉
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 取消預約確認 Modal -->
-    <div
-      v-if="showCancelModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      @click.self="showCancelModal = false"
-    >
-      <div class="bg-white rounded-2xl p-8 max-w-md w-full">
-        <h3 class="text-xl font-bold text-[#4a4540] mb-4">確認取消預約</h3>
-        <p class="text-[#6b6460] mb-6">
-          您確定要取消這個預約嗎？此操作無法復原。
-        </p>
-
-        <div v-if="appointmentToCancel" class="bg-[#f9f7f4] rounded-xl p-4 mb-6">
-          <p class="text-sm text-[#4a4540] mb-2">
-            <span class="font-semibold">預約日期：</span>
-            {{ formatDate(appointmentToCancel.scheduled_date) }}
-          </p>
-          <p class="text-sm text-[#4a4540]">
-            <span class="font-semibold">預約時間：</span>
-            {{ formatTime(appointmentToCancel.scheduled_time) }}
-          </p>
-        </div>
-
-        <div class="flex gap-3">
-          <button
-            @click="showCancelModal = false"
-            :disabled="cancelling"
-            class="flex-1 px-6 py-3 border border-[#e8e4dc] text-[#4a4540] rounded-xl font-semibold hover:bg-[#f9f7f4] transition disabled:opacity-50"
-          >
-            返回
-          </button>
-          <button
-            @click="handleCancel"
-            :disabled="cancelling"
-            class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition disabled:opacity-50"
-          >
-            {{ cancelling ? '取消中...' : '確認取消' }}
           </button>
         </div>
       </div>
