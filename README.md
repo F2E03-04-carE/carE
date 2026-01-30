@@ -21,10 +21,6 @@ carE 是一個汽車維修服務媒合平台，提供搜尋、篩選、預約維
 - Frontend Demo：<https://care-f.zeabur.app>  
 - Backend API：<https://care-backend.zeabur.app>  
 
-> 測試帳號 
-- 車主帳號：`<weiyunuma@gmail.com>` 
-- 維修廠帳號：`<chickundersea@gmail.com>` 
-
 ---
 
 ## 網站畫面（待補）
@@ -37,17 +33,18 @@ carE 是一個汽車維修服務媒合平台，提供搜尋、篩選、預約維
 
 <details>
   <summary>搜尋結果列表</summary>
-  <img src="./docs/images/search.png" alt="搜尋結果畫面" width="100%"/>
+  <img width="1343" height="640" alt="截圖 2026-01-28 中午12 09 28" src="https://github.com/user-attachments/assets/cd54c689-0653-4617-867d-e48e433b166d" />
+"/>
 </details>
 
 <details>
-  <summary>維修廠詳細頁</summary>
-  <img src="./docs/images/garage.png" alt="維修廠詳細頁" width="100%"/>
+  <summary>結帳頁面</summary>
+  <img width="1430" height="699" alt="截圖 2026-01-28 上午11 56 14" src="https://github.com/user-attachments/assets/94cb6b32-24ce-4ae1-9a22-e0aa008fe913" />
 </details>
 
 <details>
-  <summary>後台管理</summary>
-  <img src="./docs/images/dashboard.png" alt="後台畫面" width="100%"/>
+  <summary>後台預約管理</summary>
+  <img width="1298" height="575" alt="截圖 2026-01-30 下午5 29 17" src="https://github.com/user-attachments/assets/9636b098-9f6b-40b0-b249-d4b8abcf4c9e" />
 </details>
 
 ---
