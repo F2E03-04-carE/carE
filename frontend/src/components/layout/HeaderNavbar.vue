@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useAuthStore } from '@/stores/auth';
 import LoginMode from '@/views/Auth/LoginMode.vue';
@@ -14,8 +14,18 @@ const props = withDefaults(defineProps<HeaderNavbarProps>(), {
 });
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+
+// 路由變更時關閉 dropdown/手機選單，避免導航後狀態殘留導致登出按鈕被遮擋或失效
+watch(
+  () => route.path,
+  () => {
+    closeDropdown();
+    closeMobileMenu();
+  },
+);
 
 const currentUserRole = computed(() => {
   if (authStore.isAuthenticated) {
@@ -27,7 +37,6 @@ const currentUserRole = computed(() => {
   return props.userRole;
 });
 
-// 取得用戶顯示名稱：userStore（profiles）優先，再 fallback 到 auth user_metadata，否則 "用戶"
 const userDisplayName = computed(() => {
   const u = userStore.currentUser;
   const fromProfile = (u?.nickname?.trim() || u?.name?.trim()) ?? '';
@@ -94,13 +103,11 @@ const handleLogout = async () => {
   }
 };
 
-// 導航到「加入維修廠」頁面
 const handleGoToJoinGarage = () => {
   closeMobileMenu();
   router.push('/join-garage');
 };
 
-// 導航到指定頁面
 const handleNavigate = (path: string) => {
   closeDropdown();
   closeMobileMenu();
@@ -144,7 +151,7 @@ const currentMenu = computed(() => {
 </script>
 
 <template>
-  <header class="fixed top-0 left-0 w-full right-0 z-50 bg-white shadow-md">
+  <header class="fixed top-0 left-0 w-full right-0 z-[100] bg-white shadow-md">
     <nav class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-[60px] sm:h-[70px]">
         <a href="/" class="flex items-center gap-2 shrink-0">
@@ -154,7 +161,6 @@ const currentMenu = computed(() => {
             class="h-10 sm:h-12 w-auto object-contain"
           />
         </a>
-
         <div class="hidden md:flex items-center gap-2 lg:gap-3 font-extrabold">
           <button
             @click="handleNavigate('/')"
@@ -162,7 +168,6 @@ const currentMenu = computed(() => {
           >
             尋找維修廠
           </button>
-
           <template v-if="currentUserRole === 'guest'">
             <button
               @click="handleGoToJoinGarage"
@@ -215,6 +220,7 @@ const currentMenu = computed(() => {
               </div>
             </div>
             <button
+              type="button"
               @click="handleLogout"
               :class="[
                 baseButtonClass,
@@ -225,8 +231,8 @@ const currentMenu = computed(() => {
             </button>
           </template>
         </div>
-
         <button
+          type="button"
           @click="toggleMobileMenu"
           class="md:hidden p-2 text-[#6b6b5a] hover:bg-[#f5f4f0] rounded-lg transition-colors"
           aria-label="開啟選單"
@@ -236,7 +242,6 @@ const currentMenu = computed(() => {
           </span>
         </button>
       </div>
-
       <div
         v-if="isMobileMenuOpen"
         class="md:hidden pb-4 flex flex-col gap-3 font-extrabold border-t border-[#e0e0db] pt-4"
@@ -262,18 +267,14 @@ const currentMenu = computed(() => {
             登入/註冊
           </button>
         </template>
-
         <template v-else-if="currentMenu">
           <div class="flex flex-col gap-2">
-            <!-- User Name Header (Static) -->
             <div
               class="w-full py-3 text-[16px] text-[#6b6b5a] border-b border-[#e0e0db] mb-2 font-bold flex items-center justify-center gap-2"
             >
               <i class="fa-solid fa-user text-[14px]"></i>
               <span class="max-w-[200px] truncate">{{ userDisplayName }}</span>
             </div>
-
-            <!-- Menu Items -->
             <button
               v-for="item in currentMenu.items"
               :key="item.href"
@@ -282,9 +283,8 @@ const currentMenu = computed(() => {
             >
               {{ item.label }}
             </button>
-
-            <!-- Logout Button -->
             <button
+              type="button"
               @click="handleLogout"
               class="w-full py-3 text-[16px] text-red-600 hover:bg-red-50 rounded-lg transition-colors text-center cursor-pointer mt-2"
             >
@@ -294,7 +294,6 @@ const currentMenu = computed(() => {
         </template>
       </div>
     </nav>
-
     <LoginMode
       v-if="isShowLoginModal"
       @close="closeLoginModal"
