@@ -1,3 +1,5 @@
+<div align="center">
+    
 # carE 汽車維修媒合平台  
 ![Vue](https://img.shields.io/badge/%20-Vue.js-34495E?logo=vue.js&logoColor=41B883)
 ![TypeScript](https://img.shields.io/badge/%20-TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
@@ -14,16 +16,17 @@
 carE 是一個汽車維修服務媒合平台，提供搜尋、篩選、預約維修服務的功能。<br><br>
 本專案為團體實作專案，聚焦於「汽車維修資訊透明化」，透過搜尋、比較、預約與進度追蹤，解決車主在維修過程中資訊不對稱與不確定感的問題，並同時提供維修廠有效曝光與管理工具。
 </h3>
----
+</div>
+
+<hr>
 
 ## 網站 Demo
 
 - Frontend Demo：<https://care-f.zeabur.app>  
 - Backend API：<https://care-backend.zeabur.app>  
 
----
 
-## 網站畫面（待補）
+## 網站畫面
 
 <details>
   <summary>首頁 / 搜尋</summary>
@@ -90,15 +93,15 @@ carE 是一個串連 **車主** 與 **汽車維修廠** 的媒合平台，核心
 - [Express](https://expressjs.com/)
 
 ### 資料庫 / 服務
-- Supabase（PostgreSQL）
+- [Supabase](https://supabase.com/)
 
 ### 部署與工具
-- Zeabur（部署）
-- Postman（API 測試）
+- [Zeabur](https://zeabur.com/zh-TW/)（部署）
+- [Postman](https://www.postman.com/)（API 測試）
 
 ### 測試工具
-- Vitest
-- StoryBook
+- [Vitest](https://vitest.dev/)
+- [StoryBook](https://storybook.js.org/)
 
 ---
 
@@ -115,7 +118,6 @@ carE 是一個串連 **車主** 與 **汽車維修廠** 的媒合平台，核心
 - 瀏覽維修廠詳細資訊
 - 會員可進行線上預約
 - 後台查看預約與維修狀態
-- 完修後評價（確保實際消費）
 
 ### 維修廠功能
 - 刊登維修廠（註冊 / 登入）
