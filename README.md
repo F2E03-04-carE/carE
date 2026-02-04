@@ -159,4 +159,27 @@ npm run dev
 cd ../backend
 npm install
 npm run dev
+```
 
+## 團隊組成
+<div align="center">    
+<table>
+<tr>
+<td align="center" width="33%">
+<img src="https://avatars.githubusercontent.com/u/236944521?v=4" width="100px;" style="border-radius: 50%;"/>
+<br>
+<a href="https://github.com/chickundersea">
+<img src="https://img.shields.io/badge/github-chickundersea-blue?logo=github"/>
+</a>
+<br><b>鄭唯云<br>
+</td>
+<td align="center" width="33%">
+<img src="https://avatars.githubusercontent.com/u/215087267?v=4" width="100px;" style="border-radius: 50%;"/>
+<br>
+<a href="https://github.com/choco-luo">
+<img src="https://img.shields.io/badge/github-choco--luo-blue?logo=github"/>
+</a>
+<br><b>Choco Luo<br>
+</td>
+</table>
+</div>
