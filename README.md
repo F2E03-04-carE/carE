@@ -12,6 +12,7 @@
     alt="Made with Supabase"
   /><a/>
 
+<img width="417" height="251" alt="carE_logo_green" src="https://github.com/user-attachments/assets/8a2ed01e-5f70-4504-b56c-d0d266c6d4b6" />
 <h3>
 carE 是一個汽車維修服務媒合平台，提供搜尋、篩選、預約維修服務的功能。<br><br>
 本專案為團體實作專案，聚焦於「汽車維修資訊透明化」，透過搜尋、比較、預約與進度追蹤，解決車主在維修過程中資訊不對稱與不確定感的問題，並同時提供維修廠有效曝光與管理工具。
