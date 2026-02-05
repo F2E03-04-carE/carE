@@ -180,7 +180,7 @@ npm run dev
 <a href="https://github.com/choco-luo">
 <img src="https://img.shields.io/badge/github-choco--luo-blue?logo=github"/>
 </a>
-<br><b>Choco Luo<br>
+<br><b>劉祐誠<br>
 </td>
 </table>
 </div>
