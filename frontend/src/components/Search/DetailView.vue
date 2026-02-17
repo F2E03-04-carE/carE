@@ -194,6 +194,13 @@ const goBack = () => {
   router.back()
 }
 
+const fullAddress = computed(() => garage.value?.address ?? '')
+
+const mapEmbedUrl = computed(() => {
+  if (!fullAddress.value) return ''
+  return `https://www.google.com/maps?q=${encodeURIComponent(fullAddress.value)}&output=embed`
+})
+
 const openGoogleMaps = () => {
   if (!garage.value) return
   const url = `https://www.google.com/maps/search/?api=1&query=${garage.value.lat},${garage.value.lng}`
