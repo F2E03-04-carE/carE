@@ -248,7 +248,7 @@ onMounted(async () => {
             <div class="flex items-start justify-between">
               <div class="flex items-end gap-3">
                 <h1 class="text-xl font-semibold text-gray-900">{{ garage.name }}</h1>
-                <span class="text-xs text-gray-500 mb-1">{{ garage.city }}{{ garage.district }} {{ garage.address }}</span>
+                <span class="text-xs text-gray-500 mb-1">{{ garage.address }}</span>
               </div>
               <div class="text-yellow-400">{{ ratingStars }}</div>
             </div>
@@ -418,7 +418,7 @@ onMounted(async () => {
                 <span class="text-4xl mb-2">🗺️</span>
                 <span class="text-sm">Google Map 載入中...</span>
               </div>
-              <p class="mt-4 text-sm text-gray-500">地址：{{ garage.city }}{{ garage.district }} {{ garage.address }}</p>
+              <p class="mt-4 text-sm text-gray-500">地址：{{ garage.address }}</p>
               <button
                 @click="openGoogleMaps"
                 class="mt-4 w-full py-2 text-sm text-[#6B6B5C] bg-[#FAF8F5] border border-[#E8E3DB] rounded-lg hover:bg-[#E8E3DB] transition"
