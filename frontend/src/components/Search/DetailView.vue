@@ -203,8 +203,12 @@ const mapEmbedUrl = computed(() => {
 
 const openGoogleMaps = () => {
   if (!garage.value) return
-  const url = `https://www.google.com/maps/search/?api=1&query=${garage.value.lat},${garage.value.lng}`
-  window.open(url, '_blank')
+
+  const hasLatLng = garage.value.lat != null && garage.value.lng != null
+  const query = hasLatLng ? `${garage.value.lat},${garage.value.lng}` : fullAddress.value
+
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 onMounted(async () => {
