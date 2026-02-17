@@ -332,10 +332,25 @@ onMounted(async () => {
                   <span class="transform transition-transform duration-200" :class="{ 'rotate-180': isOpenMap }">▼</span>
                 </button>
                 <div v-show="isOpenMap" class="p-4 bg-white border-t border-gray-200">
-                  <div class="w-full aspect-square bg-gray-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-gray-400">
-                    <span class="text-4xl mb-2">🗺️</span>
-                    <span class="text-sm">Google Map 載入中...</span>
+                  <div class="w-full aspect-square rounded-xl border border-gray-200 overflow-hidden bg-gray-100">
+                    <iframe
+                      v-if="mapEmbedUrl"
+                      :src="mapEmbedUrl"
+                      class="w-full h-full"
+                      style="border:0;"
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                    ></iframe>
+
+                    <div
+                      v-else
+                      class="w-full h-full flex flex-col items-center justify-center text-gray-400"
+                    >
+                      <span class="text-4xl mb-2">🗺️</span>
+                      <span class="text-sm">地址尚未提供</span>
+                    </div>
                   </div>
+
                   <div class="mt-4 text-sm text-gray-500">
                     <p>地址：{{ garage.address }}</p>
                   </div>
@@ -424,11 +439,23 @@ onMounted(async () => {
         <div class="w-full lg:w-[320px] flex-shrink-0 hidden lg:block">
           <div class="sticky top-8 space-y-6">
             <div class="p-6 bg-white rounded-2xl shadow-sm">
-              <h3 class="mb-4 font-medium text-gray-800">維修廠地圖地點</h3>
-              <div class="w-full aspect-square bg-gray-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-gray-400">
-                <span class="text-4xl mb-2">🗺️</span>
-                <span class="text-sm">Google Map 載入中...</span>
-              </div>
+                <div class="w-full aspect-square rounded-xl border border-gray-200 overflow-hidden bg-gray-100">
+                  <iframe
+                    v-if="mapEmbedUrl"
+                    :src="mapEmbedUrl"
+                    class="w-full h-full"
+                    style="border:0;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                  <div
+                    v-else
+                    class="w-full h-full flex flex-col items-center justify-center text-gray-400"
+                  >
+                    <span class="text-4xl mb-2">🗺️</span>
+                    <span class="text-sm">地址尚未提供</span>
+                  </div>
+                </div>
               <p class="mt-4 text-sm text-gray-500">地址：{{ garage.address }}</p>
               <button
                 @click="openGoogleMaps"
