@@ -102,7 +102,6 @@ carE 是一個串連 **車主** 與 **汽車維修廠** 的媒合平台，核心
 
 ### 測試工具
 - [Vitest](https://vitest.dev/)
-- [StoryBook](https://storybook.js.org/)
 
 ---
 
